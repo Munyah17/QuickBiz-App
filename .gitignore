@@ -1,0 +1,36 @@
+node_modules/
+.pnpm-store/
+
+# Next.js
+.next/
+out/
+apps/*/.next/
+apps/*/out/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Supabase
+supabase/.branches/
+supabase/.temp/
+
+# Build
+dist/
+build/
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/

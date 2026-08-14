@@ -1,0 +1,63 @@
+/*
+  QuickBiz ERP design tokens — derived from the approved UI prototype.
+  Fixed light enterprise theme by design (spec §26/§56): the workspace is
+  always light, the sidebar is always dark navy as a brand identity, neither
+  follows the OS color-scheme preference.
+*/
+@theme {
+  /* Sidebar (dark navy, always) */
+  --color-sidebar: #0b1222;
+  --color-sidebar-elevated: #141d30;
+  --color-sidebar-border: #1f2a3f;
+  --color-sidebar-text: #94a3b8;
+  --color-sidebar-text-active: #ffffff;
+  --color-sidebar-heading: #64748b;
+
+  /* Primary (enterprise blue) */
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-500: #3b76f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+
+  /* Secondary accent — used sparingly for high-emphasis actions (POS Pay,
+     Generate Payslips), never as the default primary action color. */
+  --color-accent-purple-500: #7c3aed;
+  --color-accent-purple-600: #6d28d9;
+
+  /* Semantic */
+  --color-success-50: #dcfce7;
+  --color-success-500: #16a34a;
+  --color-success-600: #15803d;
+  --color-warning-50: #fef3c7;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  --color-danger-50: #fee2e2;
+  --color-danger-500: #ef4444;
+  --color-danger-600: #dc2626;
+  --color-info-50: #dbeafe;
+  --color-info-500: #3b82f6;
+  --color-info-600: #1d4ed8;
+
+  /* Workspace */
+  --color-workspace: #f8fafc;
+  --color-surface: #ffffff;
+  --color-border: #e5e7eb;
+  --color-border-subtle: #f1f5f9;
+
+  /* Text */
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #64748b;
+  --color-text-tertiary: #94a3b8;
+
+  /* Radius — restrained, not "bubble" UI */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+
+  /* Shadows — subtle only */
+  --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 1px 0 rgb(15 23 42 / 0.03);
+  --shadow-popover: 0 4px 12px -2px rgb(15 23 42 / 0.10), 0 2px 4px -2px rgb(15 23 42 / 0.06);
+
+  --font-sans: var(--font-inter);
+}

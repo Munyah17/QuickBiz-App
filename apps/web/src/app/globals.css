@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@import "../config/design-tokens.css";
+
+body {
+  background: var(--color-workspace);
+  color: var(--color-text-primary);
+}
+
+* {
+  border-color: var(--color-border);
+}
