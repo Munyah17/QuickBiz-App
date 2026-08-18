@@ -2,7 +2,23 @@ import type { TypedSupabaseClient as SupabaseClient } from "@quickbiz/supabase/t
 
 // Modules with a real implementation behind them — every other catalog
 // entry stays honestly disabled in the Module Store until it's built too.
-export const IMPLEMENTED_MODULE_KEYS = new Set(["inventory", "sales"]);
+export const IMPLEMENTED_MODULE_KEYS = new Set([
+  "inventory",
+  "sales",
+  "pos",
+  "purchasing",
+  "finance",
+  "hr",
+  "crm",
+  "projects",
+  "assets",
+  "service_management",
+  "fleet",
+  "documents",
+  "reporting",
+  "marketing",
+  "manufacturing",
+]);
 
 export interface ModuleCatalogEntry {
   key: string;
