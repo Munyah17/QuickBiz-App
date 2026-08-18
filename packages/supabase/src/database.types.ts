@@ -1183,6 +1183,201 @@ export type Database = {
           },
         ]
       }
+      online_order_items: {
+        Row: {
+          created_at: string
+          id: string
+          line_total: number
+          order_id: string
+          org_id: string
+          product_id: string
+          quantity: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          line_total?: number
+          order_id: string
+          org_id: string
+          product_id: string
+          quantity: number
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          line_total?: number
+          order_id?: string
+          org_id?: string
+          product_id?: string
+          quantity?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "online_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "online_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "online_order_items_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "online_order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      online_orders: {
+        Row: {
+          branch_id: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          delivery_address: string | null
+          delivery_method: string
+          delivery_status: string
+          guest_name: string | null
+          guest_phone: string | null
+          id: string
+          notes: string | null
+          order_number: string
+          org_id: string
+          status: string
+          subtotal: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          delivery_address?: string | null
+          delivery_method?: string
+          delivery_status?: string
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          notes?: string | null
+          order_number: string
+          org_id: string
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          delivery_address?: string | null
+          delivery_method?: string
+          delivery_status?: string
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          notes?: string | null
+          order_number?: string
+          org_id?: string
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "online_orders_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "online_orders_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "online_orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "online_orders_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      online_products: {
+        Row: {
+          created_at: string
+          description_override: string | null
+          id: string
+          is_published: boolean
+          online_price: number | null
+          org_id: string
+          product_id: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description_override?: string | null
+          id?: string
+          is_published?: boolean
+          online_price?: number | null
+          org_id: string
+          product_id: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description_override?: string | null
+          id?: string
+          is_published?: boolean
+          online_price?: number | null
+          org_id?: string
+          product_id?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "online_products_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "online_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       opportunities: {
         Row: {
           created_at: string
@@ -2910,6 +3105,21 @@ export type Database = {
       }
       convert_lead_to_customer: {
         Args: { p_lead_id: string; p_org_id: string }
+        Returns: string
+      }
+      create_online_order: {
+        Args: {
+          p_branch_id: string
+          p_customer_id?: string
+          p_delivery_address?: string
+          p_delivery_method?: string
+          p_guest_name?: string
+          p_guest_phone?: string
+          p_items?: Json
+          p_notes?: string
+          p_org_id: string
+          p_warehouse_id?: string
+        }
         Returns: string
       }
       create_organization: {

@@ -29,6 +29,8 @@ import {
   Star,
   Layers,
   Factory,
+  Store,
+  ShoppingBag,
 } from "lucide-react";
 
 export interface NavItem {
@@ -74,6 +76,8 @@ export const CORE_NAV_ITEMS: NavItem[] = [
   { href: "/loyalty", label: "Loyalty", icon: Star, moduleKey: "marketing" },
   { href: "/manufacturing/boms", label: "Bills of Materials", icon: Layers, moduleKey: "manufacturing" },
   { href: "/manufacturing/work-orders", label: "Work Orders", icon: Factory, moduleKey: "manufacturing" },
+  { href: "/ecommerce/catalog", label: "Online Catalog", icon: Store, moduleKey: "ecommerce" },
+  { href: "/ecommerce/orders", label: "Online Orders", icon: ShoppingBag, moduleKey: "ecommerce" },
   { href: "/company", label: "Company", icon: Building2 },
   { href: "/branches", label: "Branches", icon: GitBranch },
   { href: "/users", label: "Users", icon: Users },
