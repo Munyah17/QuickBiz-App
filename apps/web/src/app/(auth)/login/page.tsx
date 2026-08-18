@@ -38,6 +38,15 @@ export default function LoginPage() {
           Create one
         </Link>
       </p>
+
+      <div className="mt-4 border-t border-border-subtle pt-4 text-center">
+        <Link
+          href="/demo"
+          className="text-sm font-medium text-text-secondary hover:text-primary-600 hover:underline"
+        >
+          View Demo - no account needed
+        </Link>
+      </div>
     </>
   );
 }
