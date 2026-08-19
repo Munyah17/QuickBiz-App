@@ -35,3 +35,6 @@ Thumbs.db
 !.vscode/extensions.json
 .idea/
 .claude/
+
+.vercel
+.env*
