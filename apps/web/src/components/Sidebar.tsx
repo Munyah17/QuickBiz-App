@@ -2,11 +2,35 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Package, ChevronsUpDown } from "lucide-react";
+import { useState } from "react";
+import { Package, ChevronsUpDown, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { CORE_NAV_ITEMS } from "@/config/nav";
+import { NAV_STRUCTURE, isNavGroup, type NavEntry, type NavLeaf } from "@/config/nav";
 
-// `permissions` is a plain string array (not the CORE_NAV_ITEMS objects,
+function isLeafActive(pathname: string, href: string): boolean {
+  return pathname === href || pathname.startsWith(href + "/");
+}
+
+function LeafLink({ item, active, indent }: { item: NavLeaf; active: boolean; indent?: boolean }) {
+  const Icon = item.icon;
+  return (
+    <Link
+      href={item.href}
+      className={cn(
+        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+        indent && "py-1.5 pl-9 text-[13px]",
+        active
+          ? "bg-primary-600 text-white"
+          : "text-sidebar-text hover:bg-sidebar-elevated hover:text-sidebar-text-active"
+      )}
+    >
+      {!indent && <Icon className="size-4 shrink-0" />}
+      {item.label}
+    </Link>
+  );
+}
+
+// `permissions` is a plain string array (not the NAV_STRUCTURE objects,
 // which hold component references) — icon components can't cross the
 // Server->Client Component boundary as props, so this Client Component
 // imports the nav config itself and only takes serializable data from the
@@ -23,11 +47,14 @@ export function Sidebar({
   branchName: string;
 }) {
   const pathname = usePathname();
-  const items = CORE_NAV_ITEMS.filter(
-    (item) =>
-      (!item.permission || permissions.includes(item.permission)) &&
-      (!item.moduleKey || enabledModules.includes(item.moduleKey))
-  );
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+
+  const visible = (entry: NavEntry) =>
+    (!entry.moduleKey || enabledModules.includes(entry.moduleKey)) &&
+    (!isNavGroup(entry) || true) &&
+    (isNavGroup(entry) || !entry.permission || permissions.includes(entry.permission));
+
+  const entries = NAV_STRUCTURE.filter(visible);
 
   return (
     <aside className="flex h-full w-60 shrink-0 flex-col bg-sidebar text-sidebar-text">
@@ -39,23 +66,46 @@ export function Sidebar({
       </div>
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-2">
-        {items.map((item) => {
-          const active = pathname === item.href || pathname.startsWith(item.href + "/");
-          const Icon = item.icon;
+        {entries.map((entry) => {
+          if (!isNavGroup(entry)) {
+            return <LeafLink key={entry.key} item={entry} active={isLeafActive(pathname, entry.href)} />;
+          }
+
+          const groupActive = entry.children.some((c) => isLeafActive(pathname, c.href));
+          const open = openGroups.has(entry.key) || groupActive;
+          const Icon = entry.icon;
+
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                active
-                  ? "bg-primary-600 text-white"
-                  : "text-sidebar-text hover:bg-sidebar-elevated hover:text-sidebar-text-active"
+            <div key={entry.key}>
+              <button
+                type="button"
+                onClick={() =>
+                  setOpenGroups((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(entry.key)) next.delete(entry.key);
+                    else next.add(entry.key);
+                    return next;
+                  })
+                }
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  groupActive
+                    ? "text-sidebar-text-active"
+                    : "text-sidebar-text hover:bg-sidebar-elevated hover:text-sidebar-text-active"
+                )}
+              >
+                <Icon className="size-4 shrink-0" />
+                <span className="flex-1 text-left">{entry.label}</span>
+                <ChevronDown className={cn("size-3.5 shrink-0 transition-transform", open && "rotate-180")} />
+              </button>
+              {open && (
+                <div className="mt-0.5 space-y-0.5">
+                  {entry.children.map((child) => (
+                    <LeafLink key={child.key} item={child} active={isLeafActive(pathname, child.href)} indent />
+                  ))}
+                </div>
               )}
-            >
-              <Icon className="size-4 shrink-0" />
-              {item.label}
-            </Link>
+            </div>
           );
         })}
       </nav>
