@@ -1,45 +1,43 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  Contact,
-  Package,
-  Receipt,
-  GitBranch,
-  Users,
-  ShieldCheck,
-  LayoutGrid,
-  ChevronsUpDown,
-  LogOut,
-} from "lucide-react";
+import { Package, ChevronsUpDown, ChevronDown, LogOut, User, Settings } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { NAV_STRUCTURE, isNavGroup, prefixNavStructure, type NavLeaf } from "@/config/nav";
 import { useDemo } from "@/lib/demo/DemoContext";
 
-interface DemoNavItem {
-  href: string;
-  label: string;
-  icon: typeof LayoutDashboard;
-  moduleKey?: string;
+const DEMO_NAV = prefixNavStructure(NAV_STRUCTURE, "/demo");
+
+function isLeafActive(pathname: string, href: string): boolean {
+  return pathname === href || pathname.startsWith(href + "/");
 }
 
-const DEMO_NAV_ITEMS: DemoNavItem[] = [
-  { href: "/demo/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/demo/customers", label: "Customers", icon: Contact },
-  { href: "/demo/products", label: "Products", icon: Package, moduleKey: "inventory" },
-  { href: "/demo/sales", label: "Sales", icon: Receipt, moduleKey: "sales" },
-  { href: "/demo/branches", label: "Branches", icon: GitBranch },
-  { href: "/demo/users", label: "Users", icon: Users },
-  { href: "/demo/roles", label: "Roles", icon: ShieldCheck },
-  { href: "/demo/modules", label: "Module Store", icon: LayoutGrid },
-];
+function LeafLink({ item, active, indent }: { item: NavLeaf; active: boolean; indent?: boolean }) {
+  const Icon = item.icon;
+  return (
+    <Link
+      href={item.href}
+      className={cn(
+        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+        indent && "py-1.5 pl-9 text-[13px]",
+        active ? "bg-primary-600 text-white" : "text-sidebar-text hover:bg-sidebar-elevated hover:text-sidebar-text-active"
+      )}
+    >
+      {!indent && <Icon className="size-4 shrink-0" />}
+      {item.label}
+    </Link>
+  );
+}
 
 export function DemoSidebar() {
   const { orgName, modules } = useDemo();
   const pathname = usePathname();
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+
   const enabledKeys = new Set(modules.filter((m) => m.enabled).map((m) => m.key));
-  const items = DEMO_NAV_ITEMS.filter((item) => !item.moduleKey || enabledKeys.has(item.moduleKey));
+  const entries = DEMO_NAV.filter((entry) => !entry.moduleKey || enabledKeys.has(entry.moduleKey));
 
   return (
     <aside className="flex h-full w-60 shrink-0 flex-col bg-sidebar text-sidebar-text">
@@ -51,23 +49,44 @@ export function DemoSidebar() {
       </div>
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-2">
-        {items.map((item) => {
-          const active = pathname === item.href || pathname.startsWith(item.href + "/");
-          const Icon = item.icon;
+        {entries.map((entry) => {
+          if (!isNavGroup(entry)) {
+            return <LeafLink key={entry.key} item={entry} active={isLeafActive(pathname, entry.href)} />;
+          }
+
+          const groupActive = entry.children.some((c) => isLeafActive(pathname, c.href));
+          const open = openGroups.has(entry.key) || groupActive;
+          const Icon = entry.icon;
+
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                active
-                  ? "bg-primary-600 text-white"
-                  : "text-sidebar-text hover:bg-sidebar-elevated hover:text-sidebar-text-active"
+            <div key={entry.key}>
+              <button
+                type="button"
+                onClick={() =>
+                  setOpenGroups((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(entry.key)) next.delete(entry.key);
+                    else next.add(entry.key);
+                    return next;
+                  })
+                }
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  groupActive ? "text-sidebar-text-active" : "text-sidebar-text hover:bg-sidebar-elevated hover:text-sidebar-text-active"
+                )}
+              >
+                <Icon className="size-4 shrink-0" />
+                <span className="flex-1 text-left">{entry.label}</span>
+                <ChevronDown className={cn("size-3.5 shrink-0 transition-transform", open && "rotate-180")} />
+              </button>
+              {open && (
+                <div className="mt-0.5 space-y-0.5">
+                  {entry.children.map((child) => (
+                    <LeafLink key={child.key} item={child} active={isLeafActive(pathname, child.href)} indent />
+                  ))}
+                </div>
               )}
-            >
-              <Icon className="size-4 shrink-0" />
-              {item.label}
-            </Link>
+            </div>
           );
         })}
       </nav>
@@ -86,23 +105,89 @@ export function DemoSidebar() {
   );
 }
 
+function DemoUserMenu() {
+  const [open, setOpen] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const { orgName, updateOrgName } = useDemo();
+  const [nameDraft, setNameDraft] = useState(orgName);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false);
+        setEditingName(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={containerRef} className="relative">
+      <button type="button" onClick={() => setOpen((v) => !v)} className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-workspace">
+        <div className="flex size-8 items-center justify-center rounded-full bg-primary-100 text-sm font-semibold text-primary-700">D</div>
+        <div className="hidden text-left sm:block">
+          <p className="text-sm font-medium leading-tight text-text-primary">Demo Owner</p>
+          <p className="text-xs leading-tight text-text-tertiary">Owner</p>
+        </div>
+        <ChevronDown className="size-4 text-text-tertiary" />
+      </button>
+
+      {open && (
+        <div className="absolute right-0 z-20 mt-1 w-64 rounded-md border border-border bg-surface py-1 shadow-popover">
+          {editingName ? (
+            <form
+              className="flex items-center gap-2 px-3 py-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (nameDraft.trim()) updateOrgName(nameDraft.trim());
+                setEditingName(false);
+              }}
+            >
+              <input
+                autoFocus
+                value={nameDraft}
+                onChange={(e) => setNameDraft(e.target.value)}
+                className="h-8 w-full rounded-md border border-border px-2 text-sm focus:outline-none"
+              />
+              <button type="submit" className="text-xs font-medium text-primary-600">
+                Save
+              </button>
+            </form>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setEditingName(true)}
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-text-primary hover:bg-workspace"
+            >
+              <User className="size-4" />
+              My Profile
+            </button>
+          )}
+          <Link href="/demo/company" onClick={() => setOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-text-primary hover:bg-workspace">
+            <Settings className="size-4" />
+            Settings
+          </Link>
+          <div className="my-1 border-t border-border-subtle" />
+          <Link href="/login" className="flex items-center gap-2 px-3 py-2 text-sm text-text-primary hover:bg-workspace">
+            <LogOut className="size-4" />
+            Exit Demo
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function DemoTopBar() {
   return (
     <header className="flex h-14 shrink-0 items-center gap-4 border-b border-border bg-surface px-4">
       <div className="flex items-center gap-2 rounded-full bg-warning-50 px-3 py-1 text-xs font-medium text-warning-600">
         Demo Mode - nothing here is saved
       </div>
-      <div className="ml-auto flex items-center gap-2">
-        <div className="flex size-8 items-center justify-center rounded-full bg-primary-100 text-sm font-semibold text-primary-700">
-          D
-        </div>
-        <Link
-          href="/login"
-          className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-text-secondary hover:bg-workspace"
-        >
-          <LogOut className="size-4" />
-          Exit Demo
-        </Link>
+      <div className="ml-auto flex items-center gap-1">
+        <DemoUserMenu />
       </div>
     </header>
   );
