@@ -9,6 +9,7 @@ import { FormField } from "@/components/FormField";
 import { useToast } from "@/components/Toast";
 import { createExpenseAction, initialExpenseActionState } from "./actions";
 import type { Account } from "@/services/finance";
+import { PAYMENT_METHODS } from "@/config/paymentMethods";
 
 function ExpenseForm({ accounts, branchId, onClose }: { accounts: Account[]; branchId: string; onClose: () => void }) {
   const [state, formAction, isPending] = useActionState(createExpenseAction, initialExpenseActionState);
@@ -57,11 +58,11 @@ function ExpenseForm({ accounts, branchId, onClose }: { accounts: Account[]; bra
         <div className="grid grid-cols-2 gap-4">
           <FormField label="Payment method" htmlFor="paymentMethod">
             <Select id="paymentMethod" name="paymentMethod" defaultValue="cash">
-              <option value="cash">Cash</option>
-              <option value="bank_transfer">Bank transfer</option>
-              <option value="mobile_money">Mobile money</option>
-              <option value="card">Card</option>
-              <option value="other">Other</option>
+              {PAYMENT_METHODS.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
             </Select>
           </FormField>
           <FormField label="Reference" htmlFor="reference" hint="Optional">

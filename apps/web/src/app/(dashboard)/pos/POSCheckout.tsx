@@ -9,6 +9,9 @@ import { useToast } from "@/components/Toast";
 import { checkoutAction, initialPosActionState } from "./actions";
 import type { ProductWithStock } from "@/services/products";
 import type { Customer } from "@/services/customers";
+import type { InvoiceDetail } from "@/services/sales";
+import { PAYMENT_METHODS } from "@/config/paymentMethods";
+import { ReceiptModal } from "./ReceiptModal";
 
 interface CartLine {
   productId: string;
@@ -29,9 +32,24 @@ export function POSCheckout(props: {
   products: ProductWithStock[];
   customers: Customer[];
   taxRatePercent: number;
+  orgName: string;
+  cashierName: string;
 }) {
   const [saleKey, setSaleKey] = useState(0);
-  return <POSCheckoutForm key={saleKey} {...props} onSaleComplete={() => setSaleKey((k) => k + 1)} />;
+  const [receipt, setReceipt] = useState<InvoiceDetail | null>(null);
+  return (
+    <>
+      <POSCheckoutForm
+        key={saleKey}
+        {...props}
+        onSaleComplete={(r) => {
+          setReceipt(r);
+          setSaleKey((k) => k + 1);
+        }}
+      />
+      {receipt && <ReceiptModal receipt={receipt} orgName={props.orgName} cashierName={props.cashierName} onClose={() => setReceipt(null)} />}
+    </>
+  );
 }
 
 function POSCheckoutForm({
@@ -49,7 +67,7 @@ function POSCheckoutForm({
   products: ProductWithStock[];
   customers: Customer[];
   taxRatePercent: number;
-  onSaleComplete: () => void;
+  onSaleComplete: (receipt: InvoiceDetail | null) => void;
 }) {
   const [state, formAction, isPending] = useActionState(checkoutAction, initialPosActionState);
   const [search, setSearch] = useState("");
@@ -61,7 +79,7 @@ function POSCheckoutForm({
   useEffect(() => {
     if (state.success) {
       push("Sale completed");
-      onSaleComplete();
+      onSaleComplete(state.receipt ?? null);
     }
     if (state.error) push(state.error, "error");
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -189,10 +207,11 @@ function POSCheckoutForm({
           </Select>
 
           <Select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} name="paymentMethod">
-            <option value="cash">Cash</option>
-            <option value="card">Card</option>
-            <option value="mobile_money">Mobile money</option>
-            <option value="bank_transfer">Bank transfer</option>
+            {PAYMENT_METHODS.map((m) => (
+              <option key={m.value} value={m.value}>
+                {m.label}
+              </option>
+            ))}
           </Select>
 
           <div className="flex flex-col gap-1 text-sm">

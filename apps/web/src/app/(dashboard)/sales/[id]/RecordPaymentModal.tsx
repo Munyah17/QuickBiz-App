@@ -7,6 +7,7 @@ import { Input, Select } from "@/components/Input";
 import { FormField } from "@/components/FormField";
 import { useToast } from "@/components/Toast";
 import { recordPaymentAction, initialSalesActionState } from "../actions";
+import { PAYMENT_METHODS } from "@/config/paymentMethods";
 
 function RecordPaymentForm({
   invoiceId,
@@ -39,11 +40,11 @@ function RecordPaymentForm({
 
         <FormField label="Method" htmlFor="method">
           <Select id="method" name="method" defaultValue="cash">
-            <option value="cash">Cash</option>
-            <option value="bank_transfer">Bank transfer</option>
-            <option value="mobile_money">Mobile money</option>
-            <option value="card">Card</option>
-            <option value="other">Other</option>
+            {PAYMENT_METHODS.map((m) => (
+              <option key={m.value} value={m.value}>
+                {m.label}
+              </option>
+            ))}
           </Select>
         </FormField>
 

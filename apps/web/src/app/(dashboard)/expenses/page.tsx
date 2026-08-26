@@ -5,6 +5,7 @@ import { Receipt } from "lucide-react";
 import { requireOrgContext, requireModuleEnabled } from "@/lib/session";
 import { listExpenses, listAccounts } from "@/services/finance";
 import { NewExpenseModal } from "./NewExpenseModal";
+import { paymentMethodLabel } from "@/config/paymentMethods";
 
 export default async function ExpensesPage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
@@ -45,7 +46,7 @@ export default async function ExpensesPage() {
                     <td className="px-4 py-2.5 text-text-secondary">{new Date(e.expense_date).toLocaleDateString()}</td>
                     <td className="px-4 py-2.5 text-text-primary">{e.description}</td>
                     <td className="px-4 py-2.5 text-text-secondary">{e.accountName ?? "Uncategorized"}</td>
-                    <td className="px-4 py-2.5 capitalize text-text-secondary">{e.payment_method.replace("_", " ")}</td>
+                    <td className="px-4 py-2.5 text-text-secondary">{paymentMethodLabel(e.payment_method)}</td>
                     <td className="px-4 py-2.5 text-text-secondary">{e.reference || "No reference"}</td>
                     <td className="px-4 py-2.5 text-text-secondary">${e.amount.toFixed(2)}</td>
                   </tr>
