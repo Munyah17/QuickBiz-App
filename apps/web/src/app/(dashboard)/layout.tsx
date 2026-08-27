@@ -5,6 +5,7 @@ import { requireOrgContext } from "@/lib/session";
 import { listNotifications } from "@/services/notifications";
 import { listEnabledModuleKeys } from "@/services/modules";
 import { generateThemeVars } from "@/lib/theme";
+import { getActiveCustomCode } from "@/services/customCode";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { supabase, orgId, orgName, branchName, roleName, permissions, themeColor, userName } =
@@ -16,9 +17,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
   ]);
   // null (no tenant color set) leaves the default navy/blue theme untouched.
   const themeVars = generateThemeVars(themeColor);
+  const customCss = enabledModules.includes("custom_code") ? await getActiveCustomCode(supabase, orgId, "css") : null;
 
   return (
     <ToastProvider>
+      {customCss && <style id="org-custom-css" dangerouslySetInnerHTML={{ __html: customCss }} />}
       <div
         className="flex h-screen w-full overflow-hidden bg-workspace"
         style={themeVars ? (themeVars as React.CSSProperties) : undefined}

@@ -5,10 +5,9 @@ import { requireOrgContext } from "@/lib/session";
 import { listCurrencies, getOrgSettings } from "@/services/org";
 import { getBillingSummary } from "@/services/billing";
 import { CompanyForm } from "./CompanyForm";
-import { ThemeColorPicker } from "./ThemeColorPicker";
 
 export default async function CompanyPage() {
-  const { supabase, orgId, permissions, themeColor } = await requireOrgContext();
+  const { supabase, orgId, permissions } = await requireOrgContext();
 
   const [{ data: org }, currencies, settings, billing] = await Promise.all([
     supabase.from("organizations").select("name, legal_name, currency, timezone").eq("id", orgId).single(),
@@ -31,17 +30,6 @@ export default async function CompanyPage() {
         currencies={currencies}
         canManage={permissions.has("settings.manage")}
       />
-
-      <Card>
-        <CardHeader title="UI/UX Configurations" />
-        <div className="p-4">
-          <p className="mb-4 text-sm text-text-secondary">
-            Choose a brand color for your organization&apos;s workspace. It drives the sidebar and every
-            primary button, link, and highlight across QuickBiz for everyone in {org?.name ?? "your organization"}.
-          </p>
-          <ThemeColorPicker currentColor={themeColor} canManage={permissions.has("settings.manage")} />
-        </div>
-      </Card>
 
       <Card>
         <CardHeader title="Plan & billing" />
