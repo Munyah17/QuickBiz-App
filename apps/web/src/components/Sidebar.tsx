@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Package, ChevronsUpDown, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { NAV_STRUCTURE, isNavGroup, type NavEntry, type NavLeaf } from "@/config/nav";
+import { NAV_STRUCTURE, isNavGroup, type NavLeaf } from "@/config/nav";
 
 function isLeafActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(href + "/");
@@ -49,12 +49,8 @@ export function Sidebar({
   const pathname = usePathname();
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
 
-  const visible = (entry: NavEntry) =>
-    (!entry.moduleKey || enabledModules.includes(entry.moduleKey)) &&
-    (!isNavGroup(entry) || true) &&
-    (isNavGroup(entry) || !entry.permission || permissions.includes(entry.permission));
-
-  const entries = NAV_STRUCTURE.filter(visible);
+  const leafVisible = (leaf: NavLeaf) =>
+    (!leaf.moduleKey || enabledModules.includes(leaf.moduleKey)) && (!leaf.permission || permissions.includes(leaf.permission));
 
   return (
     <aside className="flex h-full w-60 shrink-0 flex-col bg-sidebar text-sidebar-text">
@@ -66,12 +62,16 @@ export function Sidebar({
       </div>
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-2">
-        {entries.map((entry) => {
+        {NAV_STRUCTURE.map((entry) => {
           if (!isNavGroup(entry)) {
+            if (!leafVisible(entry)) return null;
             return <LeafLink key={entry.key} item={entry} active={isLeafActive(pathname, entry.href)} />;
           }
 
-          const groupActive = entry.children.some((c) => isLeafActive(pathname, c.href));
+          const visibleChildren = entry.children.filter(leafVisible);
+          if (visibleChildren.length === 0) return null;
+
+          const groupActive = visibleChildren.some((c) => isLeafActive(pathname, c.href));
           const open = openGroups.has(entry.key) || groupActive;
           const Icon = entry.icon;
 
@@ -100,7 +100,7 @@ export function Sidebar({
               </button>
               {open && (
                 <div className="mt-0.5 space-y-0.5">
-                  {entry.children.map((child) => (
+                  {visibleChildren.map((child) => (
                     <LeafLink key={child.key} item={child} active={isLeafActive(pathname, child.href)} indent />
                   ))}
                 </div>

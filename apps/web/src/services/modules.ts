@@ -19,6 +19,9 @@ export const IMPLEMENTED_MODULE_KEYS = new Set([
   "marketing",
   "manufacturing",
   "ecommerce",
+  "local_services",
+  "logistics",
+  "custom_code",
 ]);
 
 export interface ModuleCatalogEntry {

@@ -498,6 +498,99 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_code: {
+        Row: {
+          code_type: string
+          content: string
+          id: string
+          is_active: boolean
+          org_id: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        Insert: {
+          code_type: string
+          content?: string
+          id?: string
+          is_active?: boolean
+          org_id: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          code_type?: string
+          content?: string
+          id?: string
+          is_active?: boolean
+          org_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_code_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_code_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_code_versions: {
+        Row: {
+          code_type: string
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          org_id: string
+          version: number
+        }
+        Insert: {
+          code_type: string
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          org_id: string
+          version: number
+        }
+        Update: {
+          code_type?: string
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          org_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_code_versions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_code_versions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_field_definitions: {
         Row: {
           created_at: string
@@ -963,6 +1056,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      integration_providers: {
+        Row: {
+          category: string
+          credential_fields: Json
+          description: string
+          key: string
+          name: string
+        }
+        Insert: {
+          category: string
+          credential_fields: Json
+          description: string
+          key: string
+          name: string
+        }
+        Update: {
+          category?: string
+          credential_fields?: Json
+          description?: string
+          key?: string
+          name?: string
+        }
+        Relationships: []
       }
       leads: {
         Row: {
@@ -1449,6 +1566,64 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_integration_connections: {
+        Row: {
+          account_label: string
+          connected_by: string | null
+          created_at: string
+          credentials: Json
+          id: string
+          is_connected: boolean
+          org_id: string
+          provider_key: string
+          updated_at: string
+        }
+        Insert: {
+          account_label: string
+          connected_by?: string | null
+          created_at?: string
+          credentials?: Json
+          id?: string
+          is_connected?: boolean
+          org_id: string
+          provider_key: string
+          updated_at?: string
+        }
+        Update: {
+          account_label?: string
+          connected_by?: string | null
+          created_at?: string
+          credentials?: Json
+          id?: string
+          is_connected?: boolean
+          org_id?: string
+          provider_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_integration_connections_connected_by_fkey"
+            columns: ["connected_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_integration_connections_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_integration_connections_provider_key_fkey"
+            columns: ["provider_key"]
+            isOneToOne: false
+            referencedRelation: "integration_providers"
+            referencedColumns: ["key"]
           },
         ]
       }
@@ -2546,6 +2721,129 @@ export type Database = {
           },
         ]
       }
+      shipments: {
+        Row: {
+          branch_id: string | null
+          carrier: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          delivered_at: string | null
+          delivery_address: string | null
+          dispatched_at: string | null
+          driver_id: string | null
+          id: string
+          notes: string | null
+          online_order_id: string | null
+          org_id: string
+          sales_invoice_id: string | null
+          shipment_number: string
+          status: string
+          tracking_number: string | null
+          updated_at: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          branch_id?: string | null
+          carrier?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          delivered_at?: string | null
+          delivery_address?: string | null
+          dispatched_at?: string | null
+          driver_id?: string | null
+          id?: string
+          notes?: string | null
+          online_order_id?: string | null
+          org_id: string
+          sales_invoice_id?: string | null
+          shipment_number: string
+          status?: string
+          tracking_number?: string | null
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          branch_id?: string | null
+          carrier?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          delivered_at?: string | null
+          delivery_address?: string | null
+          dispatched_at?: string | null
+          driver_id?: string | null
+          id?: string
+          notes?: string | null
+          online_order_id?: string | null
+          org_id?: string
+          sales_invoice_id?: string | null
+          shipment_number?: string
+          status?: string
+          tracking_number?: string | null
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipments_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_online_order_id_fkey"
+            columns: ["online_order_id"]
+            isOneToOne: false
+            referencedRelation: "online_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_sales_invoice_id_fkey"
+            columns: ["sales_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "sales_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_levels: {
         Row: {
           id: string
@@ -3103,6 +3401,15 @@ export type Database = {
         Args: { p_org_id: string; p_work_order_id: string }
         Returns: undefined
       }
+      connect_integration: {
+        Args: {
+          p_account_label: string
+          p_credentials: Json
+          p_org_id: string
+          p_provider_key: string
+        }
+        Returns: undefined
+      }
       convert_lead_to_customer: {
         Args: { p_lead_id: string; p_org_id: string }
         Returns: string
@@ -3149,6 +3456,10 @@ export type Database = {
         }
         Returns: string
       }
+      disconnect_integration: {
+        Args: { p_org_id: string; p_provider_key: string }
+        Returns: undefined
+      }
       get_platform_staff_context: {
         Args: never
         Returns: {
@@ -3187,6 +3498,15 @@ export type Database = {
         Returns: string
       }
       is_org_member: { Args: { target_org_id: string }; Returns: boolean }
+      list_integration_connections: {
+        Args: { p_org_id: string }
+        Returns: {
+          account_label: string
+          connected_at: string
+          is_connected: boolean
+          provider_key: string
+        }[]
+      }
       next_number: {
         Args: { p_entity_type: string; target_org_id: string }
         Returns: string
@@ -3222,6 +3542,18 @@ export type Database = {
           p_reference?: string
         }
         Returns: undefined
+      }
+      rollback_custom_code: {
+        Args: {
+          p_code_type: string
+          p_org_id: string
+          p_target_version: number
+        }
+        Returns: number
+      }
+      save_custom_code: {
+        Args: { p_code_type: string; p_content: string; p_org_id: string }
+        Returns: number
       }
       seed_default_accounts: { Args: { p_org_id: string }; Returns: undefined }
       tag_invoice_pos_session: {

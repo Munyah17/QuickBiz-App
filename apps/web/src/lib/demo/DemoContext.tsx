@@ -229,6 +229,64 @@ export interface DemoAuditEntry {
   createdAt: string;
 }
 
+export interface DemoShipment {
+  id: string;
+  shipmentNumber: string;
+  customerName: string | null;
+  carrier: string | null;
+  vehicleRegistration: string | null;
+  deliveryAddress: string;
+  status: "pending" | "dispatched" | "in_transit" | "delivered" | "failed" | "returned";
+  dispatchedAt: string | null;
+  deliveredAt: string | null;
+}
+
+export type CustomCodeType = "css" | "html";
+
+export interface DemoCustomCodeVersion {
+  version: number;
+  content: string;
+  createdAt: string;
+}
+
+export interface DemoCustomCodeEntry {
+  content: string;
+  version: number;
+  history: DemoCustomCodeVersion[];
+}
+
+export interface DemoIntegrationProvider {
+  key: string;
+  name: string;
+  category: "mobile_money" | "gateway" | "bank_rail" | "card" | "sms" | "tax";
+  description: string;
+}
+
+export interface DemoIntegrationConnection {
+  providerKey: string;
+  accountLabel: string;
+}
+
+export const DEMO_INTEGRATION_PROVIDERS: DemoIntegrationProvider[] = [
+  { key: "ecocash", name: "EcoCash", category: "mobile_money", description: "Econet's mobile money wallet, the most widely used in Zimbabwe." },
+  { key: "onemoney", name: "OneMoney", category: "mobile_money", description: "NetOne's mobile money wallet." },
+  { key: "omari", name: "Omari", category: "mobile_money", description: "CBZ Bank's mobile wallet." },
+  { key: "innbucks", name: "InnBucks", category: "mobile_money", description: "Steward Bank's digital wallet." },
+  { key: "zeepay", name: "Zeepay", category: "mobile_money", description: "Pan-African mobile money aggregator operating in Zimbabwe." },
+  { key: "contipay", name: "ContiPay", category: "mobile_money", description: "Zimbabwean payment aggregator covering mobile money and cards." },
+  { key: "paynow", name: "Paynow", category: "gateway", description: "Zimbabwe's payment gateway aggregator (EcoCash, OneMoney, Visa, Mastercard, ZIPIT in one integration)." },
+  { key: "stripe", name: "Stripe", category: "gateway", description: "International card and online payment gateway, for businesses billing customers abroad." },
+  { key: "payfast", name: "PayFast", category: "gateway", description: "Southern African online payment gateway (cards, EFT) used by some Zimbabwean online businesses." },
+  { key: "zipit", name: "ZIPIT", category: "bank_rail", description: "RTGS-backed instant interbank transfer, used directly or through a bank." },
+  { key: "zimswitch", name: "ZimSwitch", category: "bank_rail", description: "Zimbabwe's national interbank switch (POS, ATM, and instant payments)." },
+  { key: "card", name: "Visa / Mastercard", category: "card", description: "Card acquiring, typically routed through a local bank or Paynow." },
+  { key: "afrosoft", name: "Afrosoft", category: "sms", description: "Zimbabwean bulk SMS gateway." },
+  { key: "africas_talking", name: "Africa's Talking", category: "sms", description: "Pan-African SMS, USSD, and airtime API commonly used by Zimbabwean businesses." },
+  { key: "whatsapp_business", name: "WhatsApp Business", category: "sms", description: "WhatsApp Business Cloud API for quotes, receipts, and customer messages." },
+  { key: "twilio", name: "Twilio", category: "sms", description: "International SMS and messaging API." },
+  { key: "zimra", name: "ZIMRA e-Services", category: "tax", description: "Zimbabwe Revenue Authority fiscalisation and e-invoicing (FDMS)." },
+];
+
 export const DEMO_PERMISSIONS = [
   { key: "branches.manage", label: "Manage branches" },
   { key: "users.manage", label: "Manage users" },
@@ -255,6 +313,9 @@ const MODULE_CATALOG: Array<Omit<DemoModule, "enabled">> = [
   { key: "marketing", name: "Marketing", description: "Campaigns, SMS, email, WhatsApp, loyalty", category: "sales", monthlyPriceUsd: 12 },
   { key: "reporting", name: "Reporting / BI", description: "Custom dashboards, KPIs, scheduled reports", category: "platform", monthlyPriceUsd: 15 },
   { key: "ecommerce", name: "Ecommerce", description: "Online products, orders, delivery sync", category: "sales", monthlyPriceUsd: 20 },
+  { key: "local_services", name: "Local Services", description: "Pre-integrated Zimbabwean and regional payment, mobile money, banking, SMS, and tax services", category: "platform", monthlyPriceUsd: 15 },
+  { key: "logistics", name: "Logistics", description: "Shipments, deliveries, carriers, and dispatch tracking", category: "operations", monthlyPriceUsd: 15 },
+  { key: "custom_code", name: "Custom Code", description: "Custom CSS and HTML for your workspace, versioned with rollback", category: "platform", monthlyPriceUsd: 10 },
 ];
 
 // The demo exists to show a prospective client everything they would get —
@@ -432,6 +493,7 @@ function numbered(prefix: string, count: number): string {
 
 interface DemoState {
   orgName: string;
+  themeColor: string | null;
   branches: DemoBranch[];
   customers: DemoCustomer[];
   products: DemoProduct[];
@@ -458,6 +520,9 @@ interface DemoState {
   onlineProducts: DemoOnlineProduct[];
   onlineOrders: DemoOnlineOrder[];
   auditLog: DemoAuditEntry[];
+  integrationConnections: DemoIntegrationConnection[];
+  shipments: DemoShipment[];
+  customCode: Record<CustomCodeType, DemoCustomCodeEntry>;
 }
 
 interface DemoContextValue extends DemoState {
@@ -496,6 +561,13 @@ interface DemoContextValue extends DemoState {
   setOnlineOrderStatus: (id: string, status: DemoOnlineOrder["status"]) => void;
   setOnlineOrderDeliveryStatus: (id: string, deliveryStatus: DemoOnlineOrder["deliveryStatus"]) => void;
   updateOrgName: (name: string) => void;
+  updateThemeColor: (color: string) => void;
+  connectProviderIntegration: (providerKey: string, accountLabel: string) => void;
+  disconnectProviderIntegration: (providerKey: string) => void;
+  createShipment: (input: { customerName: string; carrier: string; vehicleRegistration: string; deliveryAddress: string }) => void;
+  setShipmentStatus: (id: string, status: DemoShipment["status"]) => void;
+  saveCustomCode: (codeType: CustomCodeType, content: string) => void;
+  rollbackCustomCode: (codeType: CustomCodeType, targetVersion: number) => void;
 }
 
 const DemoContext = createContext<DemoContextValue | null>(null);
@@ -504,9 +576,37 @@ function seedAuditLog(): DemoAuditEntry[] {
   return [{ id: "au-1", action: "Organization created", actor: "You (Demo Owner)", createdAt: new Date(Date.now() - 30 * 86400000).toISOString() }];
 }
 
+function seedIntegrationConnections(): DemoIntegrationConnection[] {
+  return [{ providerKey: "ecocash", accountLabel: "0771234567" }];
+}
+
+function seedShipments(): DemoShipment[] {
+  return [
+    {
+      id: "sh-1",
+      shipmentNumber: "SHP-0001",
+      customerName: "Rutendo Traders (Pvt) Ltd",
+      carrier: null,
+      vehicleRegistration: "ADX 1234",
+      deliveryAddress: "45 Samora Machel Ave, Harare",
+      status: "delivered",
+      dispatchedAt: new Date(Date.now() - 3 * 86400000).toISOString(),
+      deliveredAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+    },
+  ];
+}
+
+function seedCustomCode(): Record<CustomCodeType, DemoCustomCodeEntry> {
+  return {
+    css: { content: "", version: 0, history: [] },
+    html: { content: "", version: 0, history: [] },
+  };
+}
+
 export function DemoProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<DemoState>(() => ({
     orgName: "Demo Company (Pvt) Ltd",
+    themeColor: null,
     branches: seedBranches(),
     customers: seedCustomers(),
     products: seedProducts(),
@@ -533,6 +633,9 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     onlineProducts: seedOnlineProducts(),
     onlineOrders: seedOnlineOrders(),
     auditLog: seedAuditLog(),
+    integrationConnections: seedIntegrationConnections(),
+    shipments: seedShipments(),
+    customCode: seedCustomCode(),
   }));
 
   const log = useCallback((action: string) => {
@@ -784,6 +887,106 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     log("Updated organization name");
   }, [log]);
 
+  const updateThemeColor = useCallback((color: string) => {
+    setState((s) => ({ ...s, themeColor: color }));
+    log("Updated theme color");
+  }, [log]);
+
+  const connectProviderIntegration = useCallback((providerKey: string, accountLabel: string) => {
+    setState((s) => ({
+      ...s,
+      integrationConnections: [...s.integrationConnections.filter((c) => c.providerKey !== providerKey), { providerKey, accountLabel }],
+    }));
+    const provider = DEMO_INTEGRATION_PROVIDERS.find((p) => p.key === providerKey);
+    log(`Connected ${provider?.name ?? providerKey}`);
+  }, [log]);
+
+  const disconnectProviderIntegration = useCallback((providerKey: string) => {
+    setState((s) => ({ ...s, integrationConnections: s.integrationConnections.filter((c) => c.providerKey !== providerKey) }));
+    const provider = DEMO_INTEGRATION_PROVIDERS.find((p) => p.key === providerKey);
+    log(`Disconnected ${provider?.name ?? providerKey}`);
+  }, [log]);
+
+  const createShipment = useCallback(
+    (input: { customerName: string; carrier: string; vehicleRegistration: string; deliveryAddress: string }) => {
+      setState((s) => ({
+        ...s,
+        shipments: [
+          {
+            id: nextId("sh"),
+            shipmentNumber: numbered("SHP", s.shipments.length),
+            customerName: input.customerName || null,
+            carrier: input.carrier || null,
+            vehicleRegistration: input.vehicleRegistration || null,
+            deliveryAddress: input.deliveryAddress,
+            status: "pending",
+            dispatchedAt: null,
+            deliveredAt: null,
+          },
+          ...s.shipments,
+        ],
+      }));
+      log("Created a shipment");
+    },
+    [log]
+  );
+
+  const setShipmentStatus = useCallback((id: string, status: DemoShipment["status"]) => {
+    setState((s) => ({
+      ...s,
+      shipments: s.shipments.map((sh) =>
+        sh.id === id
+          ? {
+              ...sh,
+              status,
+              dispatchedAt: status === "dispatched" ? new Date().toISOString() : sh.dispatchedAt,
+              deliveredAt: status === "delivered" ? new Date().toISOString() : sh.deliveredAt,
+            }
+          : sh
+      ),
+    }));
+  }, []);
+
+  const saveCustomCode = useCallback((codeType: CustomCodeType, content: string) => {
+    setState((s) => {
+      const current = s.customCode[codeType];
+      const nextVersion = current.version + 1;
+      return {
+        ...s,
+        customCode: {
+          ...s.customCode,
+          [codeType]: {
+            content,
+            version: nextVersion,
+            history: [{ version: nextVersion, content, createdAt: new Date().toISOString() }, ...current.history],
+          },
+        },
+      };
+    });
+    log(`Saved custom ${codeType.toUpperCase()}`);
+  }, [log]);
+
+  const rollbackCustomCode = useCallback((codeType: CustomCodeType, targetVersion: number) => {
+    setState((s) => {
+      const current = s.customCode[codeType];
+      const target = current.history.find((v) => v.version === targetVersion);
+      if (!target) return s;
+      const nextVersion = current.version + 1;
+      return {
+        ...s,
+        customCode: {
+          ...s.customCode,
+          [codeType]: {
+            content: target.content,
+            version: nextVersion,
+            history: [{ version: nextVersion, content: target.content, createdAt: new Date().toISOString() }, ...current.history],
+          },
+        },
+      };
+    });
+    log(`Rolled back custom ${codeType.toUpperCase()}`);
+  }, [log]);
+
   const value = useMemo<DemoContextValue>(
     () => ({
       ...state,
@@ -822,6 +1025,13 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       setOnlineOrderStatus,
       setOnlineOrderDeliveryStatus,
       updateOrgName,
+      updateThemeColor,
+      connectProviderIntegration,
+      disconnectProviderIntegration,
+      createShipment,
+      setShipmentStatus,
+      saveCustomCode,
+      rollbackCustomCode,
     }),
     [
       state,
@@ -860,6 +1070,13 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       setOnlineOrderStatus,
       setOnlineOrderDeliveryStatus,
       updateOrgName,
+      updateThemeColor,
+      connectProviderIntegration,
+      disconnectProviderIntegration,
+      createShipment,
+      setShipmentStatus,
+      saveCustomCode,
+      rollbackCustomCode,
     ]
   );
 

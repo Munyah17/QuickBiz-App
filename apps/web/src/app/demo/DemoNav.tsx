@@ -37,7 +37,7 @@ export function DemoSidebar() {
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
 
   const enabledKeys = new Set(modules.filter((m) => m.enabled).map((m) => m.key));
-  const entries = DEMO_NAV.filter((entry) => !entry.moduleKey || enabledKeys.has(entry.moduleKey));
+  const leafVisible = (leaf: NavLeaf) => !leaf.moduleKey || enabledKeys.has(leaf.moduleKey);
 
   return (
     <aside className="flex h-full w-60 shrink-0 flex-col bg-sidebar text-sidebar-text">
@@ -49,12 +49,16 @@ export function DemoSidebar() {
       </div>
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-2">
-        {entries.map((entry) => {
+        {DEMO_NAV.map((entry) => {
           if (!isNavGroup(entry)) {
+            if (!leafVisible(entry)) return null;
             return <LeafLink key={entry.key} item={entry} active={isLeafActive(pathname, entry.href)} />;
           }
 
-          const groupActive = entry.children.some((c) => isLeafActive(pathname, c.href));
+          const visibleChildren = entry.children.filter(leafVisible);
+          if (visibleChildren.length === 0) return null;
+
+          const groupActive = visibleChildren.some((c) => isLeafActive(pathname, c.href));
           const open = openGroups.has(entry.key) || groupActive;
           const Icon = entry.icon;
 
@@ -81,7 +85,7 @@ export function DemoSidebar() {
               </button>
               {open && (
                 <div className="mt-0.5 space-y-0.5">
-                  {entry.children.map((child) => (
+                  {visibleChildren.map((child) => (
                     <LeafLink key={child.key} item={child} active={isLeafActive(pathname, child.href)} indent />
                   ))}
                 </div>
