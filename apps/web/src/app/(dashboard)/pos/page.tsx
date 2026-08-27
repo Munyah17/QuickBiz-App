@@ -9,7 +9,7 @@ import { POSCheckout } from "./POSCheckout";
 import { CloseRegisterModal } from "./CloseRegisterModal";
 
 export default async function PosPage() {
-  const { supabase, orgId, branchName } = await requireOrgContext();
+  const { supabase, orgId, branchName, orgName, userName } = await requireOrgContext();
   await requireModuleEnabled(supabase, orgId, "pos");
 
   const { data: member } = await supabase.from("org_members").select("branch_id").eq("status", "active").limit(1).maybeSingle();
@@ -69,6 +69,8 @@ export default async function PosPage() {
         products={products}
         customers={customers.filter((c) => c.is_active)}
         taxRatePercent={taxRatePercent}
+        orgName={orgName}
+        cashierName={userName}
       />
     </div>
   );

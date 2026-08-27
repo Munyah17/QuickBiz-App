@@ -3,11 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { requireOrgContext } from "@/lib/session";
 import { openSession, closeSession, checkout } from "@/services/pos";
-import type { InvoiceLineInput } from "@/services/sales";
+import { getInvoiceDetail, type InvoiceLineInput, type InvoiceDetail } from "@/services/sales";
 
 export interface PosActionState {
   error: string | null;
   success: boolean;
+  receipt?: InvoiceDetail | null;
 }
 
 export const initialPosActionState: PosActionState = { error: null, success: false };
@@ -75,12 +76,15 @@ export async function checkoutAction(_prev: PosActionState, formData: FormData):
 
   if (items.length === 0) return { error: "Cart is empty.", success: false };
 
+  let invoiceId: string;
   try {
-    await checkout(supabase, { orgId, branchId, warehouseId, sessionId, customerId, items, taxTotal, paymentMethod });
+    invoiceId = await checkout(supabase, { orgId, branchId, warehouseId, sessionId, customerId, items, taxTotal, paymentMethod });
   } catch (err) {
     return { error: (err as Error).message, success: false };
   }
 
+  const receipt = await getInvoiceDetail(supabase, orgId, invoiceId);
+
   revalidatePath("/pos");
-  return { error: null, success: true };
+  return { error: null, success: true, receipt };
 }
