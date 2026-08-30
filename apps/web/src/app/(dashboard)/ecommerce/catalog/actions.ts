@@ -74,3 +74,24 @@ export async function setOnlineProductPublishedAction(
   revalidatePath("/ecommerce/catalog");
   return { error: null, success: true };
 }
+
+export async function bulkSetOnlineProductPublishedAction(
+  onlineProductIds: string[],
+  isPublished: boolean
+): Promise<OnlineProductActionState> {
+  const { supabase, permissions } = await requireOrgContext();
+
+  if (!permissions.has("ecommerce.manage")) {
+    return { error: "You don't have permission to manage the online catalog.", success: false };
+  }
+  if (onlineProductIds.length === 0) return { error: "No products selected.", success: false };
+
+  try {
+    await Promise.all(onlineProductIds.map((id) => setOnlineProductPublished(supabase, id, isPublished)));
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/ecommerce/catalog");
+  return { error: null, success: true };
+}

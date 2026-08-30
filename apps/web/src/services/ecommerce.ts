@@ -69,15 +69,20 @@ export interface OnlineOrderRow {
   status: "pending" | "confirmed" | "fulfilled" | "cancelled";
   delivery_method: "pickup" | "delivery";
   delivery_status: "not_shipped" | "shipped" | "delivered";
+  subtotal: number;
   total: number;
-  buyerName: string;
+  delivery_address: string | null;
   created_at: string;
+  buyerName: string;
+  buyerContact: string | null;
 }
 
 export async function listOnlineOrders(supabase: SupabaseClient, orgId: string): Promise<OnlineOrderRow[]> {
   const { data, error } = await supabase
     .from("online_orders")
-    .select("id, order_number, status, delivery_method, delivery_status, total, guest_name, created_at, customers(name)")
+    .select(
+      "id, order_number, status, delivery_method, delivery_status, subtotal, total, delivery_address, guest_name, guest_phone, created_at, customers(name, email, phone)"
+    )
     .eq("org_id", orgId)
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -89,10 +94,13 @@ export async function listOnlineOrders(supabase: SupabaseClient, orgId: string):
       status: OnlineOrderRow["status"];
       delivery_method: OnlineOrderRow["delivery_method"];
       delivery_status: OnlineOrderRow["delivery_status"];
+      subtotal: number;
       total: number;
+      delivery_address: string | null;
       guest_name: string | null;
+      guest_phone: string | null;
       created_at: string;
-      customers: { name: string } | null;
+      customers: { name: string; email: string | null; phone: string | null } | null;
     }>
   ).map((row) => ({
     id: row.id,
@@ -100,9 +108,12 @@ export async function listOnlineOrders(supabase: SupabaseClient, orgId: string):
     status: row.status,
     delivery_method: row.delivery_method,
     delivery_status: row.delivery_status,
+    subtotal: row.subtotal,
     total: row.total,
-    buyerName: row.customers?.name ?? row.guest_name ?? "Unknown buyer",
+    delivery_address: row.delivery_address,
     created_at: row.created_at,
+    buyerName: row.customers?.name ?? row.guest_name ?? "Unknown buyer",
+    buyerContact: row.customers?.email ?? row.customers?.phone ?? row.guest_phone ?? null,
   }));
 }
 

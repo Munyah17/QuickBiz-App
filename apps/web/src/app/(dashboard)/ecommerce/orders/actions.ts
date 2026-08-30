@@ -85,6 +85,24 @@ export async function updateOnlineOrderStatusAction(
   return { error: null, success: true };
 }
 
+export async function bulkSetOnlineOrderStatusAction(orderIds: string[], status: string): Promise<OnlineOrderActionState> {
+  const { supabase, permissions } = await requireOrgContext();
+
+  if (!permissions.has("ecommerce.manage")) {
+    return { error: "You don't have permission to update orders.", success: false };
+  }
+  if (orderIds.length === 0) return { error: "No orders selected.", success: false };
+
+  try {
+    await Promise.all(orderIds.map((id) => updateOnlineOrderStatus(supabase, id, status)));
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/ecommerce/orders");
+  return { error: null, success: true };
+}
+
 export async function updateOnlineOrderDeliveryStatusAction(
   _prev: OnlineOrderActionState,
   formData: FormData
