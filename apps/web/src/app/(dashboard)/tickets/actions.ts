@@ -61,6 +61,24 @@ export async function updateTicketStatusAction(_prev: TicketActionState, formDat
   return { error: null, success: true };
 }
 
+export async function bulkSetTicketStatusAction(ticketIds: string[], status: string): Promise<TicketActionState> {
+  const { supabase, permissions } = await requireOrgContext();
+
+  if (!permissions.has("service.manage")) {
+    return { error: "You don't have permission to update tickets.", success: false };
+  }
+  if (ticketIds.length === 0) return { error: "No tickets selected.", success: false };
+
+  try {
+    await Promise.all(ticketIds.map((id) => updateTicketStatus(supabase, id, status)));
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/tickets");
+  return { error: null, success: true };
+}
+
 export async function addTicketCommentAction(_prev: TicketActionState, formData: FormData): Promise<TicketActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
 

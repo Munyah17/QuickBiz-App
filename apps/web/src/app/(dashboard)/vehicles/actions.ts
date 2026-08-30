@@ -64,6 +64,24 @@ export async function updateVehicleStatusAction(_prev: VehicleActionState, formD
   return { error: null, success: true };
 }
 
+export async function bulkSetVehicleStatusAction(vehicleIds: string[], status: string): Promise<VehicleActionState> {
+  const { supabase, permissions } = await requireOrgContext();
+
+  if (!permissions.has("fleet.manage")) {
+    return { error: "You don't have permission to update vehicles.", success: false };
+  }
+  if (vehicleIds.length === 0) return { error: "No vehicles selected.", success: false };
+
+  try {
+    await Promise.all(vehicleIds.map((id) => updateVehicleStatus(supabase, id, status)));
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/vehicles");
+  return { error: null, success: true };
+}
+
 export async function logFuelAction(_prev: VehicleActionState, formData: FormData): Promise<VehicleActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
 
