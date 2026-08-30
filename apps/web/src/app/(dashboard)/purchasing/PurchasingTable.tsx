@@ -8,6 +8,7 @@ import { Badge } from "@/components/Badge";
 import { EmptyState } from "@/components/EmptyState";
 import { SearchInput } from "@/components/SearchInput";
 import { Select } from "@/components/Input";
+import { ExportButton } from "@/components/ExportButton";
 import type { PurchaseOrderListRow } from "@/services/purchasing";
 
 const statusTone: Record<string, "success" | "info" | "warning" | "danger" | "neutral"> = {
@@ -45,6 +46,17 @@ export function PurchasingTable({ orders }: { orders: PurchaseOrderListRow[] }) 
             <option value="received">Received</option>
             <option value="cancelled">Cancelled</option>
           </Select>
+          <ExportButton
+            filename="purchase-orders"
+            rows={filtered.map((po) => ({
+              PO: po.po_number,
+              Supplier: po.supplierName ?? "",
+              Status: po.status,
+              Total: po.total,
+              Paid: po.amount_paid,
+              Date: new Date(po.created_at).toISOString().slice(0, 10),
+            }))}
+          />
         </div>
       </div>
 

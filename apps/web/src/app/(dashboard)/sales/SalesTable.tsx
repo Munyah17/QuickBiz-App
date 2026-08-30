@@ -8,6 +8,7 @@ import { Badge } from "@/components/Badge";
 import { EmptyState } from "@/components/EmptyState";
 import { SearchInput } from "@/components/SearchInput";
 import { Select } from "@/components/Input";
+import { ExportButton } from "@/components/ExportButton";
 import type { InvoiceListRow } from "@/services/sales";
 
 const statusTone: Record<string, "success" | "info" | "warning" | "danger" | "neutral"> = {
@@ -45,6 +46,17 @@ export function SalesTable({ invoices }: { invoices: InvoiceListRow[] }) {
             <option value="paid">Paid</option>
             <option value="cancelled">Cancelled</option>
           </Select>
+          <ExportButton
+            filename="sales-invoices"
+            rows={filtered.map((inv) => ({
+              Invoice: inv.invoice_number,
+              Customer: inv.customerName ?? "Walk-in",
+              Status: inv.status,
+              Total: inv.total,
+              Paid: inv.amount_paid,
+              Date: new Date(inv.created_at).toISOString().slice(0, 10),
+            }))}
+          />
         </div>
       </div>
 

@@ -8,6 +8,7 @@ import { Badge } from "@/components/Badge";
 import { EmptyState } from "@/components/EmptyState";
 import { SearchInput } from "@/components/SearchInput";
 import { Select } from "@/components/Input";
+import { ExportButton } from "@/components/ExportButton";
 import { useToast } from "@/components/Toast";
 import { CustomerFormModal } from "./CustomerFormModal";
 import { setCustomerActiveAction, initialCustomerActionState } from "./actions";
@@ -67,6 +68,19 @@ export function CustomersTable({ customers, canManage }: { customers: Customer[]
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </Select>
+          <ExportButton
+            filename="customers"
+            rows={filtered.map((c) => ({
+              Name: c.name,
+              Type: c.customer_type,
+              Email: c.email ?? "",
+              Phone: c.phone ?? "",
+              "Tax number": c.tax_number ?? "",
+              City: c.address?.city ?? "",
+              Country: c.address?.country ?? "",
+              Status: c.is_active ? "Active" : "Inactive",
+            }))}
+          />
           {canManage && (
             <Button
               size="sm"

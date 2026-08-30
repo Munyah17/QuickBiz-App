@@ -8,6 +8,7 @@ import { Badge } from "@/components/Badge";
 import { EmptyState } from "@/components/EmptyState";
 import { SearchInput } from "@/components/SearchInput";
 import { Select } from "@/components/Input";
+import { ExportButton } from "@/components/ExportButton";
 import { useToast } from "@/components/Toast";
 import { ProductFormModal } from "./ProductFormModal";
 import { AdjustStockModal } from "./AdjustStockModal";
@@ -79,6 +80,19 @@ export function ProductsTable({
             <option value="inactive">Inactive</option>
             <option value="low_stock">Low stock</option>
           </Select>
+          <ExportButton
+            filename="products"
+            rows={filtered.map((p) => ({
+              Name: p.name,
+              SKU: p.sku,
+              Category: p.categoryName ?? "",
+              Cost: p.cost_price,
+              Price: p.selling_price,
+              Stock: p.totalStock,
+              "Reorder level": p.reorder_level,
+              Status: p.is_active ? "Active" : "Inactive",
+            }))}
+          />
           {canManage && (
             <Button
               size="sm"
