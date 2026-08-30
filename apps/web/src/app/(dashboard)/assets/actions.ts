@@ -62,6 +62,24 @@ export async function updateAssetStatusAction(_prev: AssetActionState, formData:
   return { error: null, success: true };
 }
 
+export async function bulkSetAssetStatusAction(assetIds: string[], status: string): Promise<AssetActionState> {
+  const { supabase, permissions } = await requireOrgContext();
+
+  if (!permissions.has("assets.manage")) {
+    return { error: "You don't have permission to update assets.", success: false };
+  }
+  if (assetIds.length === 0) return { error: "No assets selected.", success: false };
+
+  try {
+    await Promise.all(assetIds.map((id) => updateAssetStatus(supabase, id, status)));
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/assets");
+  return { error: null, success: true };
+}
+
 export async function recordMaintenanceAction(_prev: AssetActionState, formData: FormData): Promise<AssetActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
 

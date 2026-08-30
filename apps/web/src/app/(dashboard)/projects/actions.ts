@@ -72,6 +72,24 @@ export async function updateProjectStatusAction(
   return { error: null, success: true };
 }
 
+export async function bulkSetProjectStatusAction(projectIds: string[], status: string): Promise<ProjectActionState> {
+  const { supabase, permissions } = await requireOrgContext();
+
+  if (!permissions.has("projects.manage")) {
+    return { error: "You don't have permission to update projects.", success: false };
+  }
+  if (projectIds.length === 0) return { error: "No projects selected.", success: false };
+
+  try {
+    await Promise.all(projectIds.map((id) => updateProjectStatus(supabase, id, status)));
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/projects");
+  return { error: null, success: true };
+}
+
 export async function createProjectTaskAction(
   _prev: ProjectActionState,
   formData: FormData
