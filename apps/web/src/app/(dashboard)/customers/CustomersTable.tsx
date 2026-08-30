@@ -1,11 +1,13 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { Plus, Pencil, Contact as ContactIcon } from "lucide-react";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/Button";
 import { Badge } from "@/components/Badge";
 import { EmptyState } from "@/components/EmptyState";
+import { SearchInput } from "@/components/SearchInput";
+import { Select } from "@/components/Input";
 import { useToast } from "@/components/Toast";
 import { CustomerFormModal } from "./CustomerFormModal";
 import { setCustomerActiveAction, initialCustomerActionState } from "./actions";
@@ -39,27 +41,51 @@ function ActiveToggle({ customer }: { customer: Customer }) {
 export function CustomersTable({ customers, canManage }: { customers: Customer[]; canManage: boolean }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Customer | undefined>(undefined);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return customers.filter((c) => {
+      if (statusFilter === "active" && !c.is_active) return false;
+      if (statusFilter === "inactive" && c.is_active) return false;
+      if (!q) return true;
+      return [c.name, c.email, c.phone, c.tax_number].some((field) => field?.toLowerCase().includes(q));
+    });
+  }, [customers, query, statusFilter]);
 
   return (
     <Card>
-      <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
-        <h3 className="text-sm font-semibold text-text-primary">{customers.length} customers</h3>
-        {canManage && (
-          <Button
-            size="sm"
-            onClick={() => {
-              setEditing(undefined);
-              setModalOpen(true);
-            }}
-          >
-            <Plus className="size-4" />
-            New Customer
-          </Button>
-        )}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle px-4 py-3">
+        <h3 className="text-sm font-semibold text-text-primary">
+          {filtered.length} of {customers.length} customers
+        </h3>
+        <div className="flex flex-1 items-center justify-end gap-2">
+          <SearchInput value={query} onChange={setQuery} placeholder="Search name, email, phone..." />
+          <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-36">
+            <option value="all">All statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </Select>
+          {canManage && (
+            <Button
+              size="sm"
+              onClick={() => {
+                setEditing(undefined);
+                setModalOpen(true);
+              }}
+            >
+              <Plus className="size-4" />
+              New Customer
+            </Button>
+          )}
+        </div>
       </div>
 
       {customers.length === 0 ? (
         <EmptyState icon={ContactIcon} title="No customers yet" description="Add your first customer to get started." />
+      ) : filtered.length === 0 ? (
+        <EmptyState icon={ContactIcon} title="No customers match your search" />
       ) : (
         <table className="w-full text-sm">
           <thead>
@@ -74,7 +100,7 @@ export function CustomersTable({ customers, canManage }: { customers: Customer[]
             </tr>
           </thead>
           <tbody>
-            {customers.map((customer) => (
+            {filtered.map((customer) => (
               <tr key={customer.id} className="border-b border-border-subtle last:border-b-0">
                 <td className="px-4 py-2.5 font-medium text-text-primary">{customer.name}</td>
                 <td className="px-4 py-2.5 capitalize text-text-secondary">{customer.customer_type}</td>

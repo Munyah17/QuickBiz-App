@@ -1,11 +1,13 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { Plus, Pencil, Package, PackagePlus } from "lucide-react";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/Button";
 import { Badge } from "@/components/Badge";
 import { EmptyState } from "@/components/EmptyState";
+import { SearchInput } from "@/components/SearchInput";
+import { Select } from "@/components/Input";
 import { useToast } from "@/components/Toast";
 import { ProductFormModal } from "./ProductFormModal";
 import { AdjustStockModal } from "./AdjustStockModal";
@@ -49,27 +51,53 @@ export function ProductsTable({
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<ProductWithStock | undefined>(undefined);
   const [adjusting, setAdjusting] = useState<ProductWithStock | undefined>(undefined);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return products.filter((p) => {
+      if (statusFilter === "active" && !p.is_active) return false;
+      if (statusFilter === "inactive" && p.is_active) return false;
+      if (statusFilter === "low_stock" && p.totalStock > p.reorder_level) return false;
+      if (!q) return true;
+      return [p.name, p.sku, p.categoryName].some((field) => field?.toLowerCase().includes(q));
+    });
+  }, [products, query, statusFilter]);
 
   return (
     <Card>
-      <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
-        <h3 className="text-sm font-semibold text-text-primary">{products.length} products</h3>
-        {canManage && (
-          <Button
-            size="sm"
-            onClick={() => {
-              setEditing(undefined);
-              setFormOpen(true);
-            }}
-          >
-            <Plus className="size-4" />
-            New Product
-          </Button>
-        )}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle px-4 py-3">
+        <h3 className="text-sm font-semibold text-text-primary">
+          {filtered.length} of {products.length} products
+        </h3>
+        <div className="flex flex-1 items-center justify-end gap-2">
+          <SearchInput value={query} onChange={setQuery} placeholder="Search name, SKU, category..." />
+          <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-36">
+            <option value="all">All statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="low_stock">Low stock</option>
+          </Select>
+          {canManage && (
+            <Button
+              size="sm"
+              onClick={() => {
+                setEditing(undefined);
+                setFormOpen(true);
+              }}
+            >
+              <Plus className="size-4" />
+              New Product
+            </Button>
+          )}
+        </div>
       </div>
 
       {products.length === 0 ? (
         <EmptyState icon={Package} title="No products yet" description="Add your first product to start tracking stock." />
+      ) : filtered.length === 0 ? (
+        <EmptyState icon={Package} title="No products match your search" />
       ) : (
         <table className="w-full text-sm">
           <thead>
@@ -85,7 +113,7 @@ export function ProductsTable({
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => {
+            {filtered.map((product) => {
               const lowStock = product.totalStock <= product.reorder_level;
               return (
                 <tr key={product.id} className="border-b border-border-subtle last:border-b-0">
