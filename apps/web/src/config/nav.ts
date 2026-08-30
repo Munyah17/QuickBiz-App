@@ -37,6 +37,7 @@ import {
   Truck as TruckIcon,
   Code,
   Palette,
+  Banknote,
 } from "lucide-react";
 
 export interface NavLeaf {
@@ -108,6 +109,7 @@ export const NAV_STRUCTURE: NavEntry[] = [
       { key: "assets", href: "/assets", label: "Fixed Assets", icon: Archive, moduleKey: "assets" },
       { key: "service", href: "/tickets", label: "Service Tickets", icon: LifeBuoy, moduleKey: "service_management" },
       { key: "hr", href: "/employees", label: "Employees", icon: IdCard, moduleKey: "hr" },
+      { key: "payroll", href: "/payroll", label: "Payroll", icon: Banknote, moduleKey: "payroll" },
     ],
   },
   {

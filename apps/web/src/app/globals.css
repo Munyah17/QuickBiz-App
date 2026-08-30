@@ -10,17 +10,20 @@ body {
   border-color: var(--color-border);
 }
 
-/* Printing a POS receipt (or anything else marked #print-area) should show
-   only that content, not the app chrome around it. */
+/* Printing a POS receipt, a payslip, or anything else marked
+   .print-area should show only that content, not the app chrome around it. */
 @media print {
   body * {
     visibility: hidden;
   }
   #pos-receipt,
-  #pos-receipt * {
+  #pos-receipt *,
+  .print-area,
+  .print-area * {
     visibility: visible;
   }
-  #pos-receipt {
+  #pos-receipt,
+  .print-area {
     position: absolute;
     top: 0;
     left: 0;
