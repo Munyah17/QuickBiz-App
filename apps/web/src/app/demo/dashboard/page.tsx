@@ -1,27 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Users, Package, Receipt, GitBranch } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardHeader } from "@/components/Card";
+import { StatCard, type StatCardTone } from "@/components/StatCard";
 import { RevenueTrendChart } from "@/components/RevenueTrendChart";
 import { CategoryDonutChart } from "@/components/CategoryDonutChart";
 import { useDemo } from "@/lib/demo/DemoContext";
 import type { RevenuePoint } from "@/services/dashboard";
 
-function StatCard({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
-  return (
-    <Card className="flex items-center gap-3 p-4">
-      <div className="flex size-10 items-center justify-center rounded-md bg-primary-50 text-primary-600">
-        <Icon className="size-5" />
-      </div>
-      <div>
-        <p className="text-xs text-text-tertiary">{label}</p>
-        <p className="text-lg font-semibold text-text-primary">{value}</p>
-      </div>
-    </Card>
-  );
-}
+const HEADLINE_TONES: StatCardTone[] = ["primary", "success", "info", "warning"];
 
 export default function DemoDashboardPage() {
   const { sales, customers, products, branches } = useDemo();
@@ -61,10 +49,10 @@ export default function DemoDashboardPage() {
       <PageHeader title="Dashboard" />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={Receipt} label="Revenue (all time)" value={`$${totalRevenue.toLocaleString()}`} />
-        <StatCard icon={Package} label="Products" value={String(products.length)} />
-        <StatCard icon={Users} label="Customers" value={String(customers.length)} />
-        <StatCard icon={GitBranch} label="Branches" value={String(branches.length)} />
+        <StatCard label="Revenue (all time)" value={`$${totalRevenue.toLocaleString()}`} tone={HEADLINE_TONES[0]} />
+        <StatCard label="Products" value={String(products.length)} tone={HEADLINE_TONES[1]} />
+        <StatCard label="Customers" value={String(customers.length)} tone={HEADLINE_TONES[2]} />
+        <StatCard label="Branches" value={String(branches.length)} tone={HEADLINE_TONES[3]} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

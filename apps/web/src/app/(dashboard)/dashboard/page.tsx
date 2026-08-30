@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { LayoutGrid } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
-import { StatCard } from "@/components/StatCard";
+import { StatCard, type StatCardTone } from "@/components/StatCard";
 import { Card, CardHeader } from "@/components/Card";
 import { Button } from "@/components/Button";
 import { RevenueTrendChart } from "@/components/RevenueTrendChart";
@@ -16,6 +16,11 @@ function delta(count: number): { label: string; direction: "up" | "flat" } {
   if (count === 0) return { label: "No change in last 30 days", direction: "flat" };
   return { label: `+${count} in last 30 days`, direction: "up" };
 }
+
+// Fixed, non-cycled order (dataviz skill) - decorative rotation for the
+// headline cards, same four positions every time, not tied to any data
+// dimension.
+const HEADLINE_TONES: StatCardTone[] = ["primary", "success", "info", "warning"];
 
 export default async function DashboardPage() {
   const { supabase, orgId, orgName, permissions } = await requireOrgContext();
@@ -36,10 +41,20 @@ export default async function DashboardPage() {
           show; every KPI beyond that only appears once its module is
           actually enabled, and is computed from real rows, never fabricated. */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Team members" value={String(stats.memberCount)} delta={delta(stats.membersAddedLast30Days)} />
-        <StatCard label="Branches" value={String(stats.branchCount)} delta={delta(stats.branchesAddedLast30Days)} />
-        {overview.moduleKpis.map((kpi) => (
-          <StatCard key={kpi.key} label={kpi.label} value={kpi.value} />
+        <StatCard
+          label="Team members"
+          value={String(stats.memberCount)}
+          delta={delta(stats.membersAddedLast30Days)}
+          tone={HEADLINE_TONES[0]}
+        />
+        <StatCard
+          label="Branches"
+          value={String(stats.branchCount)}
+          delta={delta(stats.branchesAddedLast30Days)}
+          tone={HEADLINE_TONES[1]}
+        />
+        {overview.moduleKpis.map((kpi, i) => (
+          <StatCard key={kpi.key} label={kpi.label} value={kpi.value} tone={HEADLINE_TONES[(i + 2) % HEADLINE_TONES.length]} />
         ))}
       </div>
 
