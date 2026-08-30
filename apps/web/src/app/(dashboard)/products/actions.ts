@@ -102,6 +102,24 @@ export async function setProductActiveAction(
   return { error: null, success: true };
 }
 
+export async function bulkSetProductActiveAction(productIds: string[], isActive: boolean): Promise<ProductActionState> {
+  const { supabase, permissions } = await requireOrgContext();
+
+  if (!permissions.has("inventory.manage")) {
+    return { error: "You don't have permission to manage products.", success: false };
+  }
+  if (productIds.length === 0) return { error: "No products selected.", success: false };
+
+  try {
+    await Promise.all(productIds.map((id) => setProductActive(supabase, id, isActive)));
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/products");
+  return { error: null, success: true };
+}
+
 export async function adjustStockAction(
   _prev: ProductActionState,
   formData: FormData

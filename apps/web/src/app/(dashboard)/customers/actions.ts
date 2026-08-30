@@ -92,3 +92,21 @@ export async function setCustomerActiveAction(
   revalidatePath("/customers");
   return { error: null, success: true };
 }
+
+export async function bulkSetCustomerActiveAction(customerIds: string[], isActive: boolean): Promise<CustomerActionState> {
+  const { supabase, permissions } = await requireOrgContext();
+
+  if (!permissions.has("customers.manage")) {
+    return { error: "You don't have permission to manage customers.", success: false };
+  }
+  if (customerIds.length === 0) return { error: "No customers selected.", success: false };
+
+  try {
+    await Promise.all(customerIds.map((id) => setCustomerActive(supabase, id, isActive)));
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/customers");
+  return { error: null, success: true };
+}
