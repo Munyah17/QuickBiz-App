@@ -83,3 +83,21 @@ export async function setSupplierActiveAction(_prev: SupplierActionState, formDa
   revalidatePath("/suppliers");
   return { error: null, success: true };
 }
+
+export async function bulkSetSupplierActiveAction(supplierIds: string[], isActive: boolean): Promise<SupplierActionState> {
+  const { supabase, permissions } = await requireOrgContext();
+
+  if (!permissions.has("purchasing.manage")) {
+    return { error: "You don't have permission to manage suppliers.", success: false };
+  }
+  if (supplierIds.length === 0) return { error: "No suppliers selected.", success: false };
+
+  try {
+    await Promise.all(supplierIds.map((id) => setSupplierActive(supabase, id, isActive)));
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/suppliers");
+  return { error: null, success: true };
+}

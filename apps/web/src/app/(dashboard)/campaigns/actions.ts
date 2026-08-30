@@ -63,3 +63,21 @@ export async function updateCampaignStatusAction(
   revalidatePath("/campaigns");
   return { error: null, success: true };
 }
+
+export async function bulkSetCampaignStatusAction(campaignIds: string[], status: string): Promise<CampaignActionState> {
+  const { supabase, permissions } = await requireOrgContext();
+
+  if (!permissions.has("marketing.manage")) {
+    return { error: "You don't have permission to update campaigns.", success: false };
+  }
+  if (campaignIds.length === 0) return { error: "No campaigns selected.", success: false };
+
+  try {
+    await Promise.all(campaignIds.map((id) => updateCampaignStatus(supabase, id, status)));
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/campaigns");
+  return { error: null, success: true };
+}
