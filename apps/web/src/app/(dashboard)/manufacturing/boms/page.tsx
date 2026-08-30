@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Layers } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
@@ -30,19 +31,29 @@ export default async function BomsPage() {
             <thead>
               <tr className="border-b border-border-subtle text-left text-xs font-medium uppercase tracking-wide text-text-tertiary">
                 <th className="px-4 py-2.5">Name</th>
+                <th className="px-4 py-2.5">Rev</th>
                 <th className="px-4 py-2.5">Finished product</th>
+                <th className="px-4 py-2.5">Yield</th>
                 <th className="px-4 py-2.5">Components</th>
+                <th className="px-4 py-2.5">Est. unit cost</th>
                 <th className="px-4 py-2.5">Status</th>
               </tr>
             </thead>
             <tbody>
               {boms.map((b) => (
                 <tr key={b.id} className="border-b border-border-subtle last:border-b-0">
-                  <td className="px-4 py-2.5 font-medium text-text-primary">{b.name}</td>
+                  <td className="px-4 py-2.5">
+                    <Link href={`/manufacturing/boms/${b.id}`} className="font-medium text-primary-600 hover:underline">
+                      {b.name}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-2.5 font-mono text-text-secondary">{b.revision}</td>
                   <td className="px-4 py-2.5 text-text-secondary">
                     {b.productName} <span className="text-text-tertiary">({b.productSku})</span>
                   </td>
+                  <td className="px-4 py-2.5 text-text-secondary">{b.yield_quantity}</td>
                   <td className="px-4 py-2.5 text-text-secondary">{b.componentCount}</td>
+                  <td className="px-4 py-2.5 text-text-secondary">${b.estimatedUnitCost.toFixed(2)}</td>
                   <td className="px-4 py-2.5">
                     <Badge tone={b.is_active ? "success" : "neutral"}>{b.is_active ? "Active" : "Inactive"}</Badge>
                   </td>

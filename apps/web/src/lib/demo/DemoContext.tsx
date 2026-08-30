@@ -191,8 +191,11 @@ export interface DemoLoyaltyTransaction {
 export interface DemoBom {
   id: string;
   name: string;
+  revision: string;
   productName: string;
+  yieldQuantity: number;
   componentCount: number;
+  estimatedUnitCost: number;
 }
 
 export interface DemoWorkOrder {
@@ -466,7 +469,9 @@ function seedLoyaltyTransactions(): DemoLoyaltyTransaction[] {
 }
 
 function seedBoms(): DemoBom[] {
-  return [{ id: "bm-1", name: "Standard mix", productName: "Ready-mix Concrete (1m3)", componentCount: 3 }];
+  return [
+    { id: "bm-1", name: "Standard mix", revision: "B", productName: "Ready-mix Concrete (1m3)", yieldQuantity: 4, componentCount: 3, estimatedUnitCost: 18.5 },
+  ];
 }
 
 function seedWorkOrders(): DemoWorkOrder[] {
@@ -552,7 +557,7 @@ interface DemoContextValue extends DemoState {
   addCampaign: (input: { name: string; channel: DemoCampaign["channel"]; message: string }) => void;
   setCampaignStatus: (id: string, status: DemoCampaign["status"]) => void;
   recordLoyaltyTransaction: (input: { customerName: string; points: number; type: DemoLoyaltyTransaction["type"]; reason: string }) => void;
-  createBom: (input: { name: string; productName: string; componentCount: number }) => void;
+  createBom: (input: { name: string; productName: string; componentCount: number; yieldQuantity: number; estimatedUnitCost: number }) => void;
   createWorkOrder: (input: { bomName: string; productName: string; quantityPlanned: number }) => void;
   completeWorkOrder: (id: string) => void;
   publishOnlineProduct: (input: { productName: string; slug: string; onlinePrice: number }) => void;
@@ -830,8 +835,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     [log]
   );
 
-  const createBom = useCallback((input: { name: string; productName: string; componentCount: number }) => {
-    setState((s) => ({ ...s, boms: [...s.boms, { id: nextId("bm"), ...input }] }));
+  const createBom = useCallback((input: { name: string; productName: string; componentCount: number; yieldQuantity: number; estimatedUnitCost: number }) => {
+    setState((s) => ({ ...s, boms: [...s.boms, { id: nextId("bm"), revision: "A", ...input }] }));
     log(`Created bill of materials "${input.name}"`);
   }, [log]);
 

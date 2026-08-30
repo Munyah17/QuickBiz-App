@@ -3,17 +3,35 @@ import type { TypedSupabaseClient as SupabaseClient } from "@quickbiz/supabase/t
 export interface BomListRow {
   id: string;
   name: string;
+  revision: string;
   is_active: boolean;
+  yield_quantity: number;
   productName: string;
   productSku: string;
   componentCount: number;
+  estimatedUnitCost: number;
   created_at: string;
+}
+
+function estimateUnitCost(
+  components: Array<{ quantityPerUnit: number; wastagePercent: number; costPrice: number }>,
+  laborCost: number,
+  overheadCost: number,
+  yieldQuantity: number
+): number {
+  const materialCost = components.reduce(
+    (sum, c) => sum + c.quantityPerUnit * (1 + c.wastagePercent / 100) * c.costPrice,
+    0
+  );
+  return (materialCost + laborCost + overheadCost) / (yieldQuantity || 1);
 }
 
 export async function listBoms(supabase: SupabaseClient, orgId: string): Promise<BomListRow[]> {
   const { data, error } = await supabase
     .from("bill_of_materials")
-    .select("id, name, is_active, created_at, products(name, sku), bom_components(id)")
+    .select(
+      "id, name, revision, is_active, yield_quantity, labor_cost, overhead_cost, created_at, products(name, sku), bom_components(quantity_per_unit, wastage_percent, products(cost_price))"
+    )
     .eq("org_id", orgId)
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -22,18 +40,34 @@ export async function listBoms(supabase: SupabaseClient, orgId: string): Promise
     data as unknown as Array<{
       id: string;
       name: string;
+      revision: string;
       is_active: boolean;
+      yield_quantity: number;
+      labor_cost: number;
+      overhead_cost: number;
       created_at: string;
       products: { name: string; sku: string } | null;
-      bom_components: Array<{ id: string }>;
+      bom_components: Array<{ quantity_per_unit: number; wastage_percent: number; products: { cost_price: number } | null }>;
     }>
   ).map((row) => ({
     id: row.id,
     name: row.name,
+    revision: row.revision,
     is_active: row.is_active,
+    yield_quantity: row.yield_quantity,
     productName: row.products?.name ?? "Unknown product",
     productSku: row.products?.sku ?? "",
     componentCount: row.bom_components.length,
+    estimatedUnitCost: estimateUnitCost(
+      row.bom_components.map((c) => ({
+        quantityPerUnit: c.quantity_per_unit,
+        wastagePercent: c.wastage_percent,
+        costPrice: c.products?.cost_price ?? 0,
+      })),
+      row.labor_cost,
+      row.overhead_cost,
+      row.yield_quantity
+    ),
     created_at: row.created_at,
   }));
 }
@@ -41,23 +75,50 @@ export async function listBoms(supabase: SupabaseClient, orgId: string): Promise
 export interface BomComponentInput {
   componentProductId: string;
   quantityPerUnit: number;
+  wastagePercent: number;
+  notes: string;
 }
 
 export async function createBom(
   supabase: SupabaseClient,
   orgId: string,
-  input: { productId: string; name: string; components: BomComponentInput[] }
+  input: {
+    productId: string;
+    name: string;
+    description: string;
+    revision: string;
+    yieldQuantity: number;
+    laborCost: number;
+    overheadCost: number;
+    components: BomComponentInput[];
+  }
 ) {
   const { data: bom, error: bomError } = await supabase
     .from("bill_of_materials")
-    .insert({ org_id: orgId, product_id: input.productId, name: input.name })
+    .insert({
+      org_id: orgId,
+      product_id: input.productId,
+      name: input.name,
+      description: input.description || null,
+      revision: input.revision || "A",
+      yield_quantity: input.yieldQuantity || 1,
+      labor_cost: input.laborCost || 0,
+      overhead_cost: input.overheadCost || 0,
+    })
     .select("id")
     .single();
   if (bomError) throw bomError;
 
   const rows = input.components
     .filter((c) => c.componentProductId && c.quantityPerUnit > 0)
-    .map((c) => ({ org_id: orgId, bom_id: bom.id, component_product_id: c.componentProductId, quantity_per_unit: c.quantityPerUnit }));
+    .map((c) => ({
+      org_id: orgId,
+      bom_id: bom.id,
+      component_product_id: c.componentProductId,
+      quantity_per_unit: c.quantityPerUnit,
+      wastage_percent: c.wastagePercent || 0,
+      notes: c.notes || null,
+    }));
 
   if (rows.length > 0) {
     const { error: compError } = await supabase.from("bom_components").insert(rows);
@@ -70,15 +131,37 @@ export async function createBom(
 export interface BomDetail {
   id: string;
   name: string;
+  description: string | null;
+  revision: string;
+  yieldQuantity: number;
+  laborCost: number;
+  overheadCost: number;
   productId: string;
   productName: string;
-  components: Array<{ id: string; componentProductId: string; componentName: string; componentSku: string; quantityPerUnit: number }>;
+  productSku: string;
+  productUnitOfMeasure: string;
+  components: Array<{
+    id: string;
+    componentProductId: string;
+    componentName: string;
+    componentSku: string;
+    componentUnitOfMeasure: string;
+    quantityPerUnit: number;
+    wastagePercent: number;
+    costPrice: number;
+    notes: string | null;
+  }>;
+  materialCost: number;
+  totalBatchCost: number;
+  estimatedUnitCost: number;
 }
 
 export async function getBom(supabase: SupabaseClient, orgId: string, bomId: string): Promise<BomDetail | null> {
   const { data, error } = await supabase
     .from("bill_of_materials")
-    .select("id, name, product_id, products(name), bom_components(id, component_product_id, quantity_per_unit, products(name, sku))")
+    .select(
+      "id, name, description, revision, yield_quantity, labor_cost, overhead_cost, product_id, products(name, sku, unit_of_measure), bom_components(id, component_product_id, quantity_per_unit, wastage_percent, notes, products(name, sku, unit_of_measure, cost_price))"
+    )
     .eq("org_id", orgId)
     .eq("id", bomId)
     .maybeSingle();
@@ -88,23 +171,54 @@ export async function getBom(supabase: SupabaseClient, orgId: string, bomId: str
   const row = data as unknown as {
     id: string;
     name: string;
+    description: string | null;
+    revision: string;
+    yield_quantity: number;
+    labor_cost: number;
+    overhead_cost: number;
     product_id: string;
-    products: { name: string } | null;
-    bom_components: Array<{ id: string; component_product_id: string; quantity_per_unit: number; products: { name: string; sku: string } | null }>;
+    products: { name: string; sku: string; unit_of_measure: string } | null;
+    bom_components: Array<{
+      id: string;
+      component_product_id: string;
+      quantity_per_unit: number;
+      wastage_percent: number;
+      notes: string | null;
+      products: { name: string; sku: string; unit_of_measure: string; cost_price: number } | null;
+    }>;
   };
+
+  const components = row.bom_components.map((c) => ({
+    id: c.id,
+    componentProductId: c.component_product_id,
+    componentName: c.products?.name ?? "Unknown component",
+    componentSku: c.products?.sku ?? "",
+    componentUnitOfMeasure: c.products?.unit_of_measure ?? "each",
+    quantityPerUnit: c.quantity_per_unit,
+    wastagePercent: c.wastage_percent,
+    costPrice: c.products?.cost_price ?? 0,
+    notes: c.notes,
+  }));
+
+  const materialCost = components.reduce((sum, c) => sum + c.quantityPerUnit * (1 + c.wastagePercent / 100) * c.costPrice, 0);
+  const totalBatchCost = materialCost + row.labor_cost + row.overhead_cost;
 
   return {
     id: row.id,
     name: row.name,
+    description: row.description,
+    revision: row.revision,
+    yieldQuantity: row.yield_quantity,
+    laborCost: row.labor_cost,
+    overheadCost: row.overhead_cost,
     productId: row.product_id,
     productName: row.products?.name ?? "Unknown product",
-    components: row.bom_components.map((c) => ({
-      id: c.id,
-      componentProductId: c.component_product_id,
-      componentName: c.products?.name ?? "Unknown component",
-      componentSku: c.products?.sku ?? "",
-      quantityPerUnit: c.quantity_per_unit,
-    })),
+    productSku: row.products?.sku ?? "",
+    productUnitOfMeasure: row.products?.unit_of_measure ?? "each",
+    components,
+    materialCost,
+    totalBatchCost,
+    estimatedUnitCost: totalBatchCost / (row.yield_quantity || 1),
   };
 }
 

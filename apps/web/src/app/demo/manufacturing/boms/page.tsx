@@ -7,7 +7,7 @@ import { Card } from "@/components/Card";
 import { Button } from "@/components/Button";
 import { EmptyState } from "@/components/EmptyState";
 import { Modal } from "@/components/Modal";
-import { Input, Select } from "@/components/Input";
+import { Input, Select, Textarea } from "@/components/Input";
 import { FormField } from "@/components/FormField";
 import { useDemo } from "@/lib/demo/DemoContext";
 import { useToast } from "@/components/Toast";
@@ -18,6 +18,9 @@ function NewBomModal({ onClose }: { onClose: () => void }) {
   const [name, setName] = useState("");
   const [productName, setProductName] = useState(products[0]?.name ?? "");
   const [componentCount, setComponentCount] = useState("1");
+  const [yieldQuantity, setYieldQuantity] = useState("1");
+  const [laborCost, setLaborCost] = useState("0");
+  const [overheadCost, setOverheadCost] = useState("0");
 
   return (
     <Modal open onClose={onClose} title="New bill of materials">
@@ -26,7 +29,14 @@ function NewBomModal({ onClose }: { onClose: () => void }) {
         onSubmit={(e) => {
           e.preventDefault();
           if (!name.trim() || !productName) return;
-          createBom({ name: name.trim(), productName, componentCount: Number(componentCount) || 1 });
+          const estimatedUnitCost = (Number(laborCost) + Number(overheadCost) + Number(componentCount) * 4) / (Number(yieldQuantity) || 1);
+          createBom({
+            name: name.trim(),
+            productName,
+            componentCount: Number(componentCount) || 1,
+            yieldQuantity: Number(yieldQuantity) || 1,
+            estimatedUnitCost,
+          });
           push("Bill of materials created");
           onClose();
         }}
@@ -34,20 +44,32 @@ function NewBomModal({ onClose }: { onClose: () => void }) {
         <FormField label="BOM name" htmlFor="name" required>
           <Input id="name" required value={name} onChange={(e) => setName(e.target.value)} />
         </FormField>
-        <div className="grid grid-cols-2 gap-4">
-          <FormField label="Finished product" htmlFor="productName">
-            <Select id="productName" value={productName} onChange={(e) => setProductName(e.target.value)}>
-              {products.map((p) => (
-                <option key={p.id} value={p.name}>
-                  {p.name}
-                </option>
-              ))}
-            </Select>
-          </FormField>
-          <FormField label="Component count" htmlFor="componentCount">
+        <FormField label="Finished product" htmlFor="productName">
+          <Select id="productName" value={productName} onChange={(e) => setProductName(e.target.value)}>
+            {products.map((p) => (
+              <option key={p.id} value={p.name}>
+                {p.name}
+              </option>
+            ))}
+          </Select>
+        </FormField>
+        <div className="grid grid-cols-3 gap-4">
+          <FormField label="Components" htmlFor="componentCount">
             <Input id="componentCount" type="number" min="1" step="1" value={componentCount} onChange={(e) => setComponentCount(e.target.value)} />
           </FormField>
+          <FormField label="Yield qty" htmlFor="yieldQuantity" hint="Per batch">
+            <Input id="yieldQuantity" type="number" min="1" step="1" value={yieldQuantity} onChange={(e) => setYieldQuantity(e.target.value)} />
+          </FormField>
+          <FormField label="Labor cost" htmlFor="laborCost">
+            <Input id="laborCost" type="number" min="0" step="0.01" value={laborCost} onChange={(e) => setLaborCost(e.target.value)} />
+          </FormField>
         </div>
+        <FormField label="Overhead cost" htmlFor="overheadCost">
+          <Input id="overheadCost" type="number" min="0" step="0.01" value={overheadCost} onChange={(e) => setOverheadCost(e.target.value)} />
+        </FormField>
+        <FormField label="Notes" htmlFor="notes" hint="Optional, e.g. process or substitution notes">
+          <Textarea id="notes" rows={2} />
+        </FormField>
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancel
@@ -81,16 +103,22 @@ export default function DemoBomsPage() {
             <thead>
               <tr className="border-b border-border-subtle text-left text-xs font-medium uppercase tracking-wide text-text-tertiary">
                 <th className="px-4 py-2.5">Name</th>
+                <th className="px-4 py-2.5">Rev</th>
                 <th className="px-4 py-2.5">Finished product</th>
+                <th className="px-4 py-2.5">Yield</th>
                 <th className="px-4 py-2.5">Components</th>
+                <th className="px-4 py-2.5">Est. unit cost</th>
               </tr>
             </thead>
             <tbody>
               {boms.map((b) => (
                 <tr key={b.id} className="border-b border-border-subtle last:border-b-0">
                   <td className="px-4 py-2.5 font-medium text-text-primary">{b.name}</td>
+                  <td className="px-4 py-2.5 font-mono text-text-secondary">{b.revision}</td>
                   <td className="px-4 py-2.5 text-text-secondary">{b.productName}</td>
+                  <td className="px-4 py-2.5 text-text-secondary">{b.yieldQuantity}</td>
                   <td className="px-4 py-2.5 text-text-secondary">{b.componentCount}</td>
+                  <td className="px-4 py-2.5 text-text-secondary">${b.estimatedUnitCost.toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>

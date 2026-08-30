@@ -260,30 +260,45 @@ export type Database = {
       bill_of_materials: {
         Row: {
           created_at: string
+          description: string | null
           id: string
           is_active: boolean
+          labor_cost: number
           name: string
           org_id: string
+          overhead_cost: number
           product_id: string
+          revision: string
           updated_at: string
+          yield_quantity: number
         }
         Insert: {
           created_at?: string
+          description?: string | null
           id?: string
           is_active?: boolean
+          labor_cost?: number
           name: string
           org_id: string
+          overhead_cost?: number
           product_id: string
+          revision?: string
           updated_at?: string
+          yield_quantity?: number
         }
         Update: {
           created_at?: string
+          description?: string | null
           id?: string
           is_active?: boolean
+          labor_cost?: number
           name?: string
           org_id?: string
+          overhead_cost?: number
           product_id?: string
+          revision?: string
           updated_at?: string
+          yield_quantity?: number
         }
         Relationships: [
           {
@@ -323,24 +338,30 @@ export type Database = {
           component_product_id: string
           created_at: string
           id: string
+          notes: string | null
           org_id: string
           quantity_per_unit: number
+          wastage_percent: number
         }
         Insert: {
           bom_id: string
           component_product_id: string
           created_at?: string
           id?: string
+          notes?: string | null
           org_id: string
           quantity_per_unit: number
+          wastage_percent?: number
         }
         Update: {
           bom_id?: string
           component_product_id?: string
           created_at?: string
           id?: string
+          notes?: string | null
           org_id?: string
           quantity_per_unit?: number
+          wastage_percent?: number
         }
         Relationships: [
           {
