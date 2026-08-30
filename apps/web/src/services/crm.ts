@@ -61,6 +61,11 @@ export async function updateLead(supabase: SupabaseClient, leadId: string, input
   if (error) throw error;
 }
 
+export async function setLeadStatus(supabase: SupabaseClient, leadId: string, status: Lead["status"]) {
+  const { error } = await supabase.from("leads").update({ status }).eq("id", leadId);
+  if (error) throw error;
+}
+
 export async function convertLead(supabase: SupabaseClient, orgId: string, leadId: string): Promise<string> {
   const { data, error } = await supabase.rpc("convert_lead_to_customer", { p_org_id: orgId, p_lead_id: leadId });
   if (error) throw error;

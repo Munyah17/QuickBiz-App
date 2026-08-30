@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireOrgContext, requireModuleEnabled } from "@/lib/session";
-import { createEmployee, updateEmployee, type EmployeeInput } from "@/services/hr";
+import { createEmployee, updateEmployee, setEmployeeStatus, type Employee, type EmployeeInput } from "@/services/hr";
 
 export interface EmployeeActionState {
   error: string | null;
@@ -37,6 +37,27 @@ export async function createEmployeeAction(_prev: EmployeeActionState, formData:
 
   try {
     await createEmployee(supabase, orgId, input);
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/employees");
+  return { error: null, success: true };
+}
+
+export async function bulkSetEmployeeStatusAction(
+  employeeIds: string[],
+  employmentStatus: Employee["employment_status"]
+): Promise<EmployeeActionState> {
+  const { supabase, permissions } = await requireOrgContext();
+
+  if (!permissions.has("hr.manage")) {
+    return { error: "You don't have permission to manage employees.", success: false };
+  }
+  if (employeeIds.length === 0) return { error: "No employees selected.", success: false };
+
+  try {
+    await Promise.all(employeeIds.map((id) => setEmployeeStatus(supabase, id, employmentStatus)));
   } catch (err) {
     return { error: (err as Error).message, success: false };
   }

@@ -87,6 +87,15 @@ export async function createEmployee(supabase: SupabaseClient, orgId: string, in
   if (error) throw error;
 }
 
+export async function setEmployeeStatus(
+  supabase: SupabaseClient,
+  employeeId: string,
+  employmentStatus: Employee["employment_status"]
+) {
+  const { error } = await supabase.from("employees").update({ employment_status: employmentStatus }).eq("id", employeeId);
+  if (error) throw error;
+}
+
 export async function updateEmployee(supabase: SupabaseClient, employeeId: string, input: EmployeeInput) {
   const { error } = await supabase
     .from("employees")
