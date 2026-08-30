@@ -74,3 +74,21 @@ export async function setAccountActiveAction(_prev: AccountActionState, formData
   revalidatePath("/accounts");
   return { error: null, success: true };
 }
+
+export async function bulkSetAccountActiveAction(accountIds: string[], isActive: boolean): Promise<AccountActionState> {
+  const { supabase, permissions } = await requireOrgContext();
+
+  if (!permissions.has("finance.manage")) {
+    return { error: "You don't have permission to manage accounts.", success: false };
+  }
+  if (accountIds.length === 0) return { error: "No accounts selected.", success: false };
+
+  try {
+    await Promise.all(accountIds.map((id) => setAccountActive(supabase, id, isActive)));
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/accounts");
+  return { error: null, success: true };
+}

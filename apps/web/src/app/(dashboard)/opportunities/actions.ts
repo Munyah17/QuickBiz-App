@@ -65,3 +65,21 @@ export async function updateOpportunityStageAction(
   revalidatePath("/opportunities");
   return { error: null, success: true };
 }
+
+export async function bulkSetOpportunityStageAction(opportunityIds: string[], stage: string): Promise<OpportunityActionState> {
+  const { supabase, permissions } = await requireOrgContext();
+
+  if (!permissions.has("crm.manage")) {
+    return { error: "You don't have permission to manage opportunities.", success: false };
+  }
+  if (opportunityIds.length === 0) return { error: "No opportunities selected.", success: false };
+
+  try {
+    await Promise.all(opportunityIds.map((id) => updateOpportunityStage(supabase, id, stage)));
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/opportunities");
+  return { error: null, success: true };
+}
