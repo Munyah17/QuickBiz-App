@@ -64,3 +64,21 @@ export async function updateShipmentStatusAction(
   revalidatePath("/shipments");
   return { error: null, success: true };
 }
+
+export async function bulkSetShipmentStatusAction(shipmentIds: string[], status: string): Promise<ShipmentActionState> {
+  const { supabase, permissions } = await requireOrgContext();
+
+  if (!permissions.has("logistics.manage")) {
+    return { error: "You don't have permission to update shipments.", success: false };
+  }
+  if (shipmentIds.length === 0) return { error: "No shipments selected.", success: false };
+
+  try {
+    await Promise.all(shipmentIds.map((id) => updateShipmentStatus(supabase, id, status)));
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/shipments");
+  return { error: null, success: true };
+}

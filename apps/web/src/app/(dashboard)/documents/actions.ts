@@ -68,3 +68,21 @@ export async function deleteDocumentAction(
   revalidatePath("/documents");
   return { error: null, success: true };
 }
+
+export async function bulkDeleteDocumentsAction(documentIds: string[]): Promise<DocumentActionState> {
+  const { supabase, orgId, permissions } = await requireOrgContext();
+
+  if (!permissions.has("documents.manage")) {
+    return { error: "You don't have permission to delete documents.", success: false };
+  }
+  if (documentIds.length === 0) return { error: "No documents selected.", success: false };
+
+  try {
+    await Promise.all(documentIds.map((id) => deleteDocument(supabase, orgId, id)));
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/documents");
+  return { error: null, success: true };
+}
