@@ -17,7 +17,7 @@ export default async function PayrollSettingsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader module="Payroll" title="Tax Settings" />
+      <PageHeader module="Payroll" title="Tax & Component Settings" />
       <TaxSettingsForm settings={taxSettings} />
       <SalaryComponentsCard components={components} />
     </div>
