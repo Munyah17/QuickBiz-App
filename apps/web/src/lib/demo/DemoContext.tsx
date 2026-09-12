@@ -307,6 +307,7 @@ const MODULE_CATALOG: Array<Omit<DemoModule, "enabled">> = [
   { key: "finance", name: "Finance", description: "Chart of accounts, general ledger, cashbook, reconciliation", category: "finance", monthlyPriceUsd: 25 },
   { key: "crm", name: "CRM", description: "Leads, opportunities, activities, campaigns", category: "sales", monthlyPriceUsd: 12 },
   { key: "hr", name: "HR", description: "Employees, attendance, leave, payroll", category: "people", monthlyPriceUsd: 18 },
+  { key: "payroll", name: "Payroll", description: "Salary structures, payroll runs, printable payslips", category: "people", monthlyPriceUsd: 15 },
   { key: "manufacturing", name: "Manufacturing", description: "Bills of materials, work orders, production planning", category: "operations", monthlyPriceUsd: 25 },
   { key: "projects", name: "Projects", description: "Projects, tasks, milestones, timesheets", category: "operations", monthlyPriceUsd: 15 },
   { key: "assets", name: "Assets", description: "Fixed assets, maintenance, depreciation", category: "operations", monthlyPriceUsd: 10 },

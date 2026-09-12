@@ -47,7 +47,9 @@ export function Sidebar({
   branchName: string;
 }) {
   const pathname = usePathname();
-  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+  // Explicit user overrides win over the "active section auto-opens" default,
+  // so clicking a group closed actually closes it even while its route is active.
+  const [groupOverrides, setGroupOverrides] = useState<Record<string, boolean>>({});
 
   const leafVisible = (leaf: NavLeaf) =>
     (!leaf.moduleKey || enabledModules.includes(leaf.moduleKey)) && (!leaf.permission || permissions.includes(leaf.permission));
@@ -72,7 +74,7 @@ export function Sidebar({
           if (visibleChildren.length === 0) return null;
 
           const groupActive = visibleChildren.some((c) => isLeafActive(pathname, c.href));
-          const open = openGroups.has(entry.key) || groupActive;
+          const open = groupOverrides[entry.key] ?? groupActive;
           const Icon = entry.icon;
 
           return (
@@ -80,12 +82,7 @@ export function Sidebar({
               <button
                 type="button"
                 onClick={() =>
-                  setOpenGroups((prev) => {
-                    const next = new Set(prev);
-                    if (next.has(entry.key)) next.delete(entry.key);
-                    else next.add(entry.key);
-                    return next;
-                  })
+                  setGroupOverrides((prev) => ({ ...prev, [entry.key]: !open }))
                 }
                 className={cn(
                   "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",

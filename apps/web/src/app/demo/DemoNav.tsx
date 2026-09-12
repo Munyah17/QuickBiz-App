@@ -31,10 +31,20 @@ function LeafLink({ item, active, indent }: { item: NavLeaf; active: boolean; in
   );
 }
 
+function allGroupKeys(): Record<string, boolean> {
+  return Object.fromEntries(
+    DEMO_NAV.filter(isNavGroup).map((g) => [g.key, true])
+  );
+}
+
 export function DemoSidebar() {
   const { orgName, modules } = useDemo();
   const pathname = usePathname();
-  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+  // Demo is a showcase of everything the product offers, so every group
+  // starts expanded (unlike the real app, which starts collapsed). Explicit
+  // user overrides still win over the "active section auto-opens" default,
+  // so clicking a group closed actually closes it even while its route is active.
+  const [groupOverrides, setGroupOverrides] = useState<Record<string, boolean>>(allGroupKeys);
 
   const enabledKeys = new Set(modules.filter((m) => m.enabled).map((m) => m.key));
   const leafVisible = (leaf: NavLeaf) => !leaf.moduleKey || enabledKeys.has(leaf.moduleKey);
@@ -59,7 +69,7 @@ export function DemoSidebar() {
           if (visibleChildren.length === 0) return null;
 
           const groupActive = visibleChildren.some((c) => isLeafActive(pathname, c.href));
-          const open = openGroups.has(entry.key) || groupActive;
+          const open = groupOverrides[entry.key] ?? groupActive;
           const Icon = entry.icon;
 
           return (
@@ -67,12 +77,7 @@ export function DemoSidebar() {
               <button
                 type="button"
                 onClick={() =>
-                  setOpenGroups((prev) => {
-                    const next = new Set(prev);
-                    if (next.has(entry.key)) next.delete(entry.key);
-                    else next.add(entry.key);
-                    return next;
-                  })
+                  setGroupOverrides((prev) => ({ ...prev, [entry.key]: !open }))
                 }
                 className={cn(
                   "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
