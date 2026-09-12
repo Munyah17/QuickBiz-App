@@ -539,7 +539,6 @@ const MODULE_CATALOG: Array<Omit<DemoModule, "enabled">> = [
   { key: "sheq", name: "SHEQ", description: "Track safety, health, environment, and quality incidents, conduct inspections and audits, and manage corrective actions", category: "operations", monthlyPriceUsd: 15 },
   { key: "disciplinary", name: "Disciplinary", description: "Manage employee disciplinary cases, warnings, hearings, and conduct records", category: "operations", monthlyPriceUsd: 15 },
   { key: "email", name: "Email", description: "Configure your own SMTP settings and keep a log of emails sent from the system", category: "platform", monthlyPriceUsd: 8 },
-  { key: "petty_cash", name: "Petty Cash", description: "Issue project petty cash floats to a custodian and track disbursements against the remaining balance", category: "operations", monthlyPriceUsd: 8 },
 ];
 
 // The demo exists to show a prospective client everything they would get —
