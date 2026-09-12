@@ -380,6 +380,26 @@ export interface DemoSheqInspection {
   findings: string | null;
 }
 
+export interface DemoDisciplinaryCase {
+  id: string;
+  caseNumber: string;
+  employeeName: string;
+  violationType: string;
+  severity: "minor" | "moderate" | "major" | "gross";
+  title: string;
+  incidentDate: string;
+  status: "open" | "under_investigation" | "hearing_scheduled" | "hearing_completed" | "action_taken" | "appealed" | "closed";
+  hearingDate: string | null;
+}
+
+export interface DemoDisciplinaryWarning {
+  id: string;
+  employeeName: string;
+  warningType: "verbal" | "written" | "final";
+  reason: string;
+  issuedDate: string;
+}
+
 export interface DemoAuditEntry {
   id: string;
   action: string;
@@ -483,6 +503,7 @@ const MODULE_CATALOG: Array<Omit<DemoModule, "enabled">> = [
   { key: "warehousing", name: "Warehousing", description: "Manage warehouses, storage zones, and bins, and track exactly where stock sits inside each site", category: "operations", monthlyPriceUsd: 15 },
   { key: "stock_take", name: "Stock Take", description: "Schedule physical inventory counts, record counted quantities against system quantities, and resolve variances", category: "operations", monthlyPriceUsd: 12 },
   { key: "sheq", name: "SHEQ", description: "Track safety, health, environment, and quality incidents, conduct inspections and audits, and manage corrective actions", category: "operations", monthlyPriceUsd: 15 },
+  { key: "disciplinary", name: "Disciplinary", description: "Manage employee disciplinary cases, warnings, hearings, and conduct records", category: "operations", monthlyPriceUsd: 15 },
 ];
 
 // The demo exists to show a prospective client everything they would get —
@@ -707,6 +728,8 @@ interface DemoState {
   stockTakeLines: DemoStockTakeLine[];
   sheqIncidents: DemoSheqIncident[];
   sheqInspections: DemoSheqInspection[];
+  disciplinaryCases: DemoDisciplinaryCase[];
+  disciplinaryWarnings: DemoDisciplinaryWarning[];
   customCode: Record<CustomCodeType, DemoCustomCodeEntry>;
 }
 
@@ -781,6 +804,10 @@ interface DemoContextValue extends DemoState {
   closeIncident: (id: string) => void;
   scheduleInspection: (input: { inspectionType: string; title: string; scheduledDate: string }) => void;
   completeInspection: (id: string, input: { findings: string; nonConformities: number }) => void;
+  openDisciplinaryCase: (input: { employeeName: string; violationType: string; severity: DemoDisciplinaryCase["severity"]; title: string; incidentDate: string }) => void;
+  scheduleDisciplinaryHearing: (id: string, hearingDate: string) => void;
+  setDisciplinaryCaseStatus: (id: string, status: DemoDisciplinaryCase["status"]) => void;
+  issueDisciplinaryWarning: (input: { employeeName: string; warningType: DemoDisciplinaryWarning["warningType"]; reason: string }) => void;
   saveCustomCode: (codeType: CustomCodeType, content: string) => void;
   rollbackCustomCode: (codeType: CustomCodeType, targetVersion: number) => void;
 }
@@ -1059,6 +1086,45 @@ function seedSheqInspections(): DemoSheqInspection[] {
   ];
 }
 
+function seedDisciplinaryCases(): DemoDisciplinaryCase[] {
+  return [
+    {
+      id: "dc-1",
+      caseNumber: "DISC-20260830-A1B2C3",
+      employeeName: "Tafadzwa Chirwa",
+      violationType: "absenteeism",
+      severity: "moderate",
+      title: "Repeated unexplained absences",
+      incidentDate: new Date(Date.now() - 10 * 86400000).toISOString().slice(0, 10),
+      status: "hearing_scheduled",
+      hearingDate: new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10),
+    },
+    {
+      id: "dc-2",
+      caseNumber: "DISC-20260901-D4E5F6",
+      employeeName: "Chipo Ndlovu",
+      violationType: "policy_violation",
+      severity: "minor",
+      title: "Late clock-in policy breach",
+      incidentDate: new Date(Date.now() - 5 * 86400000).toISOString().slice(0, 10),
+      status: "open",
+      hearingDate: null,
+    },
+  ];
+}
+
+function seedDisciplinaryWarnings(): DemoDisciplinaryWarning[] {
+  return [
+    {
+      id: "dw-1",
+      employeeName: "Chipo Ndlovu",
+      warningType: "verbal",
+      reason: "Late clock-in on three occasions this month.",
+      issuedDate: new Date(Date.now() - 4 * 86400000).toISOString().slice(0, 10),
+    },
+  ];
+}
+
 function seedCustomCode(): Record<CustomCodeType, DemoCustomCodeEntry> {
   return {
     css: { content: "", version: 0, history: [] },
@@ -1114,6 +1180,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     stockTakeLines: seedStockTakeLines(),
     sheqIncidents: seedSheqIncidents(),
     sheqInspections: seedSheqInspections(),
+    disciplinaryCases: seedDisciplinaryCases(),
+    disciplinaryWarnings: seedDisciplinaryWarnings(),
     customCode: seedCustomCode(),
   }));
 
@@ -1715,6 +1783,60 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     log("Completed inspection");
   }, [log]);
 
+  const openDisciplinaryCase = useCallback((input: { employeeName: string; violationType: string; severity: DemoDisciplinaryCase["severity"]; title: string; incidentDate: string }) => {
+    setState((s) => ({
+      ...s,
+      disciplinaryCases: [
+        {
+          id: nextId("dc"),
+          caseNumber: `DISC-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${String(s.disciplinaryCases.length + 1).padStart(4, "0")}`,
+          employeeName: input.employeeName,
+          violationType: input.violationType,
+          severity: input.severity,
+          title: input.title,
+          incidentDate: input.incidentDate,
+          status: "open",
+          hearingDate: null,
+        },
+        ...s.disciplinaryCases,
+      ],
+    }));
+    log(`Opened disciplinary case "${input.title}"`);
+  }, [log]);
+
+  const scheduleDisciplinaryHearing = useCallback((id: string, hearingDate: string) => {
+    setState((s) => ({
+      ...s,
+      disciplinaryCases: s.disciplinaryCases.map((c) => (c.id === id ? { ...c, status: "hearing_scheduled", hearingDate } : c)),
+    }));
+    log("Scheduled disciplinary hearing");
+  }, [log]);
+
+  const setDisciplinaryCaseStatus = useCallback((id: string, status: DemoDisciplinaryCase["status"]) => {
+    setState((s) => ({
+      ...s,
+      disciplinaryCases: s.disciplinaryCases.map((c) => (c.id === id ? { ...c, status } : c)),
+    }));
+    log(`Updated disciplinary case status to "${status.replace("_", " ")}"`);
+  }, [log]);
+
+  const issueDisciplinaryWarning = useCallback((input: { employeeName: string; warningType: DemoDisciplinaryWarning["warningType"]; reason: string }) => {
+    setState((s) => ({
+      ...s,
+      disciplinaryWarnings: [
+        {
+          id: nextId("dw"),
+          employeeName: input.employeeName,
+          warningType: input.warningType,
+          reason: input.reason,
+          issuedDate: new Date().toISOString().slice(0, 10),
+        },
+        ...s.disciplinaryWarnings,
+      ],
+    }));
+    log(`Issued ${input.warningType} warning to ${input.employeeName}`);
+  }, [log]);
+
   const saveCustomCode = useCallback((codeType: CustomCodeType, content: string) => {
     setState((s) => {
       const current = s.customCode[codeType];
@@ -1820,6 +1942,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       closeIncident,
       scheduleInspection,
       completeInspection,
+      openDisciplinaryCase,
+      scheduleDisciplinaryHearing,
+      setDisciplinaryCaseStatus,
+      issueDisciplinaryWarning,
       saveCustomCode,
       rollbackCustomCode,
     }),
@@ -1887,6 +2013,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       closeIncident,
       scheduleInspection,
       completeInspection,
+      openDisciplinaryCase,
+      scheduleDisciplinaryHearing,
+      setDisciplinaryCaseStatus,
+      issueDisciplinaryWarning,
       saveCustomCode,
       rollbackCustomCode,
     ]
