@@ -334,6 +334,28 @@ export interface DemoWarehouseZone {
   capacity: string;
 }
 
+export interface DemoStockTake {
+  id: string;
+  stockTakeNumber: string;
+  title: string;
+  branchName: string;
+  countType: "full" | "partial" | "cycle" | "spot";
+  status: "planned" | "in_progress" | "completed" | "cancelled" | "under_review";
+  startedAt: string | null;
+  completedAt: string | null;
+  totalVarianceValue: number | null;
+}
+
+export interface DemoStockTakeLine {
+  id: string;
+  stockTakeId: string;
+  productName: string;
+  systemQuantity: number;
+  countedQuantity: number | null;
+  variance: number | null;
+  countStatus: "pending" | "counted" | "verified" | "discrepancy";
+}
+
 export interface DemoAuditEntry {
   id: string;
   action: string;
@@ -435,6 +457,7 @@ const MODULE_CATALOG: Array<Omit<DemoModule, "enabled">> = [
   { key: "tender_bidding", name: "Tender & Bidding", description: "Create tenders when sourcing suppliers, receive and evaluate bids, and track the tender lifecycle through to award", category: "procurement", monthlyPriceUsd: 15 },
   { key: "risk_insurance", name: "Risk & Insurance", description: "Onboard insurers, manage policies, process claims, and maintain a risk register with mitigation plans", category: "operations", monthlyPriceUsd: 18 },
   { key: "warehousing", name: "Warehousing", description: "Manage warehouses, storage zones, and bins, and track exactly where stock sits inside each site", category: "operations", monthlyPriceUsd: 15 },
+  { key: "stock_take", name: "Stock Take", description: "Schedule physical inventory counts, record counted quantities against system quantities, and resolve variances", category: "operations", monthlyPriceUsd: 12 },
 ];
 
 // The demo exists to show a prospective client everything they would get —
@@ -655,6 +678,8 @@ interface DemoState {
   riskAssessments: DemoRiskAssessment[];
   warehouses: DemoWarehouse[];
   warehouseZones: DemoWarehouseZone[];
+  stockTakes: DemoStockTake[];
+  stockTakeLines: DemoStockTakeLine[];
   customCode: Record<CustomCodeType, DemoCustomCodeEntry>;
 }
 
@@ -721,6 +746,9 @@ interface DemoContextValue extends DemoState {
   createRiskAssessment: (input: { title: string; category: string; likelihood: number; impact: number; reviewDate: string }) => void;
   addWarehouse: (input: { code: string; name: string; address: string; managerName: string }) => void;
   createWarehouseZone: (input: { warehouseId: string; code: string; name: string; zoneType: string; capacity: string }) => void;
+  startStockTake: (input: { title: string; branchName: string; countType: DemoStockTake["countType"] }) => void;
+  recordStockTakeCount: (lineId: string, countedQuantity: number) => void;
+  completeStockTake: (id: string) => void;
   saveCustomCode: (codeType: CustomCodeType, content: string) => void;
   rollbackCustomCode: (codeType: CustomCodeType, targetVersion: number) => void;
 }
@@ -918,6 +946,43 @@ function seedWarehouseZones(): DemoWarehouseZone[] {
   ];
 }
 
+function seedStockTakes(): DemoStockTake[] {
+  return [
+    {
+      id: "stk-1",
+      stockTakeNumber: "STK-20260901-A1B2C3",
+      title: "September Full Count - Harare Main",
+      branchName: "Harare Main Warehouse",
+      countType: "full",
+      status: "completed",
+      startedAt: new Date(Date.now() - 10 * 86400000).toISOString(),
+      completedAt: new Date(Date.now() - 9 * 86400000).toISOString(),
+      totalVarianceValue: -42.5,
+    },
+    {
+      id: "stk-2",
+      stockTakeNumber: "STK-20260910-D4E5F6",
+      title: "Spot Check - Fast Movers",
+      branchName: "Bulawayo Distribution Centre",
+      countType: "spot",
+      status: "in_progress",
+      startedAt: new Date(Date.now() - 1 * 86400000).toISOString(),
+      completedAt: null,
+      totalVarianceValue: null,
+    },
+  ];
+}
+
+function seedStockTakeLines(): DemoStockTakeLine[] {
+  return [
+    { id: "stl-1", stockTakeId: "stk-1", productName: "2kg Roller Meal", systemQuantity: 120, countedQuantity: 115, variance: -5, countStatus: "discrepancy" },
+    { id: "stl-2", stockTakeId: "stk-1", productName: "500ml Cooking Oil", systemQuantity: 80, countedQuantity: 80, variance: 0, countStatus: "verified" },
+    { id: "stl-3", stockTakeId: "stk-1", productName: "2L Coca-Cola", systemQuantity: 60, countedQuantity: 68, variance: 8, countStatus: "discrepancy" },
+    { id: "stl-4", stockTakeId: "stk-2", productName: "Washing Powder 1kg", systemQuantity: 45, countedQuantity: null, variance: null, countStatus: "pending" },
+    { id: "stl-5", stockTakeId: "stk-2", productName: "White Sugar 2kg", systemQuantity: 90, countedQuantity: null, variance: null, countStatus: "pending" },
+  ];
+}
+
 function seedCustomCode(): Record<CustomCodeType, DemoCustomCodeEntry> {
   return {
     css: { content: "", version: 0, history: [] },
@@ -969,6 +1034,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     riskAssessments: seedRiskAssessments(),
     warehouses: seedWarehouses(),
     warehouseZones: seedWarehouseZones(),
+    stockTakes: seedStockTakes(),
+    stockTakeLines: seedStockTakeLines(),
     customCode: seedCustomCode(),
   }));
 
@@ -1441,6 +1508,67 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     log(`Added storage zone "${input.name}"`);
   }, [log]);
 
+  const startStockTake = useCallback((input: { title: string; branchName: string; countType: DemoStockTake["countType"] }) => {
+    const id = nextId("stk");
+    setState((s) => ({
+      ...s,
+      stockTakes: [
+        {
+          id,
+          stockTakeNumber: `STK-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${String(s.stockTakes.length + 1).padStart(4, "0")}`,
+          title: input.title,
+          branchName: input.branchName,
+          countType: input.countType,
+          status: "in_progress",
+          startedAt: new Date().toISOString(),
+          completedAt: null,
+          totalVarianceValue: null,
+        },
+        ...s.stockTakes,
+      ],
+      stockTakeLines: [
+        ...s.stockTakeLines,
+        ...s.products.map((p) => ({
+          id: nextId("stl"),
+          stockTakeId: id,
+          productName: p.name,
+          systemQuantity: p.stockOnHand,
+          countedQuantity: null,
+          variance: null,
+          countStatus: "pending" as const,
+        })),
+      ],
+    }));
+    log(`Started stock take "${input.title}"`);
+  }, [log]);
+
+  const recordStockTakeCount = useCallback((lineId: string, countedQuantity: number) => {
+    setState((s) => ({
+      ...s,
+      stockTakeLines: s.stockTakeLines.map((l) => {
+        if (l.id !== lineId) return l;
+        const variance = countedQuantity - l.systemQuantity;
+        return { ...l, countedQuantity, variance, countStatus: variance === 0 ? "verified" : "discrepancy" };
+      }),
+    }));
+    log("Recorded stock take count");
+  }, [log]);
+
+  const completeStockTake = useCallback((id: string) => {
+    setState((s) => {
+      const totalVarianceValue = s.stockTakeLines
+        .filter((l) => l.stockTakeId === id)
+        .reduce((sum, l) => sum + (l.variance ?? 0), 0);
+      return {
+        ...s,
+        stockTakes: s.stockTakes.map((st) =>
+          st.id === id ? { ...st, status: "completed", completedAt: new Date().toISOString(), totalVarianceValue } : st
+        ),
+      };
+    });
+    log("Completed stock take");
+  }, [log]);
+
   const saveCustomCode = useCallback((codeType: CustomCodeType, content: string) => {
     setState((s) => {
       const current = s.customCode[codeType];
@@ -1538,6 +1666,9 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       createRiskAssessment,
       addWarehouse,
       createWarehouseZone,
+      startStockTake,
+      recordStockTakeCount,
+      completeStockTake,
       saveCustomCode,
       rollbackCustomCode,
     }),
@@ -1597,6 +1728,9 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       createRiskAssessment,
       addWarehouse,
       createWarehouseZone,
+      startStockTake,
+      recordStockTakeCount,
+      completeStockTake,
       saveCustomCode,
       rollbackCustomCode,
     ]
