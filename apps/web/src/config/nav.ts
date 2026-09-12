@@ -40,6 +40,7 @@ import {
   Banknote,
   Landmark,
   Share2,
+  ReceiptText,
 } from "lucide-react";
 
 export interface NavLeaf {
@@ -133,6 +134,7 @@ export const NAV_STRUCTURE: NavEntry[] = [
       { key: "accounts", href: "/accounts", label: "Chart of Accounts", icon: Wallet, moduleKey: "finance" },
       { key: "expenses", href: "/expenses", label: "Expenses", icon: BadgeDollarSign, moduleKey: "finance" },
       { key: "iban", href: "/iban", label: "IBAN", icon: Landmark, moduleKey: "iban" },
+      { key: "tax-compliance", href: "/tax-compliance", label: "Tax Compliance", icon: ReceiptText, moduleKey: "tax_compliance" },
     ],
   },
   {

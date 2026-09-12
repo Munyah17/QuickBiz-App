@@ -248,6 +248,15 @@ export interface DemoSocialPost {
   createdAt: string;
 }
 
+export interface DemoTaxFiling {
+  id: string;
+  taxType: string;
+  period: string;
+  dueDate: string;
+  status: "draft" | "submitted" | "accepted" | "rejected" | "paid";
+  notes: string;
+}
+
 export interface DemoAuditEntry {
   id: string;
   action: string;
@@ -345,6 +354,7 @@ const MODULE_CATALOG: Array<Omit<DemoModule, "enabled">> = [
   { key: "custom_code", name: "Custom Code", description: "Custom CSS and HTML for your workspace, versioned with rollback", category: "platform", monthlyPriceUsd: 10 },
   { key: "iban", name: "International Payments (IBAN)", description: "Request your own IBAN to receive international payments, provisioned through a banking partner", category: "finance", monthlyPriceUsd: 25 },
   { key: "social_media", name: "Social Media", description: "Connect social accounts and queue posts across platforms from one place", category: "marketing", monthlyPriceUsd: 12 },
+  { key: "tax_compliance", name: "Tax Compliance & ZIMRA", description: "Track tax periods, filings, payments, and fiscal device registrations aligned to ZIMRA's tax calendar", category: "finance", monthlyPriceUsd: 15 },
 ];
 
 // The demo exists to show a prospective client everything they would get —
@@ -556,6 +566,7 @@ interface DemoState {
   ibanRequests: DemoIbanRequest[];
   socialAccounts: DemoSocialAccount[];
   socialPosts: DemoSocialPost[];
+  taxFilings: DemoTaxFiling[];
   customCode: Record<CustomCodeType, DemoCustomCodeEntry>;
 }
 
@@ -603,6 +614,8 @@ interface DemoContextValue extends DemoState {
   requestIban: (currency: string, notes: string) => void;
   connectSocialAccount: (platform: string, handle: string) => void;
   queueSocialPost: (platform: string, message: string) => void;
+  createTaxFiling: (input: { taxType: string; period: string; dueDate: string; notes: string }) => void;
+  submitTaxFiling: (id: string) => void;
   saveCustomCode: (codeType: CustomCodeType, content: string) => void;
   rollbackCustomCode: (codeType: CustomCodeType, targetVersion: number) => void;
 }
@@ -656,6 +669,35 @@ function seedSocialPosts(): DemoSocialPost[] {
   ];
 }
 
+function seedTaxFilings(): DemoTaxFiling[] {
+  return [
+    {
+      id: "tf-1",
+      taxType: "PAYE",
+      period: "August 2026",
+      dueDate: new Date(Date.now() - 4 * 86400000).toISOString(),
+      status: "paid",
+      notes: "Filed and paid through ZIMRA e-Services",
+    },
+    {
+      id: "tf-2",
+      taxType: "VAT",
+      period: "August 2026",
+      dueDate: new Date(Date.now() - 1 * 86400000).toISOString(),
+      status: "submitted",
+      notes: "",
+    },
+    {
+      id: "tf-3",
+      taxType: "Withholding Tax",
+      period: "September 2026",
+      dueDate: new Date(Date.now() + 5 * 86400000).toISOString(),
+      status: "draft",
+      notes: "",
+    },
+  ];
+}
+
 function seedCustomCode(): Record<CustomCodeType, DemoCustomCodeEntry> {
   return {
     css: { content: "", version: 0, history: [] },
@@ -698,6 +740,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     ibanRequests: seedIbanRequests(),
     socialAccounts: seedSocialAccounts(),
     socialPosts: seedSocialPosts(),
+    taxFilings: seedTaxFilings(),
     customCode: seedCustomCode(),
   }));
 
@@ -1040,6 +1083,22 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     log(`Queued a ${platform} post`);
   }, [log]);
 
+  const createTaxFiling = useCallback((input: { taxType: string; period: string; dueDate: string; notes: string }) => {
+    setState((s) => ({
+      ...s,
+      taxFilings: [{ id: nextId("tf"), status: "draft", ...input }, ...s.taxFilings],
+    }));
+    log(`Created a ${input.taxType} tax filing for ${input.period}`);
+  }, [log]);
+
+  const submitTaxFiling = useCallback((id: string) => {
+    setState((s) => ({
+      ...s,
+      taxFilings: s.taxFilings.map((f) => (f.id === id ? { ...f, status: "submitted" } : f)),
+    }));
+    log("Recorded a tax filing as submitted");
+  }, [log]);
+
   const saveCustomCode = useCallback((codeType: CustomCodeType, content: string) => {
     setState((s) => {
       const current = s.customCode[codeType];
@@ -1126,6 +1185,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       requestIban,
       connectSocialAccount,
       queueSocialPost,
+      createTaxFiling,
+      submitTaxFiling,
       saveCustomCode,
       rollbackCustomCode,
     }),
@@ -1174,6 +1235,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       requestIban,
       connectSocialAccount,
       queueSocialPost,
+      createTaxFiling,
+      submitTaxFiling,
       saveCustomCode,
       rollbackCustomCode,
     ]
