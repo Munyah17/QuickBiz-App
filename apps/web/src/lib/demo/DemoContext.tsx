@@ -257,6 +257,23 @@ export interface DemoTaxFiling {
   notes: string;
 }
 
+export interface DemoTender {
+  id: string;
+  tenderNumber: string;
+  title: string;
+  status: "draft" | "published" | "closed" | "awarded" | "cancelled";
+  closingDate: string;
+  estimatedValue: number;
+}
+
+export interface DemoTenderBid {
+  id: string;
+  tenderId: string;
+  supplierName: string;
+  bidAmount: number;
+  status: "submitted" | "under_review" | "shortlisted" | "rejected" | "awarded" | "withdrawn";
+}
+
 export interface DemoAuditEntry {
   id: string;
   action: string;
@@ -355,6 +372,7 @@ const MODULE_CATALOG: Array<Omit<DemoModule, "enabled">> = [
   { key: "iban", name: "International Payments (IBAN)", description: "Request your own IBAN to receive international payments, provisioned through a banking partner", category: "finance", monthlyPriceUsd: 25 },
   { key: "social_media", name: "Social Media", description: "Connect social accounts and queue posts across platforms from one place", category: "marketing", monthlyPriceUsd: 12 },
   { key: "tax_compliance", name: "Tax Compliance & ZIMRA", description: "Track tax periods, filings, payments, and fiscal device registrations aligned to ZIMRA's tax calendar", category: "finance", monthlyPriceUsd: 15 },
+  { key: "tender_bidding", name: "Tender & Bidding", description: "Create tenders when sourcing suppliers, receive and evaluate bids, and track the tender lifecycle through to award", category: "procurement", monthlyPriceUsd: 15 },
 ];
 
 // The demo exists to show a prospective client everything they would get —
@@ -567,6 +585,8 @@ interface DemoState {
   socialAccounts: DemoSocialAccount[];
   socialPosts: DemoSocialPost[];
   taxFilings: DemoTaxFiling[];
+  tenders: DemoTender[];
+  tenderBids: DemoTenderBid[];
   customCode: Record<CustomCodeType, DemoCustomCodeEntry>;
 }
 
@@ -616,6 +636,9 @@ interface DemoContextValue extends DemoState {
   queueSocialPost: (platform: string, message: string) => void;
   createTaxFiling: (input: { taxType: string; period: string; dueDate: string; notes: string }) => void;
   submitTaxFiling: (id: string) => void;
+  createTender: (input: { title: string; closingDate: string; estimatedValue: number }) => void;
+  submitBid: (tenderId: string, supplierName: string, bidAmount: number) => void;
+  awardTender: (tenderId: string, bidId: string) => void;
   saveCustomCode: (codeType: CustomCodeType, content: string) => void;
   rollbackCustomCode: (codeType: CustomCodeType, targetVersion: number) => void;
 }
@@ -698,6 +721,35 @@ function seedTaxFilings(): DemoTaxFiling[] {
   ];
 }
 
+function seedTenders(): DemoTender[] {
+  return [
+    {
+      id: "tn-1",
+      tenderNumber: "TDR-0001",
+      title: "Supply of Office Furniture",
+      status: "published",
+      closingDate: new Date(Date.now() + 10 * 86400000).toISOString(),
+      estimatedValue: 8500,
+    },
+    {
+      id: "tn-2",
+      tenderNumber: "TDR-0002",
+      title: "Annual Fleet Maintenance Contract",
+      status: "awarded",
+      closingDate: new Date(Date.now() - 5 * 86400000).toISOString(),
+      estimatedValue: 15000,
+    },
+  ];
+}
+
+function seedTenderBids(): DemoTenderBid[] {
+  return [
+    { id: "tb-1", tenderId: "tn-1", supplierName: "Harare Building Supplies", bidAmount: 8200, status: "submitted" },
+    { id: "tb-2", tenderId: "tn-1", supplierName: "Midlands Office Solutions", bidAmount: 7950, status: "submitted" },
+    { id: "tb-3", tenderId: "tn-2", supplierName: "Harare Building Supplies", bidAmount: 14200, status: "awarded" },
+  ];
+}
+
 function seedCustomCode(): Record<CustomCodeType, DemoCustomCodeEntry> {
   return {
     css: { content: "", version: 0, history: [] },
@@ -741,6 +793,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     socialAccounts: seedSocialAccounts(),
     socialPosts: seedSocialPosts(),
     taxFilings: seedTaxFilings(),
+    tenders: seedTenders(),
+    tenderBids: seedTenderBids(),
     customCode: seedCustomCode(),
   }));
 
@@ -1099,6 +1153,36 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     log("Recorded a tax filing as submitted");
   }, [log]);
 
+  const createTender = useCallback((input: { title: string; closingDate: string; estimatedValue: number }) => {
+    setState((s) => ({
+      ...s,
+      tenders: [
+        { id: nextId("tn"), tenderNumber: numbered("TDR", s.tenders.length), status: "published", ...input },
+        ...s.tenders,
+      ],
+    }));
+    log(`Created tender "${input.title}"`);
+  }, [log]);
+
+  const submitBid = useCallback((tenderId: string, supplierName: string, bidAmount: number) => {
+    setState((s) => ({
+      ...s,
+      tenderBids: [{ id: nextId("tb"), tenderId, supplierName, bidAmount, status: "submitted" }, ...s.tenderBids],
+    }));
+    log(`${supplierName} submitted a bid`);
+  }, [log]);
+
+  const awardTender = useCallback((tenderId: string, bidId: string) => {
+    setState((s) => ({
+      ...s,
+      tenders: s.tenders.map((t) => (t.id === tenderId ? { ...t, status: "awarded" } : t)),
+      tenderBids: s.tenderBids.map((b) =>
+        b.tenderId !== tenderId ? b : { ...b, status: b.id === bidId ? "awarded" : "rejected" }
+      ),
+    }));
+    log("Awarded a tender");
+  }, [log]);
+
   const saveCustomCode = useCallback((codeType: CustomCodeType, content: string) => {
     setState((s) => {
       const current = s.customCode[codeType];
@@ -1187,6 +1271,9 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       queueSocialPost,
       createTaxFiling,
       submitTaxFiling,
+      createTender,
+      submitBid,
+      awardTender,
       saveCustomCode,
       rollbackCustomCode,
     }),
@@ -1237,6 +1324,9 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       queueSocialPost,
       createTaxFiling,
       submitTaxFiling,
+      createTender,
+      submitBid,
+      awardTender,
       saveCustomCode,
       rollbackCustomCode,
     ]

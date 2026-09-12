@@ -41,6 +41,7 @@ import {
   Landmark,
   Share2,
   ReceiptText,
+  Gavel,
 } from "lucide-react";
 
 export interface NavLeaf {
@@ -107,6 +108,7 @@ export const NAV_STRUCTURE: NavEntry[] = [
       { key: "inventory", href: "/products", label: "Products", icon: Package, moduleKey: "inventory" },
       { key: "suppliers", href: "/suppliers", label: "Suppliers", icon: Truck, moduleKey: "purchasing" },
       { key: "purchase-orders", href: "/purchasing", label: "Purchase Orders", icon: ClipboardList, moduleKey: "purchasing" },
+      { key: "tenders", href: "/tenders", label: "Tenders", icon: Gavel, moduleKey: "tender_bidding" },
       { key: "boms", href: "/manufacturing/boms", label: "Bills of Materials", icon: Layers, moduleKey: "manufacturing" },
       { key: "work-orders", href: "/manufacturing/work-orders", label: "Work Orders", icon: Factory, moduleKey: "manufacturing" },
       { key: "projects", href: "/projects", label: "Projects", icon: FolderKanban, moduleKey: "projects" },
