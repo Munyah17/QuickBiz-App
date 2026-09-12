@@ -274,6 +274,47 @@ export interface DemoTenderBid {
   status: "submitted" | "under_review" | "shortlisted" | "rejected" | "awarded" | "withdrawn";
 }
 
+export interface DemoInsurer {
+  id: string;
+  name: string;
+  code: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+}
+
+export interface DemoInsurancePolicy {
+  id: string;
+  policyNumber: string;
+  insurerName: string;
+  policyType: string;
+  coverageType: string;
+  sumInsured: number;
+  premium: number;
+  endDate: string;
+  status: "active" | "expired" | "cancelled" | "pending_renewal";
+}
+
+export interface DemoInsuranceClaim {
+  id: string;
+  policyId: string;
+  claimNumber: string;
+  incidentDate: string;
+  incidentDescription: string;
+  claimAmount: number;
+  status: "draft" | "submitted" | "under_review" | "approved" | "rejected" | "paid" | "closed";
+}
+
+export interface DemoRiskAssessment {
+  id: string;
+  title: string;
+  category: string;
+  riskLevel: "low" | "medium" | "high" | "critical";
+  riskScore: number;
+  reviewDate: string;
+  status: "open" | "mitigating" | "mitigated" | "accepted" | "closed";
+}
+
 export interface DemoAuditEntry {
   id: string;
   action: string;
@@ -373,6 +414,7 @@ const MODULE_CATALOG: Array<Omit<DemoModule, "enabled">> = [
   { key: "social_media", name: "Social Media", description: "Connect social accounts and queue posts across platforms from one place", category: "marketing", monthlyPriceUsd: 12 },
   { key: "tax_compliance", name: "Tax Compliance & ZIMRA", description: "Track tax periods, filings, payments, and fiscal device registrations aligned to ZIMRA's tax calendar", category: "finance", monthlyPriceUsd: 15 },
   { key: "tender_bidding", name: "Tender & Bidding", description: "Create tenders when sourcing suppliers, receive and evaluate bids, and track the tender lifecycle through to award", category: "procurement", monthlyPriceUsd: 15 },
+  { key: "risk_insurance", name: "Risk & Insurance", description: "Onboard insurers, manage policies, process claims, and maintain a risk register with mitigation plans", category: "operations", monthlyPriceUsd: 18 },
 ];
 
 // The demo exists to show a prospective client everything they would get —
@@ -587,6 +629,10 @@ interface DemoState {
   taxFilings: DemoTaxFiling[];
   tenders: DemoTender[];
   tenderBids: DemoTenderBid[];
+  insurers: DemoInsurer[];
+  insurancePolicies: DemoInsurancePolicy[];
+  insuranceClaims: DemoInsuranceClaim[];
+  riskAssessments: DemoRiskAssessment[];
   customCode: Record<CustomCodeType, DemoCustomCodeEntry>;
 }
 
@@ -639,6 +685,18 @@ interface DemoContextValue extends DemoState {
   createTender: (input: { title: string; closingDate: string; estimatedValue: number }) => void;
   submitBid: (tenderId: string, supplierName: string, bidAmount: number) => void;
   awardTender: (tenderId: string, bidId: string) => void;
+  addInsurer: (input: { name: string; code: string; contactPerson: string; email: string; phone: string }) => void;
+  createInsurancePolicy: (input: {
+    insurerName: string;
+    policyNumber: string;
+    policyType: string;
+    coverageType: string;
+    sumInsured: number;
+    premium: number;
+    endDate: string;
+  }) => void;
+  submitInsuranceClaim: (policyId: string, incidentDate: string, incidentDescription: string, claimAmount: number) => void;
+  createRiskAssessment: (input: { title: string; category: string; likelihood: number; impact: number; reviewDate: string }) => void;
   saveCustomCode: (codeType: CustomCodeType, content: string) => void;
   rollbackCustomCode: (codeType: CustomCodeType, targetVersion: number) => void;
 }
@@ -750,6 +808,77 @@ function seedTenderBids(): DemoTenderBid[] {
   ];
 }
 
+function seedInsurers(): DemoInsurer[] {
+  return [
+    { id: "ins-1", name: "Old Mutual", code: "OM-001", contactPerson: "Tendai Moyo", email: "info@oldmutual.co.zw", phone: "+263 4 777 777" },
+    { id: "ins-2", name: "CBZ Insurance", code: "CBZ-001", contactPerson: "Rutendo Chuma", email: "insurance@cbz.co.zw", phone: "+263 4 777 000" },
+  ];
+}
+
+function seedInsurancePolicies(): DemoInsurancePolicy[] {
+  return [
+    {
+      id: "pol-1",
+      policyNumber: "POL-0001",
+      insurerName: "Old Mutual",
+      policyType: "property",
+      coverageType: "Fire and perils",
+      sumInsured: 120000,
+      premium: 850,
+      endDate: new Date(Date.now() + 200 * 86400000).toISOString(),
+      status: "active",
+    },
+    {
+      id: "pol-2",
+      policyNumber: "POL-0002",
+      insurerName: "CBZ Insurance",
+      policyType: "vehicle",
+      coverageType: "Comprehensive",
+      sumInsured: 25000,
+      premium: 320,
+      endDate: new Date(Date.now() + 45 * 86400000).toISOString(),
+      status: "pending_renewal",
+    },
+  ];
+}
+
+function seedInsuranceClaims(): DemoInsuranceClaim[] {
+  return [
+    {
+      id: "clm-1",
+      policyId: "pol-2",
+      claimNumber: "CLM-2026-A1B2C3",
+      incidentDate: new Date(Date.now() - 20 * 86400000).toISOString(),
+      incidentDescription: "Minor collision damage to front bumper.",
+      claimAmount: 1200,
+      status: "under_review",
+    },
+  ];
+}
+
+function seedRiskAssessments(): DemoRiskAssessment[] {
+  return [
+    {
+      id: "risk-1",
+      title: "Warehouse fire hazard",
+      category: "operational",
+      riskLevel: "high",
+      riskScore: 12,
+      reviewDate: new Date(Date.now() + 60 * 86400000).toISOString(),
+      status: "mitigating",
+    },
+    {
+      id: "risk-2",
+      title: "Currency exchange volatility",
+      category: "financial",
+      riskLevel: "medium",
+      riskScore: 8,
+      reviewDate: new Date(Date.now() + 90 * 86400000).toISOString(),
+      status: "open",
+    },
+  ];
+}
+
 function seedCustomCode(): Record<CustomCodeType, DemoCustomCodeEntry> {
   return {
     css: { content: "", version: 0, history: [] },
@@ -795,6 +924,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     taxFilings: seedTaxFilings(),
     tenders: seedTenders(),
     tenderBids: seedTenderBids(),
+    insurers: seedInsurers(),
+    insurancePolicies: seedInsurancePolicies(),
+    insuranceClaims: seedInsuranceClaims(),
+    riskAssessments: seedRiskAssessments(),
     customCode: seedCustomCode(),
   }));
 
@@ -1183,6 +1316,68 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     log("Awarded a tender");
   }, [log]);
 
+  const addInsurer = useCallback((input: { name: string; code: string; contactPerson: string; email: string; phone: string }) => {
+    setState((s) => ({ ...s, insurers: [...s.insurers, { id: nextId("ins"), ...input }] }));
+    log(`Added insurer "${input.name}"`);
+  }, [log]);
+
+  const createInsurancePolicy = useCallback((input: {
+    insurerName: string;
+    policyNumber: string;
+    policyType: string;
+    coverageType: string;
+    sumInsured: number;
+    premium: number;
+    endDate: string;
+  }) => {
+    setState((s) => ({
+      ...s,
+      insurancePolicies: [{ id: nextId("pol"), status: "active", ...input }, ...s.insurancePolicies],
+    }));
+    log(`Created policy "${input.policyNumber}"`);
+  }, [log]);
+
+  const submitInsuranceClaim = useCallback((policyId: string, incidentDate: string, incidentDescription: string, claimAmount: number) => {
+    setState((s) => ({
+      ...s,
+      insuranceClaims: [
+        {
+          id: nextId("clm"),
+          policyId,
+          claimNumber: `CLM-${new Date().getFullYear()}-${nextId("x").slice(-6).toUpperCase()}`,
+          incidentDate,
+          incidentDescription,
+          claimAmount,
+          status: "submitted",
+        },
+        ...s.insuranceClaims,
+      ],
+    }));
+    log("Submitted an insurance claim");
+  }, [log]);
+
+  const createRiskAssessment = useCallback((input: { title: string; category: string; likelihood: number; impact: number; reviewDate: string }) => {
+    const riskScore = input.likelihood * input.impact;
+    const riskLevel: DemoRiskAssessment["riskLevel"] =
+      riskScore >= 15 ? "critical" : riskScore >= 10 ? "high" : riskScore >= 5 ? "medium" : "low";
+    setState((s) => ({
+      ...s,
+      riskAssessments: [
+        {
+          id: nextId("risk"),
+          title: input.title,
+          category: input.category,
+          riskLevel,
+          riskScore,
+          reviewDate: input.reviewDate,
+          status: "open",
+        },
+        ...s.riskAssessments,
+      ],
+    }));
+    log(`Recorded risk assessment "${input.title}"`);
+  }, [log]);
+
   const saveCustomCode = useCallback((codeType: CustomCodeType, content: string) => {
     setState((s) => {
       const current = s.customCode[codeType];
@@ -1274,6 +1469,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       createTender,
       submitBid,
       awardTender,
+      addInsurer,
+      createInsurancePolicy,
+      submitInsuranceClaim,
+      createRiskAssessment,
       saveCustomCode,
       rollbackCustomCode,
     }),
@@ -1327,6 +1526,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       createTender,
       submitBid,
       awardTender,
+      addInsurer,
+      createInsurancePolicy,
+      submitInsuranceClaim,
+      createRiskAssessment,
       saveCustomCode,
       rollbackCustomCode,
     ]

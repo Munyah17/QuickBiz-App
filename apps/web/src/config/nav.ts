@@ -42,6 +42,7 @@ import {
   Share2,
   ReceiptText,
   Gavel,
+  ShieldAlert,
 } from "lucide-react";
 
 export interface NavLeaf {
@@ -116,6 +117,7 @@ export const NAV_STRUCTURE: NavEntry[] = [
       { key: "service", href: "/tickets", label: "Service Tickets", icon: LifeBuoy, moduleKey: "service_management" },
       { key: "hr", href: "/employees", label: "Employees", icon: IdCard, moduleKey: "hr" },
       { key: "payroll", href: "/payroll", label: "Payroll", icon: Banknote, moduleKey: "payroll" },
+      { key: "risk-insurance", href: "/risk-insurance", label: "Risk & Insurance", icon: ShieldAlert, moduleKey: "risk_insurance" },
     ],
   },
   {
