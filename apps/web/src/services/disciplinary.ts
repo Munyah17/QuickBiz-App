@@ -14,7 +14,7 @@ export interface DisciplinaryCaseRow {
 export async function listDisciplinaryCases(supabase: SupabaseClient, orgId: string, status?: string): Promise<DisciplinaryCaseRow[]> {
   const { data, error } = await supabase.rpc("list_disciplinary_cases", {
     p_org_id: orgId,
-    p_status: status ?? null,
+    p_status: status ?? undefined,
   });
   if (error) throw error;
 
@@ -145,8 +145,8 @@ export async function scheduleDisciplinaryHearing(supabase: SupabaseClient, inpu
   const { data, error } = await supabase.rpc("schedule_disciplinary_hearing", {
     p_case_id: input.caseId,
     p_hearing_date: input.hearingDate,
-    p_hearing_time: input.hearingTime || null,
-    p_location: input.location || null,
+    p_hearing_time: input.hearingTime || undefined,
+    p_location: input.location || undefined,
   });
   if (error) throw error;
 
@@ -224,8 +224,8 @@ export async function issueDisciplinaryWarning(supabase: SupabaseClient, orgId: 
     p_employee_id: input.employeeId,
     p_warning_type: input.warningType,
     p_reason: input.reason,
-    p_case_id: input.caseId || null,
-    p_expires_date: input.expiresDate || null,
+    p_case_id: input.caseId || undefined,
+    p_expires_date: input.expiresDate || undefined,
   });
   if (error) throw error;
 

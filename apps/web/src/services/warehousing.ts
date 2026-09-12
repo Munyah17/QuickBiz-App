@@ -46,7 +46,7 @@ export async function createWarehouse(supabase: SupabaseClient, orgId: string, i
     p_org_id: orgId,
     p_code: input.code,
     p_name: input.name,
-    p_address: input.address || null,
+    p_address: input.address || undefined,
   });
   if (error) throw error;
 
@@ -112,9 +112,9 @@ export async function createWarehouseZone(supabase: SupabaseClient, input: Creat
     p_warehouse_id: input.warehouseId,
     p_code: input.code,
     p_name: input.name,
-    p_zone_type: input.zoneType || null,
-    p_area: input.area || null,
-    p_capacity_volume: input.capacityVolume || null,
+    p_zone_type: input.zoneType,
+    p_area: input.area || undefined,
+    p_capacity_volume: input.capacityVolume || undefined,
   });
   if (error) throw error;
 
@@ -171,7 +171,7 @@ export async function createWarehouseBin(supabase: SupabaseClient, input: Create
   const { data, error } = await supabase.rpc("create_warehouse_bin", {
     p_zone_id: input.zoneId,
     p_code: input.code,
-    p_name: input.name || null,
+    p_name: input.name || undefined,
     p_bin_type: input.binType || "shelf",
   });
   if (error) throw error;

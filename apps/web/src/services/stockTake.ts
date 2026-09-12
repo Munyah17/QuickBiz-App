@@ -12,7 +12,7 @@ export interface StockTakeRow {
 }
 
 export async function listStockTakes(supabase: SupabaseClient, orgId: string, status?: string): Promise<StockTakeRow[]> {
-  const { data, error } = await supabase.rpc("list_stock_takes", { p_org_id: orgId, p_status: status ?? null });
+  const { data, error } = await supabase.rpc("list_stock_takes", { p_org_id: orgId, p_status: status ?? undefined });
   if (error) throw error;
 
   return (
@@ -50,9 +50,9 @@ export async function createStockTake(supabase: SupabaseClient, orgId: string, i
     p_title: input.title,
     p_scheduled_date: input.scheduledDate,
     p_count_type: input.countType,
-    p_warehouse_id: input.warehouseId || null,
-    p_branch_id: null,
-    p_description: input.description || null,
+    p_warehouse_id: input.warehouseId || undefined,
+    p_branch_id: undefined,
+    p_description: input.description || undefined,
   });
   if (error) throw error;
 
@@ -76,8 +76,8 @@ export async function populateStockTakeLinesFromStock(supabase: SupabaseClient, 
           p_product_name: p.name,
           p_system_quantity: p.totalStock,
           p_product_id: p.id,
-          p_warehouse_id: null,
-          p_bin_id: null,
+          p_warehouse_id: undefined,
+          p_bin_id: undefined,
           p_sku_code: p.sku,
           p_unit_cost: p.cost_price,
         })

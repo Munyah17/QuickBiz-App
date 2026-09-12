@@ -44,8 +44,8 @@ function OpenCaseModal({ employeeNames, onClose }: { employeeNames: string[]; on
   const { openDisciplinaryCase } = useDemo();
   const { push } = useToast();
   const [employeeName, setEmployeeName] = useState(employeeNames[0] ?? "");
-  const [violationType, setViolationType] = useState(VIOLATION_TYPES[0]);
-  const [severity, setSeverity] = useState<DemoDisciplinaryCase["severity"]>(SEVERITIES[0]);
+  const [violationType, setViolationType] = useState(VIOLATION_TYPES[0]!);
+  const [severity, setSeverity] = useState<DemoDisciplinaryCase["severity"]>(SEVERITIES[0]!);
   const [title, setTitle] = useState("");
   const [incidentDate, setIncidentDate] = useState("");
 
@@ -157,7 +157,7 @@ function IssueWarningModal({ employeeNames, onClose }: { employeeNames: string[]
   const { issueDisciplinaryWarning } = useDemo();
   const { push } = useToast();
   const [employeeName, setEmployeeName] = useState(employeeNames[0] ?? "");
-  const [warningType, setWarningType] = useState<DemoDisciplinaryWarning["warningType"]>(WARNING_TYPES[0]);
+  const [warningType, setWarningType] = useState<DemoDisciplinaryWarning["warningType"]>(WARNING_TYPES[0]!);
   const [reason, setReason] = useState("");
 
   return (

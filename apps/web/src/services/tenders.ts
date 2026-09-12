@@ -46,9 +46,9 @@ export async function createTender(supabase: SupabaseClient, orgId: string, inpu
     p_org_id: orgId,
     p_tender_number: input.tenderNumber,
     p_title: input.title,
-    p_description: input.description || null,
-    p_category: input.category || null,
-    p_budget: input.budget || null,
+    p_description: input.description,
+    p_category: input.category,
+    p_budget: input.budget,
     p_closing_date: input.closingDate,
   });
   if (error) throw error;

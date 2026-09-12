@@ -54,8 +54,10 @@ function NewFloatForm({
         </FormField>
 
         <FormField label="Custodian" htmlFor="custodianId">
-          <Select id="custodianId" name="custodianId" defaultValue="">
-            <option value="">No custodian assigned</option>
+          <Select id="custodianId" name="custodianId" defaultValue="" required>
+            <option value="" disabled>
+              Select a custodian
+            </option>
             {employees.map((e) => (
               <option key={e.id} value={e.id}>
                 {e.fullName}

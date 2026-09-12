@@ -53,10 +53,10 @@ export async function createInsurer(supabase: SupabaseClient, orgId: string, inp
     p_org_id: orgId,
     p_name: input.name,
     p_code: input.code,
-    p_contact_person: input.contactPerson || null,
-    p_email: input.email || null,
-    p_phone: input.phone || null,
-    p_address: input.address || null,
+    p_contact_person: input.contactPerson || undefined,
+    p_email: input.email || undefined,
+    p_phone: input.phone || undefined,
+    p_address: input.address || undefined,
   });
   if (error) throw error;
 
@@ -123,13 +123,13 @@ export async function createInsurancePolicy(supabase: SupabaseClient, orgId: str
     p_insurer_id: input.insurerId,
     p_policy_number: input.policyNumber,
     p_policy_type: input.policyType,
-    p_sum_insured: input.sumInsured || null,
+    p_sum_insured: input.sumInsured,
     p_premium: input.premium,
     p_start_date: input.startDate,
     p_end_date: input.endDate,
-    p_asset_id: input.assetId || null,
-    p_vehicle_id: input.vehicleId || null,
-    p_coverage_type: input.coverageType || null,
+    p_asset_id: input.assetId || undefined,
+    p_vehicle_id: input.vehicleId || undefined,
+    p_coverage_type: input.coverageType || undefined,
   });
   if (error) throw error;
 
@@ -270,12 +270,12 @@ export async function createRiskAssessment(
   const { data, error } = await supabase.rpc("create_risk_assessment", {
     p_org_id: orgId,
     p_title: input.title,
-    p_category: input.category || null,
+    p_category: input.category,
     p_likelihood: input.likelihood,
     p_impact: input.impact,
-    p_description: input.description || null,
-    p_mitigation_strategy: input.mitigationStrategy || null,
-    p_review_date: input.reviewDate || null,
+    p_description: input.description || undefined,
+    p_mitigation_strategy: input.mitigationStrategy || undefined,
+    p_review_date: input.reviewDate || undefined,
   });
   if (error) throw error;
 

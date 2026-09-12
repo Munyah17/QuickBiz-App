@@ -24,8 +24,8 @@ export async function issueFloatAction(_prev: PettyCashActionState, formData: Fo
   const initialAmount = Number(formData.get("initialAmount") ?? 0);
   const custodianId = String(formData.get("custodianId") ?? "");
 
-  if (!projectId || !fundName || !initialAmount) {
-    return { error: "Project, fund name, and initial amount are required.", success: false };
+  if (!projectId || !fundName || !initialAmount || !custodianId) {
+    return { error: "Project, fund name, initial amount, and custodian are required.", success: false };
   }
 
   try {

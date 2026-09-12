@@ -49,7 +49,7 @@ export interface IssuePettyCashFloatInput {
   projectId: string;
   fundName: string;
   initialAmount: number;
-  custodianId?: string;
+  custodianId: string;
 }
 
 export async function issuePettyCashFloat(supabase: SupabaseClient, input: IssuePettyCashFloatInput): Promise<string> {
@@ -57,7 +57,7 @@ export async function issuePettyCashFloat(supabase: SupabaseClient, input: Issue
     p_project_id: input.projectId,
     p_fund_name: input.fundName,
     p_initial_amount: input.initialAmount,
-    p_custodian_id: input.custodianId || null,
+    p_custodian_id: input.custodianId,
   });
   if (error) throw error;
 
@@ -135,9 +135,9 @@ export async function recordPettyCashTransaction(supabase: SupabaseClient, input
     p_transaction_type: input.transactionType,
     p_amount: input.amount,
     p_description: input.description,
-    p_category: input.category || null,
-    p_receipt_number: input.receiptNumber || null,
-    p_recipient_id: input.recipientId || null,
+    p_category: input.category || undefined,
+    p_receipt_number: input.receiptNumber || undefined,
+    p_recipient_id: input.recipientId || undefined,
   });
   if (error) throw error;
 

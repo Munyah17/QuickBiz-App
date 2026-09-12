@@ -82,7 +82,7 @@ export async function createSheqIncident(supabase: SupabaseClient, orgId: string
     p_title: input.title,
     p_description: input.description,
     p_date_occurred: input.dateOccurred,
-    p_location: input.location || null,
+    p_location: input.location || undefined,
   });
   if (error) throw error;
 
@@ -199,7 +199,7 @@ export async function createSheqInspection(supabase: SupabaseClient, orgId: stri
     p_inspection_type: input.inspectionType,
     p_title: input.title,
     p_scheduled_date: input.scheduledDate,
-    p_description: input.description || null,
+    p_description: input.description || undefined,
   });
   if (error) throw error;
 

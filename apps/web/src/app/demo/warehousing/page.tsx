@@ -71,7 +71,7 @@ function NewZoneModal({ warehouses, onClose }: { warehouses: DemoWarehouse[]; on
   const [warehouseId, setWarehouseId] = useState(warehouses[0]?.id ?? "");
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
-  const [zoneType, setZoneType] = useState(ZONE_TYPES[1]);
+  const [zoneType, setZoneType] = useState(ZONE_TYPES[1]!);
   const [capacity, setCapacity] = useState("");
 
   return (

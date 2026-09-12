@@ -104,7 +104,7 @@ function NewPolicyModal({ insurerNames, onClose }: { insurerNames: string[]; onC
   const { push } = useToast();
   const [insurerName, setInsurerName] = useState(insurerNames[0] ?? "");
   const [policyNumber, setPolicyNumber] = useState("");
-  const [policyType, setPolicyType] = useState(POLICY_TYPES[0]);
+  const [policyType, setPolicyType] = useState(POLICY_TYPES[0]!);
   const [coverageType, setCoverageType] = useState("");
   const [sumInsured, setSumInsured] = useState("");
   const [premium, setPremium] = useState("");
@@ -266,7 +266,7 @@ function NewRiskAssessmentModal({ onClose }: { onClose: () => void }) {
   const { createRiskAssessment } = useDemo();
   const { push } = useToast();
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState(RISK_CATEGORIES[0]);
+  const [category, setCategory] = useState(RISK_CATEGORIES[0]!);
   const [likelihood, setLikelihood] = useState("3");
   const [impact, setImpact] = useState("3");
   const [reviewDate, setReviewDate] = useState("");

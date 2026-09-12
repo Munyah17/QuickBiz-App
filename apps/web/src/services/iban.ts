@@ -47,7 +47,7 @@ export async function requestIban(supabase: SupabaseClient, orgId: string, input
   const { error } = await supabase.rpc("request_iban", {
     p_org_id: orgId,
     p_currency: input.currency,
-    p_notes: input.notes || null,
+    p_notes: input.notes || undefined,
   });
   if (error) throw error;
 }

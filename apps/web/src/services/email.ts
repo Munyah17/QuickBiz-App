@@ -60,7 +60,16 @@ export async function updateEmailSettings(supabase: SupabaseClient, orgId: strin
   const existing = await supabase.from("email_settings").select("id").eq("org_id", orgId).order("created_at", { ascending: false }).limit(1).maybeSingle();
   if (existing.error) throw existing.error;
 
-  const payload: Record<string, unknown> = {
+  const payload: {
+    provider: string;
+    smtp_host: string | null;
+    smtp_port: number | null;
+    smtp_username: string | null;
+    from_email: string;
+    from_name: string;
+    reply_to_email: string | null;
+    smtp_password_encrypted?: string;
+  } = {
     provider: input.provider,
     smtp_host: input.smtpHost || null,
     smtp_port: input.smtpPort,

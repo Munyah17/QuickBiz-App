@@ -42,8 +42,8 @@ const INSPECTION_STATUS_TONE: Record<DemoSheqInspection["status"], "neutral" | "
 function ReportIncidentModal({ onClose }: { onClose: () => void }) {
   const { reportIncident } = useDemo();
   const { push } = useToast();
-  const [incidentType, setIncidentType] = useState(INCIDENT_TYPES[0]);
-  const [severity, setSeverity] = useState<DemoSheqIncident["severity"]>(SEVERITIES[0]);
+  const [incidentType, setIncidentType] = useState(INCIDENT_TYPES[0]!);
+  const [severity, setSeverity] = useState<DemoSheqIncident["severity"]>(SEVERITIES[0]!);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
@@ -149,7 +149,7 @@ function CorrectiveActionModal({ incident, onClose }: { incident: DemoSheqIncide
 function ScheduleInspectionModal({ onClose }: { onClose: () => void }) {
   const { scheduleInspection } = useDemo();
   const { push } = useToast();
-  const [inspectionType, setInspectionType] = useState(INSPECTION_TYPES[0]);
+  const [inspectionType, setInspectionType] = useState(INSPECTION_TYPES[0]!);
   const [title, setTitle] = useState("");
   const [scheduledDate, setScheduledDate] = useState("");
 

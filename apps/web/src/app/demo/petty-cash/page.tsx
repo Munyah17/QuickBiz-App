@@ -32,7 +32,7 @@ export default function DemoPettyCashPage() {
   const [floatId, setFloatId] = useState(activeFloats[0]?.id ?? "");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState(0);
-  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [category, setCategory] = useState(CATEGORIES[0]!);
 
   return (
     <div className="flex flex-col gap-6">

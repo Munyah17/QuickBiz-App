@@ -107,7 +107,7 @@ export async function submitTaxFiling(supabase: SupabaseClient, filingId: string
   const { error } = await supabase.rpc("submit_tax_filing", {
     p_tax_filing_id: filingId,
     p_amount: amount,
-    p_filing_reference: filingReference || null,
+    p_filing_reference: filingReference || undefined,
   });
   if (error) throw error;
 }

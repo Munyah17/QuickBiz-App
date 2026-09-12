@@ -30,7 +30,7 @@ function isOverdue(filing: DemoTaxFiling) {
 function NewFilingModal({ onClose }: { onClose: () => void }) {
   const { createTaxFiling } = useDemo();
   const { push } = useToast();
-  const [taxType, setTaxType] = useState(TAX_TYPES[0]);
+  const [taxType, setTaxType] = useState(TAX_TYPES[0]!);
   const [period, setPeriod] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [notes, setNotes] = useState("");
