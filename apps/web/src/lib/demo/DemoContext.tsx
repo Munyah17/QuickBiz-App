@@ -315,6 +315,25 @@ export interface DemoRiskAssessment {
   status: "open" | "mitigating" | "mitigated" | "accepted" | "closed";
 }
 
+export interface DemoWarehouse {
+  id: string;
+  code: string;
+  name: string;
+  address: string;
+  managerName: string;
+  status: "active" | "inactive" | "maintenance" | "closed";
+}
+
+export interface DemoWarehouseZone {
+  id: string;
+  warehouseId: string;
+  warehouseName: string;
+  code: string;
+  name: string;
+  zoneType: string;
+  capacity: string;
+}
+
 export interface DemoAuditEntry {
   id: string;
   action: string;
@@ -415,6 +434,7 @@ const MODULE_CATALOG: Array<Omit<DemoModule, "enabled">> = [
   { key: "tax_compliance", name: "Tax Compliance & ZIMRA", description: "Track tax periods, filings, payments, and fiscal device registrations aligned to ZIMRA's tax calendar", category: "finance", monthlyPriceUsd: 15 },
   { key: "tender_bidding", name: "Tender & Bidding", description: "Create tenders when sourcing suppliers, receive and evaluate bids, and track the tender lifecycle through to award", category: "procurement", monthlyPriceUsd: 15 },
   { key: "risk_insurance", name: "Risk & Insurance", description: "Onboard insurers, manage policies, process claims, and maintain a risk register with mitigation plans", category: "operations", monthlyPriceUsd: 18 },
+  { key: "warehousing", name: "Warehousing", description: "Manage warehouses, storage zones, and bins, and track exactly where stock sits inside each site", category: "operations", monthlyPriceUsd: 15 },
 ];
 
 // The demo exists to show a prospective client everything they would get —
@@ -633,6 +653,8 @@ interface DemoState {
   insurancePolicies: DemoInsurancePolicy[];
   insuranceClaims: DemoInsuranceClaim[];
   riskAssessments: DemoRiskAssessment[];
+  warehouses: DemoWarehouse[];
+  warehouseZones: DemoWarehouseZone[];
   customCode: Record<CustomCodeType, DemoCustomCodeEntry>;
 }
 
@@ -697,6 +719,8 @@ interface DemoContextValue extends DemoState {
   }) => void;
   submitInsuranceClaim: (policyId: string, incidentDate: string, incidentDescription: string, claimAmount: number) => void;
   createRiskAssessment: (input: { title: string; category: string; likelihood: number; impact: number; reviewDate: string }) => void;
+  addWarehouse: (input: { code: string; name: string; address: string; managerName: string }) => void;
+  createWarehouseZone: (input: { warehouseId: string; code: string; name: string; zoneType: string; capacity: string }) => void;
   saveCustomCode: (codeType: CustomCodeType, content: string) => void;
   rollbackCustomCode: (codeType: CustomCodeType, targetVersion: number) => void;
 }
@@ -879,6 +903,21 @@ function seedRiskAssessments(): DemoRiskAssessment[] {
   ];
 }
 
+function seedWarehouses(): DemoWarehouse[] {
+  return [
+    { id: "wh-1", code: "WH-HRE", name: "Harare Main Warehouse", address: "12 Seke Road, Harare", managerName: "Tafadzwa Ncube", status: "active" },
+    { id: "wh-2", code: "WH-BYO", name: "Bulawayo Distribution Centre", address: "45 Fife Street, Bulawayo", managerName: "Nomsa Sibanda", status: "active" },
+  ];
+}
+
+function seedWarehouseZones(): DemoWarehouseZone[] {
+  return [
+    { id: "wz-1", warehouseId: "wh-1", warehouseName: "Harare Main Warehouse", code: "A", name: "Receiving Bay", zoneType: "receiving", capacity: "200 sq m" },
+    { id: "wz-2", warehouseId: "wh-1", warehouseName: "Harare Main Warehouse", code: "B", name: "Bulk Storage", zoneType: "storage", capacity: "800 sq m" },
+    { id: "wz-3", warehouseId: "wh-2", warehouseName: "Bulawayo Distribution Centre", code: "A", name: "Picking Zone", zoneType: "picking", capacity: "150 sq m" },
+  ];
+}
+
 function seedCustomCode(): Record<CustomCodeType, DemoCustomCodeEntry> {
   return {
     css: { content: "", version: 0, history: [] },
@@ -928,6 +967,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     insurancePolicies: seedInsurancePolicies(),
     insuranceClaims: seedInsuranceClaims(),
     riskAssessments: seedRiskAssessments(),
+    warehouses: seedWarehouses(),
+    warehouseZones: seedWarehouseZones(),
     customCode: seedCustomCode(),
   }));
 
@@ -1378,6 +1419,28 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     log(`Recorded risk assessment "${input.title}"`);
   }, [log]);
 
+  const addWarehouse = useCallback((input: { code: string; name: string; address: string; managerName: string }) => {
+    setState((s) => ({
+      ...s,
+      warehouses: [...s.warehouses, { id: nextId("wh"), status: "active", ...input }],
+    }));
+    log(`Added warehouse "${input.name}"`);
+  }, [log]);
+
+  const createWarehouseZone = useCallback((input: { warehouseId: string; code: string; name: string; zoneType: string; capacity: string }) => {
+    setState((s) => {
+      const warehouse = s.warehouses.find((w) => w.id === input.warehouseId);
+      return {
+        ...s,
+        warehouseZones: [
+          ...s.warehouseZones,
+          { id: nextId("wz"), warehouseName: warehouse?.name ?? "Unknown warehouse", ...input },
+        ],
+      };
+    });
+    log(`Added storage zone "${input.name}"`);
+  }, [log]);
+
   const saveCustomCode = useCallback((codeType: CustomCodeType, content: string) => {
     setState((s) => {
       const current = s.customCode[codeType];
@@ -1473,6 +1536,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       createInsurancePolicy,
       submitInsuranceClaim,
       createRiskAssessment,
+      addWarehouse,
+      createWarehouseZone,
       saveCustomCode,
       rollbackCustomCode,
     }),
@@ -1530,6 +1595,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       createInsurancePolicy,
       submitInsuranceClaim,
       createRiskAssessment,
+      addWarehouse,
+      createWarehouseZone,
       saveCustomCode,
       rollbackCustomCode,
     ]

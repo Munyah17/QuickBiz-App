@@ -43,6 +43,7 @@ import {
   ReceiptText,
   Gavel,
   ShieldAlert,
+  Warehouse,
 } from "lucide-react";
 
 export interface NavLeaf {
@@ -107,6 +108,7 @@ export const NAV_STRUCTURE: NavEntry[] = [
     icon: Boxes,
     children: [
       { key: "inventory", href: "/products", label: "Products", icon: Package, moduleKey: "inventory" },
+      { key: "warehousing", href: "/warehousing", label: "Warehousing", icon: Warehouse, moduleKey: "warehousing" },
       { key: "suppliers", href: "/suppliers", label: "Suppliers", icon: Truck, moduleKey: "purchasing" },
       { key: "purchase-orders", href: "/purchasing", label: "Purchase Orders", icon: ClipboardList, moduleKey: "purchasing" },
       { key: "tenders", href: "/tenders", label: "Tenders", icon: Gavel, moduleKey: "tender_bidding" },
