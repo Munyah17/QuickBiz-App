@@ -47,6 +47,7 @@ import {
   ClipboardCheck,
   HardHat,
   FileWarning,
+  Mail,
 } from "lucide-react";
 
 export interface NavLeaf {
@@ -156,6 +157,7 @@ export const NAV_STRUCTURE: NavEntry[] = [
     children: [
       { key: "documents", href: "/documents", label: "Documents", icon: FileText, moduleKey: "documents" },
       { key: "reporting", href: "/reports", label: "Reports", icon: BarChart3, moduleKey: "reporting" },
+      { key: "email", href: "/email", label: "Email", icon: Mail, moduleKey: "email" },
     ],
   },
   {

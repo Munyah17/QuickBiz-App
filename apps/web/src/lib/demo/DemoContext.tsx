@@ -400,6 +400,22 @@ export interface DemoDisciplinaryWarning {
   issuedDate: string;
 }
 
+export interface DemoEmailSettings {
+  fromAddress: string;
+  fromName: string;
+  smtpHost: string;
+  smtpPort: number;
+  isConfigured: boolean;
+}
+
+export interface DemoEmailLogEntry {
+  id: string;
+  to: string;
+  subject: string;
+  status: "sent" | "failed";
+  sentAt: string;
+}
+
 export interface DemoAuditEntry {
   id: string;
   action: string;
@@ -504,6 +520,7 @@ const MODULE_CATALOG: Array<Omit<DemoModule, "enabled">> = [
   { key: "stock_take", name: "Stock Take", description: "Schedule physical inventory counts, record counted quantities against system quantities, and resolve variances", category: "operations", monthlyPriceUsd: 12 },
   { key: "sheq", name: "SHEQ", description: "Track safety, health, environment, and quality incidents, conduct inspections and audits, and manage corrective actions", category: "operations", monthlyPriceUsd: 15 },
   { key: "disciplinary", name: "Disciplinary", description: "Manage employee disciplinary cases, warnings, hearings, and conduct records", category: "operations", monthlyPriceUsd: 15 },
+  { key: "email", name: "Email", description: "Configure your own SMTP settings and keep a log of emails sent from the system", category: "platform", monthlyPriceUsd: 8 },
 ];
 
 // The demo exists to show a prospective client everything they would get —
@@ -730,6 +747,8 @@ interface DemoState {
   sheqInspections: DemoSheqInspection[];
   disciplinaryCases: DemoDisciplinaryCase[];
   disciplinaryWarnings: DemoDisciplinaryWarning[];
+  emailSettings: DemoEmailSettings;
+  emailLogs: DemoEmailLogEntry[];
   customCode: Record<CustomCodeType, DemoCustomCodeEntry>;
 }
 
@@ -808,6 +827,8 @@ interface DemoContextValue extends DemoState {
   scheduleDisciplinaryHearing: (id: string, hearingDate: string) => void;
   setDisciplinaryCaseStatus: (id: string, status: DemoDisciplinaryCase["status"]) => void;
   issueDisciplinaryWarning: (input: { employeeName: string; warningType: DemoDisciplinaryWarning["warningType"]; reason: string }) => void;
+  updateEmailSettings: (input: { fromAddress: string; fromName: string; smtpHost: string; smtpPort: number }) => void;
+  sendTestEmail: (to: string) => void;
   saveCustomCode: (codeType: CustomCodeType, content: string) => void;
   rollbackCustomCode: (codeType: CustomCodeType, targetVersion: number) => void;
 }
@@ -1125,6 +1146,24 @@ function seedDisciplinaryWarnings(): DemoDisciplinaryWarning[] {
   ];
 }
 
+function seedEmailSettings(): DemoEmailSettings {
+  return {
+    fromAddress: "notifications@democompany.co.zw",
+    fromName: "Demo Company (Pvt) Ltd",
+    smtpHost: "smtp.office365.com",
+    smtpPort: 587,
+    isConfigured: true,
+  };
+}
+
+function seedEmailLogs(): DemoEmailLogEntry[] {
+  return [
+    { id: "el-1", to: "customer1@example.com", subject: "Invoice INV-2026-0142", status: "sent", sentAt: new Date(Date.now() - 2 * 86400000).toISOString() },
+    { id: "el-2", to: "customer2@example.com", subject: "Receipt for payment received", status: "sent", sentAt: new Date(Date.now() - 1 * 86400000).toISOString() },
+    { id: "el-3", to: "unreachable@example.com", subject: "Purchase Order PO-0098", status: "failed", sentAt: new Date(Date.now() - 6 * 3600000).toISOString() },
+  ];
+}
+
 function seedCustomCode(): Record<CustomCodeType, DemoCustomCodeEntry> {
   return {
     css: { content: "", version: 0, history: [] },
@@ -1182,6 +1221,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     sheqInspections: seedSheqInspections(),
     disciplinaryCases: seedDisciplinaryCases(),
     disciplinaryWarnings: seedDisciplinaryWarnings(),
+    emailSettings: seedEmailSettings(),
+    emailLogs: seedEmailLogs(),
     customCode: seedCustomCode(),
   }));
 
@@ -1837,6 +1878,25 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     log(`Issued ${input.warningType} warning to ${input.employeeName}`);
   }, [log]);
 
+  const updateEmailSettings = useCallback((input: { fromAddress: string; fromName: string; smtpHost: string; smtpPort: number }) => {
+    setState((s) => ({
+      ...s,
+      emailSettings: { ...input, isConfigured: true },
+    }));
+    log("Updated email settings");
+  }, [log]);
+
+  const sendTestEmail = useCallback((to: string) => {
+    setState((s) => ({
+      ...s,
+      emailLogs: [
+        { id: nextId("el"), to, subject: "Test email", status: "sent", sentAt: new Date().toISOString() },
+        ...s.emailLogs,
+      ],
+    }));
+    log(`Recorded test email to ${to}`);
+  }, [log]);
+
   const saveCustomCode = useCallback((codeType: CustomCodeType, content: string) => {
     setState((s) => {
       const current = s.customCode[codeType];
@@ -1946,6 +2006,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       scheduleDisciplinaryHearing,
       setDisciplinaryCaseStatus,
       issueDisciplinaryWarning,
+      updateEmailSettings,
+      sendTestEmail,
       saveCustomCode,
       rollbackCustomCode,
     }),
@@ -2017,6 +2079,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       scheduleDisciplinaryHearing,
       setDisciplinaryCaseStatus,
       issueDisciplinaryWarning,
+      updateEmailSettings,
+      sendTestEmail,
       saveCustomCode,
       rollbackCustomCode,
     ]
