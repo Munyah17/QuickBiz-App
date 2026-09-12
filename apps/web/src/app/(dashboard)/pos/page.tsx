@@ -1,4 +1,5 @@
 import { PageHeader } from "@/components/PageHeader";
+import { StatCard } from "@/components/StatCard";
 import { requireOrgContext, requireModuleEnabled } from "@/lib/session";
 import { getRegisterForBranch, getOpenSession, getSessionSummary } from "@/services/pos";
 import { listProductsWithStock } from "@/services/products";
@@ -56,12 +57,42 @@ export default async function PosPage() {
   const taxRateRaw = String(settings["tax.default_rate"] ?? "0%");
   const taxRatePercent = parseFloat(taxRateRaw.replace("%", "")) || 0;
 
+  const totalSales = summary.totalSales;
+  const totalTransactions = summary.invoiceCount;
+  const averageTransaction = totalTransactions > 0 ? totalSales / totalTransactions : 0;
+  const cashSales = summary.cashSales;
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
         title="Point of Sale"
         action={<CloseRegisterModal sessionId={session.id} summary={summary} openingFloat={session.opening_float} />}
       />
+
+      {/* Session Statistics */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          label="Session sales"
+          value={`$${totalSales.toLocaleString()}`}
+          tone="primary"
+        />
+        <StatCard
+          label="Transactions"
+          value={totalTransactions.toString()}
+          tone="info"
+        />
+        <StatCard
+          label="Avg transaction"
+          value={`$${averageTransaction.toFixed(2)}`}
+          tone="success"
+        />
+        <StatCard
+          label="Cash sales"
+          value={`${Math.round((cashSales / (totalSales || 1)) * 100)}%`}
+          tone="warning"
+        />
+      </div>
+
       <POSCheckout
         branchId={branchId}
         warehouseId={warehouse?.id ?? ""}
