@@ -233,6 +233,21 @@ export interface DemoIbanRequest {
   requestedAt: string;
 }
 
+export interface DemoSocialAccount {
+  id: string;
+  platform: string;
+  handle: string;
+  connected: boolean;
+}
+
+export interface DemoSocialPost {
+  id: string;
+  platform: string;
+  message: string;
+  status: "draft" | "queued";
+  createdAt: string;
+}
+
 export interface DemoAuditEntry {
   id: string;
   action: string;
@@ -329,6 +344,7 @@ const MODULE_CATALOG: Array<Omit<DemoModule, "enabled">> = [
   { key: "logistics", name: "Logistics", description: "Shipments, deliveries, carriers, and dispatch tracking", category: "operations", monthlyPriceUsd: 15 },
   { key: "custom_code", name: "Custom Code", description: "Custom CSS and HTML for your workspace, versioned with rollback", category: "platform", monthlyPriceUsd: 10 },
   { key: "iban", name: "International Payments (IBAN)", description: "Request your own IBAN to receive international payments, provisioned through a banking partner", category: "finance", monthlyPriceUsd: 25 },
+  { key: "social_media", name: "Social Media", description: "Connect social accounts and queue posts across platforms from one place", category: "marketing", monthlyPriceUsd: 12 },
 ];
 
 // The demo exists to show a prospective client everything they would get —
@@ -538,6 +554,8 @@ interface DemoState {
   integrationConnections: DemoIntegrationConnection[];
   shipments: DemoShipment[];
   ibanRequests: DemoIbanRequest[];
+  socialAccounts: DemoSocialAccount[];
+  socialPosts: DemoSocialPost[];
   customCode: Record<CustomCodeType, DemoCustomCodeEntry>;
 }
 
@@ -583,6 +601,8 @@ interface DemoContextValue extends DemoState {
   createShipment: (input: { customerName: string; carrier: string; vehicleRegistration: string; deliveryAddress: string }) => void;
   setShipmentStatus: (id: string, status: DemoShipment["status"]) => void;
   requestIban: (currency: string, notes: string) => void;
+  connectSocialAccount: (platform: string, handle: string) => void;
+  queueSocialPost: (platform: string, message: string) => void;
   saveCustomCode: (codeType: CustomCodeType, content: string) => void;
   rollbackCustomCode: (codeType: CustomCodeType, targetVersion: number) => void;
 }
@@ -617,6 +637,22 @@ function seedIbanRequests(): DemoIbanRequest[] {
   return [
     { id: "ib-1", currency: "EUR", status: "active", notes: "For invoicing our German supplier", requestedAt: new Date(Date.now() - 20 * 86400000).toISOString() },
     { id: "ib-2", currency: "USD", status: "pending", notes: "", requestedAt: new Date(Date.now() - 2 * 86400000).toISOString() },
+  ];
+}
+
+function seedSocialAccounts(): DemoSocialAccount[] {
+  return [{ id: "sa-1", platform: "facebook", handle: "@demo-company", connected: true }];
+}
+
+function seedSocialPosts(): DemoSocialPost[] {
+  return [
+    {
+      id: "sp-1",
+      platform: "facebook",
+      message: "We just launched our new product line - check it out!",
+      status: "queued",
+      createdAt: new Date(Date.now() - 1 * 86400000).toISOString(),
+    },
   ];
 }
 
@@ -660,6 +696,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     integrationConnections: seedIntegrationConnections(),
     shipments: seedShipments(),
     ibanRequests: seedIbanRequests(),
+    socialAccounts: seedSocialAccounts(),
+    socialPosts: seedSocialPosts(),
     customCode: seedCustomCode(),
   }));
 
@@ -983,6 +1021,25 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     log(`Requested an IBAN (${currency})`);
   }, [log]);
 
+  const connectSocialAccount = useCallback((platform: string, handle: string) => {
+    setState((s) => ({
+      ...s,
+      socialAccounts: [...s.socialAccounts.filter((a) => a.platform !== platform), { id: nextId("sa"), platform, handle, connected: true }],
+    }));
+    log(`Connected ${platform} account (${handle})`);
+  }, [log]);
+
+  const queueSocialPost = useCallback((platform: string, message: string) => {
+    setState((s) => ({
+      ...s,
+      socialPosts: [
+        { id: nextId("sp"), platform, message, status: "queued", createdAt: new Date().toISOString() },
+        ...s.socialPosts,
+      ],
+    }));
+    log(`Queued a ${platform} post`);
+  }, [log]);
+
   const saveCustomCode = useCallback((codeType: CustomCodeType, content: string) => {
     setState((s) => {
       const current = s.customCode[codeType];
@@ -1067,6 +1124,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       createShipment,
       setShipmentStatus,
       requestIban,
+      connectSocialAccount,
+      queueSocialPost,
       saveCustomCode,
       rollbackCustomCode,
     }),
@@ -1113,6 +1172,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       createShipment,
       setShipmentStatus,
       requestIban,
+      connectSocialAccount,
+      queueSocialPost,
       saveCustomCode,
       rollbackCustomCode,
     ]

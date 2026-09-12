@@ -39,6 +39,7 @@ import {
   Palette,
   Banknote,
   Landmark,
+  Share2,
 } from "lucide-react";
 
 export interface NavLeaf {
@@ -92,6 +93,7 @@ export const NAV_STRUCTURE: NavEntry[] = [
       { key: "opportunities", href: "/opportunities", label: "Opportunities", icon: Target, moduleKey: "crm" },
       { key: "campaigns", href: "/campaigns", label: "Campaigns", icon: Megaphone, moduleKey: "marketing" },
       { key: "loyalty", href: "/loyalty", label: "Loyalty", icon: Star, moduleKey: "marketing" },
+      { key: "social-media", href: "/social-media", label: "Social Media", icon: Share2, moduleKey: "social_media" },
       { key: "catalog", href: "/ecommerce/catalog", label: "Online Catalog", icon: Store, moduleKey: "ecommerce" },
       { key: "online-orders", href: "/ecommerce/orders", label: "Online Orders", icon: ShoppingBag, moduleKey: "ecommerce" },
     ],
