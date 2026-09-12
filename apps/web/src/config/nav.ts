@@ -38,6 +38,7 @@ import {
   Code,
   Palette,
   Banknote,
+  Landmark,
 } from "lucide-react";
 
 export interface NavLeaf {
@@ -129,6 +130,7 @@ export const NAV_STRUCTURE: NavEntry[] = [
       { key: "pnl", href: "/finance", label: "Profit & Loss", icon: TrendingUp, moduleKey: "finance" },
       { key: "accounts", href: "/accounts", label: "Chart of Accounts", icon: Wallet, moduleKey: "finance" },
       { key: "expenses", href: "/expenses", label: "Expenses", icon: BadgeDollarSign, moduleKey: "finance" },
+      { key: "iban", href: "/iban", label: "IBAN", icon: Landmark, moduleKey: "iban" },
     ],
   },
   {

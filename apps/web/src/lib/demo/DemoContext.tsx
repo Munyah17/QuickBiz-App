@@ -225,6 +225,14 @@ export interface DemoOnlineOrder {
   deliveryStatus: "not_shipped" | "shipped" | "delivered";
 }
 
+export interface DemoIbanRequest {
+  id: string;
+  currency: string;
+  status: "pending" | "active" | "suspended" | "closed";
+  notes: string;
+  requestedAt: string;
+}
+
 export interface DemoAuditEntry {
   id: string;
   action: string;
@@ -320,6 +328,7 @@ const MODULE_CATALOG: Array<Omit<DemoModule, "enabled">> = [
   { key: "local_services", name: "Local Services", description: "Pre-integrated Zimbabwean and regional payment, mobile money, banking, SMS, and tax services", category: "platform", monthlyPriceUsd: 15 },
   { key: "logistics", name: "Logistics", description: "Shipments, deliveries, carriers, and dispatch tracking", category: "operations", monthlyPriceUsd: 15 },
   { key: "custom_code", name: "Custom Code", description: "Custom CSS and HTML for your workspace, versioned with rollback", category: "platform", monthlyPriceUsd: 10 },
+  { key: "iban", name: "International Payments (IBAN)", description: "Request your own IBAN to receive international payments, provisioned through a banking partner", category: "finance", monthlyPriceUsd: 25 },
 ];
 
 // The demo exists to show a prospective client everything they would get —
@@ -528,6 +537,7 @@ interface DemoState {
   auditLog: DemoAuditEntry[];
   integrationConnections: DemoIntegrationConnection[];
   shipments: DemoShipment[];
+  ibanRequests: DemoIbanRequest[];
   customCode: Record<CustomCodeType, DemoCustomCodeEntry>;
 }
 
@@ -572,6 +582,7 @@ interface DemoContextValue extends DemoState {
   disconnectProviderIntegration: (providerKey: string) => void;
   createShipment: (input: { customerName: string; carrier: string; vehicleRegistration: string; deliveryAddress: string }) => void;
   setShipmentStatus: (id: string, status: DemoShipment["status"]) => void;
+  requestIban: (currency: string, notes: string) => void;
   saveCustomCode: (codeType: CustomCodeType, content: string) => void;
   rollbackCustomCode: (codeType: CustomCodeType, targetVersion: number) => void;
 }
@@ -599,6 +610,13 @@ function seedShipments(): DemoShipment[] {
       dispatchedAt: new Date(Date.now() - 3 * 86400000).toISOString(),
       deliveredAt: new Date(Date.now() - 2 * 86400000).toISOString(),
     },
+  ];
+}
+
+function seedIbanRequests(): DemoIbanRequest[] {
+  return [
+    { id: "ib-1", currency: "EUR", status: "active", notes: "For invoicing our German supplier", requestedAt: new Date(Date.now() - 20 * 86400000).toISOString() },
+    { id: "ib-2", currency: "USD", status: "pending", notes: "", requestedAt: new Date(Date.now() - 2 * 86400000).toISOString() },
   ];
 }
 
@@ -641,6 +659,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     auditLog: seedAuditLog(),
     integrationConnections: seedIntegrationConnections(),
     shipments: seedShipments(),
+    ibanRequests: seedIbanRequests(),
     customCode: seedCustomCode(),
   }));
 
@@ -953,6 +972,17 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
+  const requestIban = useCallback((currency: string, notes: string) => {
+    setState((s) => ({
+      ...s,
+      ibanRequests: [
+        { id: nextId("ib"), currency, status: "pending", notes, requestedAt: new Date().toISOString() },
+        ...s.ibanRequests,
+      ],
+    }));
+    log(`Requested an IBAN (${currency})`);
+  }, [log]);
+
   const saveCustomCode = useCallback((codeType: CustomCodeType, content: string) => {
     setState((s) => {
       const current = s.customCode[codeType];
@@ -1036,6 +1066,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       disconnectProviderIntegration,
       createShipment,
       setShipmentStatus,
+      requestIban,
       saveCustomCode,
       rollbackCustomCode,
     }),
@@ -1081,6 +1112,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       disconnectProviderIntegration,
       createShipment,
       setShipmentStatus,
+      requestIban,
       saveCustomCode,
       rollbackCustomCode,
     ]
