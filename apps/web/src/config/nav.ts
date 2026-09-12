@@ -45,6 +45,7 @@ import {
   ShieldAlert,
   Warehouse,
   ClipboardCheck,
+  HardHat,
 } from "lucide-react";
 
 export interface NavLeaf {
@@ -122,6 +123,7 @@ export const NAV_STRUCTURE: NavEntry[] = [
       { key: "hr", href: "/employees", label: "Employees", icon: IdCard, moduleKey: "hr" },
       { key: "payroll", href: "/payroll", label: "Payroll", icon: Banknote, moduleKey: "payroll" },
       { key: "risk-insurance", href: "/risk-insurance", label: "Risk & Insurance", icon: ShieldAlert, moduleKey: "risk_insurance" },
+      { key: "sheq", href: "/sheq", label: "SHEQ", icon: HardHat, moduleKey: "sheq" },
     ],
   },
   {

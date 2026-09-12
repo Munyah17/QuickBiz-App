@@ -356,6 +356,30 @@ export interface DemoStockTakeLine {
   countStatus: "pending" | "counted" | "verified" | "discrepancy";
 }
 
+export interface DemoSheqIncident {
+  id: string;
+  incidentNumber: string;
+  incidentType: string;
+  severity: "minor" | "moderate" | "major" | "critical";
+  title: string;
+  description: string;
+  location: string;
+  dateOccurred: string;
+  status: "open" | "under_investigation" | "closed" | "archived";
+  correctiveActions: string | null;
+}
+
+export interface DemoSheqInspection {
+  id: string;
+  inspectionNumber: string;
+  inspectionType: string;
+  title: string;
+  scheduledDate: string;
+  status: "scheduled" | "in_progress" | "completed" | "cancelled" | "overdue";
+  nonConformities: number | null;
+  findings: string | null;
+}
+
 export interface DemoAuditEntry {
   id: string;
   action: string;
@@ -458,6 +482,7 @@ const MODULE_CATALOG: Array<Omit<DemoModule, "enabled">> = [
   { key: "risk_insurance", name: "Risk & Insurance", description: "Onboard insurers, manage policies, process claims, and maintain a risk register with mitigation plans", category: "operations", monthlyPriceUsd: 18 },
   { key: "warehousing", name: "Warehousing", description: "Manage warehouses, storage zones, and bins, and track exactly where stock sits inside each site", category: "operations", monthlyPriceUsd: 15 },
   { key: "stock_take", name: "Stock Take", description: "Schedule physical inventory counts, record counted quantities against system quantities, and resolve variances", category: "operations", monthlyPriceUsd: 12 },
+  { key: "sheq", name: "SHEQ", description: "Track safety, health, environment, and quality incidents, conduct inspections and audits, and manage corrective actions", category: "operations", monthlyPriceUsd: 15 },
 ];
 
 // The demo exists to show a prospective client everything they would get —
@@ -680,6 +705,8 @@ interface DemoState {
   warehouseZones: DemoWarehouseZone[];
   stockTakes: DemoStockTake[];
   stockTakeLines: DemoStockTakeLine[];
+  sheqIncidents: DemoSheqIncident[];
+  sheqInspections: DemoSheqInspection[];
   customCode: Record<CustomCodeType, DemoCustomCodeEntry>;
 }
 
@@ -749,6 +776,11 @@ interface DemoContextValue extends DemoState {
   startStockTake: (input: { title: string; branchName: string; countType: DemoStockTake["countType"] }) => void;
   recordStockTakeCount: (lineId: string, countedQuantity: number) => void;
   completeStockTake: (id: string) => void;
+  reportIncident: (input: { incidentType: string; severity: DemoSheqIncident["severity"]; title: string; description: string; location: string }) => void;
+  recordIncidentCorrectiveAction: (id: string, correctiveActions: string) => void;
+  closeIncident: (id: string) => void;
+  scheduleInspection: (input: { inspectionType: string; title: string; scheduledDate: string }) => void;
+  completeInspection: (id: string, input: { findings: string; nonConformities: number }) => void;
   saveCustomCode: (codeType: CustomCodeType, content: string) => void;
   rollbackCustomCode: (codeType: CustomCodeType, targetVersion: number) => void;
 }
@@ -983,6 +1015,50 @@ function seedStockTakeLines(): DemoStockTakeLine[] {
   ];
 }
 
+function seedSheqIncidents(): DemoSheqIncident[] {
+  return [
+    {
+      id: "shi-1",
+      incidentNumber: "INC-20260905-A1B2C3",
+      incidentType: "near_miss",
+      severity: "moderate",
+      title: "Forklift near-collision in loading bay",
+      description: "A forklift operator braked sharply to avoid a pedestrian crossing the loading bay without a spotter.",
+      location: "Harare Main Warehouse - Loading Bay",
+      dateOccurred: new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10),
+      status: "under_investigation",
+      correctiveActions: "Repaint pedestrian walkway lines and require spotters during forklift operation.",
+    },
+    {
+      id: "shi-2",
+      incidentNumber: "INC-20260909-D4E5F6",
+      incidentType: "injury",
+      severity: "minor",
+      title: "Employee cut hand on packaging strap",
+      description: "Employee sustained a minor cut while cutting a packaging strap without protective gloves.",
+      location: "Bulawayo Distribution Centre - Packing Area",
+      dateOccurred: new Date(Date.now() - 2 * 86400000).toISOString().slice(0, 10),
+      status: "open",
+      correctiveActions: null,
+    },
+  ];
+}
+
+function seedSheqInspections(): DemoSheqInspection[] {
+  return [
+    {
+      id: "shq-1",
+      inspectionNumber: "INS-20260908-G7H8I9",
+      inspectionType: "safety",
+      title: "Monthly Fire Safety Walkthrough",
+      scheduledDate: new Date(Date.now() - 4 * 86400000).toISOString().slice(0, 10),
+      status: "completed",
+      nonConformities: 2,
+      findings: "Two fire extinguishers past their inspection date; replacement scheduled.",
+    },
+  ];
+}
+
 function seedCustomCode(): Record<CustomCodeType, DemoCustomCodeEntry> {
   return {
     css: { content: "", version: 0, history: [] },
@@ -1036,6 +1112,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     warehouseZones: seedWarehouseZones(),
     stockTakes: seedStockTakes(),
     stockTakeLines: seedStockTakeLines(),
+    sheqIncidents: seedSheqIncidents(),
+    sheqInspections: seedSheqInspections(),
     customCode: seedCustomCode(),
   }));
 
@@ -1569,6 +1647,74 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     log("Completed stock take");
   }, [log]);
 
+  const reportIncident = useCallback((input: { incidentType: string; severity: DemoSheqIncident["severity"]; title: string; description: string; location: string }) => {
+    setState((s) => ({
+      ...s,
+      sheqIncidents: [
+        {
+          id: nextId("shi"),
+          incidentNumber: `INC-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${String(s.sheqIncidents.length + 1).padStart(4, "0")}`,
+          incidentType: input.incidentType,
+          severity: input.severity,
+          title: input.title,
+          description: input.description,
+          location: input.location,
+          dateOccurred: new Date().toISOString().slice(0, 10),
+          status: "open",
+          correctiveActions: null,
+        },
+        ...s.sheqIncidents,
+      ],
+    }));
+    log(`Reported incident "${input.title}"`);
+  }, [log]);
+
+  const recordIncidentCorrectiveAction = useCallback((id: string, correctiveActions: string) => {
+    setState((s) => ({
+      ...s,
+      sheqIncidents: s.sheqIncidents.map((i) => (i.id === id ? { ...i, correctiveActions, status: "under_investigation" } : i)),
+    }));
+    log("Recorded corrective action");
+  }, [log]);
+
+  const closeIncident = useCallback((id: string) => {
+    setState((s) => ({
+      ...s,
+      sheqIncidents: s.sheqIncidents.map((i) => (i.id === id ? { ...i, status: "closed" } : i)),
+    }));
+    log("Closed incident");
+  }, [log]);
+
+  const scheduleInspection = useCallback((input: { inspectionType: string; title: string; scheduledDate: string }) => {
+    setState((s) => ({
+      ...s,
+      sheqInspections: [
+        {
+          id: nextId("shq"),
+          inspectionNumber: `INS-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${String(s.sheqInspections.length + 1).padStart(4, "0")}`,
+          inspectionType: input.inspectionType,
+          title: input.title,
+          scheduledDate: input.scheduledDate,
+          status: "scheduled",
+          nonConformities: null,
+          findings: null,
+        },
+        ...s.sheqInspections,
+      ],
+    }));
+    log(`Scheduled inspection "${input.title}"`);
+  }, [log]);
+
+  const completeInspection = useCallback((id: string, input: { findings: string; nonConformities: number }) => {
+    setState((s) => ({
+      ...s,
+      sheqInspections: s.sheqInspections.map((i) =>
+        i.id === id ? { ...i, status: "completed", findings: input.findings, nonConformities: input.nonConformities } : i
+      ),
+    }));
+    log("Completed inspection");
+  }, [log]);
+
   const saveCustomCode = useCallback((codeType: CustomCodeType, content: string) => {
     setState((s) => {
       const current = s.customCode[codeType];
@@ -1669,6 +1815,11 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       startStockTake,
       recordStockTakeCount,
       completeStockTake,
+      reportIncident,
+      recordIncidentCorrectiveAction,
+      closeIncident,
+      scheduleInspection,
+      completeInspection,
       saveCustomCode,
       rollbackCustomCode,
     }),
@@ -1731,6 +1882,11 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       startStockTake,
       recordStockTakeCount,
       completeStockTake,
+      reportIncident,
+      recordIncidentCorrectiveAction,
+      closeIncident,
+      scheduleInspection,
+      completeInspection,
       saveCustomCode,
       rollbackCustomCode,
     ]
