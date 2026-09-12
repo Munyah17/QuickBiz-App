@@ -48,6 +48,7 @@ import {
   HardHat,
   FileWarning,
   Mail,
+  HandCoins,
 } from "lucide-react";
 
 export interface NavLeaf {
@@ -120,6 +121,7 @@ export const NAV_STRUCTURE: NavEntry[] = [
       { key: "boms", href: "/manufacturing/boms", label: "Bills of Materials", icon: Layers, moduleKey: "manufacturing" },
       { key: "work-orders", href: "/manufacturing/work-orders", label: "Work Orders", icon: Factory, moduleKey: "manufacturing" },
       { key: "projects", href: "/projects", label: "Projects", icon: FolderKanban, moduleKey: "projects" },
+      { key: "petty-cash", href: "/petty-cash", label: "Petty Cash", icon: HandCoins, moduleKey: "projects", permission: "projects.petty_cash" },
       { key: "assets", href: "/assets", label: "Fixed Assets", icon: Archive, moduleKey: "assets" },
       { key: "service", href: "/tickets", label: "Service Tickets", icon: LifeBuoy, moduleKey: "service_management" },
       { key: "hr", href: "/employees", label: "Employees", icon: IdCard, moduleKey: "hr" },

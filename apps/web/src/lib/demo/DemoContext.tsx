@@ -416,6 +416,24 @@ export interface DemoEmailLogEntry {
   sentAt: string;
 }
 
+export interface DemoPettyCashFloat {
+  id: string;
+  projectName: string;
+  custodianName: string;
+  amountIssued: number;
+  amountRemaining: number;
+  status: "active" | "inactive" | "closed";
+}
+
+export interface DemoPettyCashTransaction {
+  id: string;
+  floatId: string;
+  description: string;
+  amount: number;
+  date: string;
+  category: string;
+}
+
 export interface DemoAuditEntry {
   id: string;
   action: string;
@@ -521,6 +539,7 @@ const MODULE_CATALOG: Array<Omit<DemoModule, "enabled">> = [
   { key: "sheq", name: "SHEQ", description: "Track safety, health, environment, and quality incidents, conduct inspections and audits, and manage corrective actions", category: "operations", monthlyPriceUsd: 15 },
   { key: "disciplinary", name: "Disciplinary", description: "Manage employee disciplinary cases, warnings, hearings, and conduct records", category: "operations", monthlyPriceUsd: 15 },
   { key: "email", name: "Email", description: "Configure your own SMTP settings and keep a log of emails sent from the system", category: "platform", monthlyPriceUsd: 8 },
+  { key: "petty_cash", name: "Petty Cash", description: "Issue project petty cash floats to a custodian and track disbursements against the remaining balance", category: "operations", monthlyPriceUsd: 8 },
 ];
 
 // The demo exists to show a prospective client everything they would get —
@@ -749,6 +768,8 @@ interface DemoState {
   disciplinaryWarnings: DemoDisciplinaryWarning[];
   emailSettings: DemoEmailSettings;
   emailLogs: DemoEmailLogEntry[];
+  pettyCashFloats: DemoPettyCashFloat[];
+  pettyCashTransactions: DemoPettyCashTransaction[];
   customCode: Record<CustomCodeType, DemoCustomCodeEntry>;
 }
 
@@ -829,6 +850,8 @@ interface DemoContextValue extends DemoState {
   issueDisciplinaryWarning: (input: { employeeName: string; warningType: DemoDisciplinaryWarning["warningType"]; reason: string }) => void;
   updateEmailSettings: (input: { fromAddress: string; fromName: string; smtpHost: string; smtpPort: number }) => void;
   sendTestEmail: (to: string) => void;
+  issuePettyCashFloat: (input: { projectName: string; custodianName: string; amountIssued: number }) => void;
+  recordPettyCashTransaction: (input: { floatId: string; description: string; amount: number; category: string }) => void;
   saveCustomCode: (codeType: CustomCodeType, content: string) => void;
   rollbackCustomCode: (codeType: CustomCodeType, targetVersion: number) => void;
 }
@@ -1164,6 +1187,18 @@ function seedEmailLogs(): DemoEmailLogEntry[] {
   ];
 }
 
+function seedPettyCashFloats(): DemoPettyCashFloat[] {
+  return [{ id: "pc-1", projectName: "Warehouse extension", custodianName: "Chipo Ndlovu", amountIssued: 500, amountRemaining: 312.5, status: "active" }];
+}
+
+function seedPettyCashTransactions(): DemoPettyCashTransaction[] {
+  return [
+    { id: "pt-1", floatId: "pc-1", description: "Site cleaning supplies", amount: 45, date: new Date(Date.now() - 5 * 86400000).toISOString().slice(0, 10), category: "supplies" },
+    { id: "pt-2", floatId: "pc-1", description: "Fuel for site visit", amount: 82.5, date: new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10), category: "transport" },
+    { id: "pt-3", floatId: "pc-1", description: "Courier for site documents", amount: 60, date: new Date(Date.now() - 1 * 86400000).toISOString().slice(0, 10), category: "delivery" },
+  ];
+}
+
 function seedCustomCode(): Record<CustomCodeType, DemoCustomCodeEntry> {
   return {
     css: { content: "", version: 0, history: [] },
@@ -1223,6 +1258,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     disciplinaryWarnings: seedDisciplinaryWarnings(),
     emailSettings: seedEmailSettings(),
     emailLogs: seedEmailLogs(),
+    pettyCashFloats: seedPettyCashFloats(),
+    pettyCashTransactions: seedPettyCashTransactions(),
     customCode: seedCustomCode(),
   }));
 
@@ -1897,6 +1934,36 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     log(`Recorded test email to ${to}`);
   }, [log]);
 
+  const issuePettyCashFloat = useCallback((input: { projectName: string; custodianName: string; amountIssued: number }) => {
+    setState((s) => ({
+      ...s,
+      pettyCashFloats: [
+        {
+          id: nextId("pc"),
+          projectName: input.projectName,
+          custodianName: input.custodianName,
+          amountIssued: input.amountIssued,
+          amountRemaining: input.amountIssued,
+          status: "active",
+        },
+        ...s.pettyCashFloats,
+      ],
+    }));
+    log(`Issued petty cash float for "${input.projectName}"`);
+  }, [log]);
+
+  const recordPettyCashTransaction = useCallback((input: { floatId: string; description: string; amount: number; category: string }) => {
+    setState((s) => ({
+      ...s,
+      pettyCashTransactions: [
+        { id: nextId("pt"), floatId: input.floatId, description: input.description, amount: input.amount, date: new Date().toISOString().slice(0, 10), category: input.category },
+        ...s.pettyCashTransactions,
+      ],
+      pettyCashFloats: s.pettyCashFloats.map((f) => (f.id === input.floatId ? { ...f, amountRemaining: Math.max(0, f.amountRemaining - input.amount) } : f)),
+    }));
+    log(`Recorded petty cash transaction "${input.description}"`);
+  }, [log]);
+
   const saveCustomCode = useCallback((codeType: CustomCodeType, content: string) => {
     setState((s) => {
       const current = s.customCode[codeType];
@@ -2008,6 +2075,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       issueDisciplinaryWarning,
       updateEmailSettings,
       sendTestEmail,
+      issuePettyCashFloat,
+      recordPettyCashTransaction,
       saveCustomCode,
       rollbackCustomCode,
     }),
@@ -2081,6 +2150,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       issueDisciplinaryWarning,
       updateEmailSettings,
       sendTestEmail,
+      issuePettyCashFloat,
+      recordPettyCashTransaction,
       saveCustomCode,
       rollbackCustomCode,
     ]
