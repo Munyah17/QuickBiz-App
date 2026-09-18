@@ -35,7 +35,7 @@ export function MarkFiledModal({ filing, onClose }: { filing: TaxFilingRow; onCl
         </FormField>
 
         <p className="text-sm text-text-tertiary">
-          This records that you submitted this return through ZIMRA's own e-Services/FDMS - it is not an actual
+          This records that you submitted this return through ZIMRA&apos;s own e-Services/FDMS - it is not anactual
           submission to ZIMRA and does not file anything on your behalf.
         </p>
 

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireOrgContext } from "@/lib/session";
-import { createCustomer, updateCustomer, setCustomerActive, type CustomerInput } from "@/services/customers";
+import { createCustomer, updateCustomer, setCustomerActive, importCustomers, type CustomerInput, type CustomerImportResult } from "@/services/customers";
 
 export interface CustomerActionState {
   error: string | null;
@@ -20,6 +20,9 @@ function inputFromForm(formData: FormData): CustomerInput {
     tax_number: String(formData.get("tax_number") ?? "").trim(),
     city: String(formData.get("city") ?? "").trim(),
     country: String(formData.get("country") ?? "").trim(),
+    credit_limit: formData.get("credit_limit") ? Number(formData.get("credit_limit")) : null,
+    payment_terms_days: formData.get("payment_terms_days") ? Number(formData.get("payment_terms_days")) : null,
+    notes: String(formData.get("notes") ?? "").trim(),
   };
 }
 
@@ -67,6 +70,7 @@ export async function updateCustomerAction(
   }
 
   revalidatePath("/customers");
+  revalidatePath(`/customers/${customerId}`);
   return { error: null, success: true };
 }
 
@@ -91,6 +95,41 @@ export async function setCustomerActiveAction(
 
   revalidatePath("/customers");
   return { error: null, success: true };
+}
+
+export interface CustomerImportActionState {
+  result: CustomerImportResult | null;
+  error: string | null;
+}
+
+export const initialCustomerImportActionState: CustomerImportActionState = { result: null, error: null };
+
+export async function importCustomersAction(
+  _prev: CustomerImportActionState,
+  formData: FormData
+): Promise<CustomerImportActionState> {
+  const { supabase, orgId, permissions } = await requireOrgContext();
+
+  if (!permissions.has("customers.manage")) {
+    return { result: null, error: "You don't have permission to manage customers." };
+  }
+
+  let rows: CustomerInput[];
+  try {
+    rows = JSON.parse(String(formData.get("rows") ?? "[]"));
+  } catch {
+    return { result: null, error: "Invalid import payload." };
+  }
+  if (rows.length === 0) return { result: null, error: "Nothing to import." };
+  if (rows.length > 500) return { result: null, error: "Import at most 500 customers at a time." };
+
+  try {
+    const result = await importCustomers(supabase, orgId, rows);
+    revalidatePath("/customers");
+    return { result, error: null };
+  } catch (err) {
+    return { result: null, error: (err as Error).message };
+  }
 }
 
 export async function bulkSetCustomerActiveAction(customerIds: string[], isActive: boolean): Promise<CustomerActionState> {

@@ -24,8 +24,13 @@ export function PurchasingTable({ orders }: { orders: PurchaseOrderListRow[] }) 
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
+    const today = new Date().toISOString().slice(0, 10);
     return orders.filter((po) => {
-      if (statusFilter !== "all" && po.status !== statusFilter) return false;
+      if (statusFilter === "late") {
+        if (!(po.status === "issued" && po.expected_date !== null && po.expected_date < today)) return false;
+      } else if (statusFilter !== "all" && po.status !== statusFilter) {
+        return false;
+      }
       if (!q) return true;
       return [po.po_number, po.supplierName].some((field) => field?.toLowerCase().includes(q));
     });
@@ -45,6 +50,7 @@ export function PurchasingTable({ orders }: { orders: PurchaseOrderListRow[] }) 
             <option value="issued">Issued</option>
             <option value="received">Received</option>
             <option value="cancelled">Cancelled</option>
+            <option value="late">Late</option>
           </Select>
           <ExportButton
             filename="purchase-orders"
@@ -71,28 +77,40 @@ export function PurchasingTable({ orders }: { orders: PurchaseOrderListRow[] }) 
               <th className="px-4 py-2.5">PO</th>
               <th className="px-4 py-2.5">Supplier</th>
               <th className="px-4 py-2.5">Status</th>
+              <th className="px-4 py-2.5">Expected</th>
               <th className="px-4 py-2.5">Total</th>
               <th className="px-4 py-2.5">Paid</th>
               <th className="px-4 py-2.5">Date</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((po) => (
-              <tr key={po.id} className="border-b border-border-subtle last:border-b-0">
-                <td className="px-4 py-2.5">
-                  <Link href={`/purchasing/${po.id}`} className="font-medium text-primary-600 hover:underline">
-                    {po.po_number}
-                  </Link>
-                </td>
-                <td className="px-4 py-2.5 text-text-secondary">{po.supplierName ?? "No supplier"}</td>
-                <td className="px-4 py-2.5">
-                  <Badge tone={statusTone[po.status] ?? "neutral"}>{po.status}</Badge>
-                </td>
-                <td className="px-4 py-2.5 text-text-secondary">${po.total.toFixed(2)}</td>
-                <td className="px-4 py-2.5 text-text-secondary">${po.amount_paid.toFixed(2)}</td>
-                <td className="px-4 py-2.5 text-text-secondary">{new Date(po.created_at).toLocaleDateString()}</td>
-              </tr>
-            ))}
+            {filtered.map((po) => {
+              const late =
+                po.status === "issued" &&
+                po.expected_date !== null &&
+                po.expected_date < new Date().toISOString().slice(0, 10);
+              return (
+                <tr key={po.id} className="border-b border-border-subtle last:border-b-0">
+                  <td className="px-4 py-2.5">
+                    <Link href={`/purchasing/${po.id}`} className="font-medium text-primary-600 hover:underline">
+                      {po.po_number}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-2.5 text-text-secondary">{po.supplierName ?? "No supplier"}</td>
+                  <td className="px-4 py-2.5">
+                    <Badge tone={late ? "danger" : (statusTone[po.status] ?? "neutral")}>
+                      {late ? "Late" : po.status}
+                    </Badge>
+                  </td>
+                  <td className={`px-4 py-2.5 ${late ? "font-medium text-danger-600" : "text-text-secondary"}`}>
+                    {po.expected_date ? new Date(po.expected_date).toLocaleDateString() : "—"}
+                  </td>
+                  <td className="px-4 py-2.5 text-text-secondary">${po.total.toFixed(2)}</td>
+                  <td className="px-4 py-2.5 text-text-secondary">${po.amount_paid.toFixed(2)}</td>
+                  <td className="px-4 py-2.5 text-text-secondary">{new Date(po.created_at).toLocaleDateString()}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}

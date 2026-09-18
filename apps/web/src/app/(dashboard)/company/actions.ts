@@ -35,6 +35,7 @@ export async function updateCompanyAction(
 
     await upsertOrgSetting(supabase, orgId, "contact.phone", String(formData.get("phone") ?? "").trim());
     await upsertOrgSetting(supabase, orgId, "tax.default_rate", String(formData.get("tax_rate") ?? "").trim());
+    await upsertOrgSetting(supabase, orgId, "invoice.footer", String(formData.get("invoice_footer") ?? "").trim());
   } catch (err) {
     return { error: (err as Error).message, success: false };
   }

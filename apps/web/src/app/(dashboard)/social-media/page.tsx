@@ -29,7 +29,7 @@ export default async function SocialMediaPage() {
       </div>
 
       <p className="text-sm text-text-tertiary">
-        QuickBiz does not publish to any social platform on your behalf yet - posts stay "queued" with "pending"
+        QuickBiz does not publish to any social platform on your behalf yet - posts stay &quot;queued&quot; with &quot;pending&quot;
         per-platform records until a real integration exists to report a genuine send result.
       </p>
 

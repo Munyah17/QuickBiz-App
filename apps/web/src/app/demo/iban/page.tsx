@@ -84,7 +84,7 @@ export default function DemoIbanPage() {
 
       <p className="text-sm text-text-tertiary">
         QuickBiz cannot mint an IBAN directly - each request is provisioned through a banking partner and stays
-        "pending" until QuickBiz staff confirm the real account was issued.
+        &quot;pending&quot; until QuickBiz staff confirm the real account was issued.
       </p>
 
       <Card>

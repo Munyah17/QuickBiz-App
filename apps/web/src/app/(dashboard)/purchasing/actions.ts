@@ -26,6 +26,7 @@ export async function createPurchaseOrderAction(
   const supplierId = String(formData.get("supplierId") ?? "") || null;
   const taxTotal = Number(formData.get("taxTotal") ?? 0);
   const notes = String(formData.get("notes") ?? "").trim();
+  const expectedDate = String(formData.get("expectedDate") ?? "").trim() || null;
 
   let items: PurchaseOrderLineInput[];
   try {
@@ -42,7 +43,7 @@ export async function createPurchaseOrderAction(
 
   let poId: string;
   try {
-    poId = await createPurchaseOrder(supabase, { orgId, branchId, supplierId, items, taxTotal, notes });
+    poId = await createPurchaseOrder(supabase, { orgId, branchId, supplierId, items, taxTotal, notes, expectedDate });
   } catch (err) {
     return { error: (err as Error).message, success: false };
   }

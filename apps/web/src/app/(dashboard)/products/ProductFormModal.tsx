@@ -45,9 +45,14 @@ export function ProductFormModal({
           </FormField>
         </div>
 
-        <FormField label="Category" htmlFor="categoryName" hint="Type a new one to create it">
-          <Input id="categoryName" name="categoryName" defaultValue={product?.categoryName ?? ""} />
-        </FormField>
+        <div className="grid grid-cols-2 gap-4">
+          <FormField label="Category" htmlFor="categoryName" hint="Type a new one to create it">
+            <Input id="categoryName" name="categoryName" defaultValue={product?.categoryName ?? ""} />
+          </FormField>
+          <FormField label="Barcode" htmlFor="barcode" hint="Scan or type it — POS looks items up by this">
+            <Input id="barcode" name="barcode" defaultValue={product?.barcode ?? ""} />
+          </FormField>
+        </div>
 
         <FormField label="Description" htmlFor="description">
           <Textarea id="description" name="description" defaultValue={product?.description ?? ""} />

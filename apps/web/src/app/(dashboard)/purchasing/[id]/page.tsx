@@ -1,5 +1,8 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import { Printer } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
+import { Button } from "@/components/Button";
 import { Card, CardHeader } from "@/components/Card";
 import { Badge } from "@/components/Badge";
 import { requireOrgContext, requireModuleEnabled } from "@/lib/session";
@@ -36,12 +39,20 @@ export default async function PurchaseOrderDetailPage({ params }: { params: Prom
         module="Purchasing"
         title={po.po_number}
         action={
-          canManage ? (
-            <div className="flex gap-2">
-              {po.status === "issued" && warehouse && <ReceiveGoodsButton poId={po.id} warehouseId={warehouse.id} />}
-              {balanceDue > 0 && po.status !== "cancelled" && <RecordPurchasePaymentModal poId={po.id} balanceDue={balanceDue} />}
-            </div>
-          ) : undefined
+          <div className="flex gap-2">
+            <Link href={`/purchasing/${po.id}/print`} target="_blank">
+              <Button variant="secondary">
+                <Printer className="size-4" />
+                Print
+              </Button>
+            </Link>
+            {canManage && po.status === "issued" && warehouse && (
+              <ReceiveGoodsButton poId={po.id} warehouseId={warehouse.id} />
+            )}
+            {canManage && balanceDue > 0 && po.status !== "cancelled" && (
+              <RecordPurchasePaymentModal poId={po.id} balanceDue={balanceDue} />
+            )}
+          </div>
         }
       />
 
@@ -127,6 +138,17 @@ export default async function PurchaseOrderDetailPage({ params }: { params: Prom
             <span className="text-sm font-medium text-text-secondary">Branch</span>
             <span className="text-sm text-text-primary">{po.branchName ?? "No branch"}</span>
           </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-text-secondary">Expected</span>
+            <span className="text-sm text-text-primary">
+              {po.expected_date ? new Date(po.expected_date).toLocaleDateString() : "Not set"}
+            </span>
+          </div>
+          {po.status === "issued" && po.expected_date && po.expected_date < new Date().toISOString().slice(0, 10) && (
+            <div className="rounded-md bg-danger-50 px-3 py-2 text-xs font-medium text-danger-600">
+              Expected delivery date has passed — this order is late.
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-text-secondary">Balance due</span>
             <span className="text-sm font-semibold text-text-primary">${balanceDue.toFixed(2)}</span>

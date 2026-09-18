@@ -52,7 +52,7 @@ function ComposePostForm({ onClose }: { onClose: () => void }) {
         </FormField>
 
         <p className="text-sm text-text-tertiary">
-          QuickBiz does not send posts to any platform yet - queueing marks the post "queued" and creates "pending"
+          QuickBiz does not send posts to any platform yet - queueing marks the post &quot;queued&quot; and creates &quot;pending&quot;
           records for each platform, awaiting a future real integration.
         </p>
 

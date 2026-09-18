@@ -100,7 +100,7 @@ function ComposePostModal({ onClose }: { onClose: () => void }) {
         </FormField>
 
         <p className="text-sm text-text-tertiary">
-          QuickBiz does not send posts to any platform yet - queueing marks the post "queued", awaiting a future real
+          QuickBiz does not send posts to any platform yet - queueing marks the post &quot;queued&quot;, awaiting a future real
           integration.
         </p>
 
@@ -137,7 +137,7 @@ export default function DemoSocialMediaPage() {
       </div>
 
       <p className="text-sm text-text-tertiary">
-        QuickBiz does not publish to any social platform on your behalf yet - posts stay "queued" until a real
+        QuickBiz does not publish to any social platform on your behalf yet - posts stay &quot;queued&quot; until a real
         integration exists to report a genuine send result.
       </p>
 

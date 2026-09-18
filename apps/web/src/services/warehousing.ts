@@ -178,3 +178,155 @@ export async function createWarehouseBin(supabase: SupabaseClient, input: Create
 
   return data as unknown as string;
 }
+
+// ============================================================
+// Stock transfers — pending → in_transit → received, with real
+// stock_movements on dispatch and receipt.
+// ============================================================
+
+export type TransferStatus = "pending" | "in_transit" | "received" | "cancelled";
+
+export interface TransferListRow {
+  id: string;
+  transfer_number: string;
+  fromName: string;
+  toName: string;
+  status: TransferStatus;
+  transfer_date: string;
+  lineCount: number;
+  totalQuantity: number;
+  created_at: string;
+}
+
+export async function listTransfers(supabase: SupabaseClient, orgId: string): Promise<TransferListRow[]> {
+  const { data, error } = await supabase
+    .from("warehouse_transfers")
+    .select(
+      "id, transfer_number, status, transfer_date, created_at, from_warehouse:warehouses!warehouse_transfers_from_warehouse_id_fkey(name), to_warehouse:warehouses!warehouse_transfers_to_warehouse_id_fkey(name), warehouse_transfer_lines(quantity)"
+    )
+    .eq("org_id", orgId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+
+  return (
+    (data ?? []) as unknown as Array<{
+      id: string;
+      transfer_number: string;
+      status: TransferStatus;
+      transfer_date: string;
+      created_at: string;
+      from_warehouse: { name: string } | null;
+      to_warehouse: { name: string } | null;
+      warehouse_transfer_lines: Array<{ quantity: number }>;
+    }>
+  ).map((row) => ({
+    id: row.id,
+    transfer_number: row.transfer_number,
+    fromName: row.from_warehouse?.name ?? "—",
+    toName: row.to_warehouse?.name ?? "—",
+    status: row.status,
+    transfer_date: row.transfer_date,
+    lineCount: row.warehouse_transfer_lines.length,
+    totalQuantity: row.warehouse_transfer_lines.reduce((s, l) => s + l.quantity, 0),
+    created_at: row.created_at,
+  }));
+}
+
+export interface TransferDetail {
+  id: string;
+  transfer_number: string;
+  fromName: string;
+  toName: string;
+  status: TransferStatus;
+  transfer_date: string;
+  notes: string | null;
+  created_at: string;
+  lines: Array<{ id: string; productName: string; sku: string; quantity: number }>;
+}
+
+export async function getTransferDetail(
+  supabase: SupabaseClient,
+  orgId: string,
+  transferId: string
+): Promise<TransferDetail | null> {
+  const { data, error } = await supabase
+    .from("warehouse_transfers")
+    .select(
+      "id, transfer_number, status, transfer_date, notes, created_at, from_warehouse:warehouses!warehouse_transfers_from_warehouse_id_fkey(name), to_warehouse:warehouses!warehouse_transfers_to_warehouse_id_fkey(name), warehouse_transfer_lines(id, quantity, products(name, sku))"
+    )
+    .eq("org_id", orgId)
+    .eq("id", transferId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+
+  const row = data as unknown as {
+    id: string;
+    transfer_number: string;
+    status: TransferStatus;
+    transfer_date: string;
+    notes: string | null;
+    created_at: string;
+    from_warehouse: { name: string } | null;
+    to_warehouse: { name: string } | null;
+    warehouse_transfer_lines: Array<{ id: string; quantity: number; products: { name: string; sku: string } | null }>;
+  };
+
+  return {
+    id: row.id,
+    transfer_number: row.transfer_number,
+    fromName: row.from_warehouse?.name ?? "—",
+    toName: row.to_warehouse?.name ?? "—",
+    status: row.status,
+    transfer_date: row.transfer_date,
+    notes: row.notes,
+    created_at: row.created_at,
+    lines: row.warehouse_transfer_lines.map((l) => ({
+      id: l.id,
+      productName: l.products?.name ?? "Unknown product",
+      sku: l.products?.sku ?? "",
+      quantity: l.quantity,
+    })),
+  };
+}
+
+export interface TransferLineInput {
+  product_id: string;
+  quantity: number;
+}
+
+export async function createTransfer(
+  supabase: SupabaseClient,
+  input: {
+    orgId: string;
+    fromWarehouseId: string;
+    toWarehouseId: string;
+    items: TransferLineInput[];
+    notes: string;
+  }
+): Promise<string> {
+  const { data, error } = await supabase.rpc("create_transfer_with_lines", {
+    p_org_id: input.orgId,
+    p_from_warehouse_id: input.fromWarehouseId,
+    p_to_warehouse_id: input.toWarehouseId,
+    p_items: input.items as never,
+    p_notes: input.notes || undefined,
+  });
+  if (error) throw error;
+  return data as string;
+}
+
+export async function dispatchTransfer(supabase: SupabaseClient, orgId: string, transferId: string) {
+  const { error } = await supabase.rpc("dispatch_transfer", { p_org_id: orgId, p_transfer_id: transferId });
+  if (error) throw error;
+}
+
+export async function receiveTransfer(supabase: SupabaseClient, orgId: string, transferId: string) {
+  const { error } = await supabase.rpc("receive_transfer", { p_org_id: orgId, p_transfer_id: transferId });
+  if (error) throw error;
+}
+
+export async function cancelTransfer(supabase: SupabaseClient, orgId: string, transferId: string) {
+  const { error } = await supabase.rpc("cancel_transfer", { p_org_id: orgId, p_transfer_id: transferId });
+  if (error) throw error;
+}

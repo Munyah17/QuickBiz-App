@@ -16,6 +16,7 @@ export function CompanyForm({
   timezone,
   phone,
   taxRate,
+  invoiceFooter,
   currencies,
   canManage,
 }: {
@@ -25,6 +26,7 @@ export function CompanyForm({
   timezone: string;
   phone: string;
   taxRate: string;
+  invoiceFooter: string;
   currencies: Currency[];
   canManage: boolean;
 }) {
@@ -69,6 +71,14 @@ export function CompanyForm({
 
         <FormField label="Phone" htmlFor="phone">
           <Input id="phone" name="phone" defaultValue={phone} disabled={!canManage} />
+        </FormField>
+
+        <FormField
+          label="Invoice footer"
+          htmlFor="invoice_footer"
+          hint="Printed at the bottom of every invoice — e.g. payment terms or banking details"
+        >
+          <Input id="invoice_footer" name="invoice_footer" defaultValue={invoiceFooter} disabled={!canManage} />
         </FormField>
 
         {state.error && <p className="text-sm text-danger-600">{state.error}</p>}

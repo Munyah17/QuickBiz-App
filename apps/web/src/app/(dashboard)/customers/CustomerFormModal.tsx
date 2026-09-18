@@ -70,6 +70,33 @@ export function CustomerFormModal({
           <Input id="tax_number" name="tax_number" defaultValue={customer?.tax_number ?? ""} />
         </FormField>
 
+        <div className="grid grid-cols-2 gap-4">
+          <FormField label="Credit limit" htmlFor="credit_limit" hint="Leave blank for no limit">
+            <Input
+              id="credit_limit"
+              name="credit_limit"
+              type="number"
+              min="0"
+              step="0.01"
+              defaultValue={customer?.credit_limit ?? ""}
+            />
+          </FormField>
+          <FormField label="Payment terms (days)" htmlFor="payment_terms_days" hint="e.g. 30 = Net 30">
+            <Input
+              id="payment_terms_days"
+              name="payment_terms_days"
+              type="number"
+              min="0"
+              step="1"
+              defaultValue={customer?.payment_terms_days ?? ""}
+            />
+          </FormField>
+        </div>
+
+        <FormField label="Notes" htmlFor="notes" hint="Internal, not shown to the customer">
+          <Input id="notes" name="notes" defaultValue={customer?.notes ?? ""} />
+        </FormField>
+
         {state.error && <p className="text-sm text-danger-600">{state.error}</p>}
 
         <div className="flex justify-end gap-2 pt-2">

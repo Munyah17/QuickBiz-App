@@ -1,15 +1,16 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
-import { Search, Plus, Minus, Trash2, ShoppingCart } from "lucide-react";
+import { useActionState, useEffect, useMemo, useState, useTransition } from "react";
+import { Search, Plus, Minus, Trash2, ShoppingCart, PauseCircle, PlayCircle } from "lucide-react";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/Button";
-import { Select } from "@/components/Input";
+import { Input, Select } from "@/components/Input";
 import { useToast } from "@/components/Toast";
-import { checkoutAction, initialPosActionState } from "./actions";
+import { checkoutAction, holdOrderAction, deleteHeldOrderAction, initialPosActionState } from "./actions";
 import type { ProductWithStock } from "@/services/products";
 import type { Customer } from "@/services/customers";
 import type { InvoiceDetail } from "@/services/sales";
+import type { HeldOrder } from "@/services/pos";
 import { PAYMENT_METHODS } from "@/config/paymentMethods";
 import { ReceiptModal } from "./ReceiptModal";
 
@@ -29,8 +30,10 @@ export function POSCheckout(props: {
   branchId: string;
   warehouseId: string;
   sessionId: string;
+  registerId: string;
   products: ProductWithStock[];
   customers: Customer[];
+  heldOrders: HeldOrder[];
   taxRatePercent: number;
   orgName: string;
   cashierName: string;
@@ -56,24 +59,36 @@ function POSCheckoutForm({
   branchId,
   warehouseId,
   sessionId,
+  registerId,
   products,
   customers,
+  heldOrders,
   taxRatePercent,
   onSaleComplete,
 }: {
   branchId: string;
   warehouseId: string;
   sessionId: string;
+  registerId: string;
   products: ProductWithStock[];
   customers: Customer[];
+  heldOrders: HeldOrder[];
   taxRatePercent: number;
   onSaleComplete: (receipt: InvoiceDetail | null) => void;
 }) {
   const [state, formAction, isPending] = useActionState(checkoutAction, initialPosActionState);
+  const [holdState, holdAction, isHolding] = useActionState(holdOrderAction, initialPosActionState);
   const [search, setSearch] = useState("");
   const [cart, setCart] = useState<CartLine[]>([]);
   const [customerId, setCustomerId] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [discount, setDiscount] = useState(0);
+  const [discountReason, setDiscountReason] = useState("");
+  const [splitTender, setSplitTender] = useState(false);
+  const [paymentMethod2, setPaymentMethod2] = useState("ecocash");
+  const [paymentAmount2, setPaymentAmount2] = useState(0);
+  const [showHeld, setShowHeld] = useState(false);
+  const [isResuming, startResumeTransition] = useTransition();
   const { push } = useToast();
 
   useEffect(() => {
@@ -85,13 +100,44 @@ function POSCheckoutForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.success, state.error]);
 
-  const filtered = useMemo(
-    () =>
-      products.filter(
-        (p) => p.is_active && (p.name.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase()))
-      ),
-    [products, search]
-  );
+  useEffect(() => {
+    if (holdState.success) {
+      push("Order held");
+      // Remount the form to clear the cart — same mechanism as a completed sale.
+      onSaleComplete(null);
+    }
+    if (holdState.error) push(holdState.error, "error");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [holdState.success, holdState.error]);
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return products.filter(
+      (p) =>
+        p.is_active &&
+        (p.name.toLowerCase().includes(q) ||
+          p.sku.toLowerCase().includes(q) ||
+          (p.barcode !== null && p.barcode.toLowerCase() === q))
+    );
+  }, [products, search]);
+
+  // Barcode scanners type the code then send Enter — an exact barcode or
+  // SKU match on Enter adds the item and clears for the next scan.
+  function onSearchKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    const q = search.trim().toLowerCase();
+    if (!q) return;
+    const exact = products.find(
+      (p) =>
+        p.is_active &&
+        ((p.barcode !== null && p.barcode.toLowerCase() === q) || p.sku.toLowerCase() === q)
+    );
+    if (exact) {
+      addToCart(exact);
+      setSearch("");
+    }
+  }
 
   function addToCart(product: ProductWithStock) {
     setCart((prev) => {
@@ -101,6 +147,14 @@ function POSCheckoutForm({
       }
       return [...prev, { productId: product.id, name: product.name, unitPrice: product.selling_price, quantity: 1, availableStock: product.totalStock }];
     });
+  }
+
+  function setQty(productId: string, qty: number) {
+    setCart((prev) =>
+      prev
+        .map((l) => (l.productId === productId ? { ...l, quantity: Math.floor(qty) } : l))
+        .filter((l) => l.quantity > 0)
+    );
   }
 
   function updateQty(productId: string, delta: number) {
@@ -115,27 +169,99 @@ function POSCheckoutForm({
     setCart((prev) => prev.filter((l) => l.productId !== productId));
   }
 
+  function resumeHeldOrder(held: HeldOrder) {
+    startResumeTransition(async () => {
+      const result = await deleteHeldOrderAction(initialPosActionState, (() => {
+        const fd = new FormData();
+        fd.set("heldOrderId", held.id);
+        return fd;
+      })());
+      if (result.error) {
+        push(result.error, "error");
+        return;
+      }
+      setCart(
+        held.cart.map((l) => ({
+          productId: l.product_id,
+          name: l.name,
+          unitPrice: l.unit_price,
+          quantity: l.quantity,
+          availableStock: products.find((p) => p.id === l.product_id)?.totalStock ?? 0,
+        }))
+      );
+      if (held.customer_id) setCustomerId(held.customer_id);
+      setShowHeld(false);
+      push("Order resumed");
+    });
+  }
+
   const subtotal = cart.reduce((sum, l) => sum + l.unitPrice * l.quantity, 0);
   const taxTotal = Math.round(subtotal * (taxRatePercent / 100) * 100) / 100;
-  const total = subtotal + taxTotal;
+  const total = Math.max(0, subtotal + taxTotal - discount);
 
   const itemsPayload = JSON.stringify(
     cart.map((l) => ({ product_id: l.productId, description: l.name, quantity: l.quantity, unit_price: l.unitPrice }))
+  );
+  const holdCartPayload = JSON.stringify(
+    cart.map((l) => ({ product_id: l.productId, name: l.name, unit_price: l.unitPrice, quantity: l.quantity }))
   );
 
   return (
     <div className="grid h-[calc(100vh-8rem)] grid-cols-1 gap-4 lg:grid-cols-3">
       <div className="flex flex-col gap-3 lg:col-span-2">
-        <div className="flex h-9 items-center gap-2 rounded-md border border-border bg-white px-3">
-          <Search className="size-4 shrink-0 text-text-tertiary" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search products or scan barcode..."
-            className="w-full bg-transparent text-sm focus:outline-none"
-            autoFocus
-          />
+        <div className="flex items-center gap-2">
+          <div className="flex h-9 flex-1 items-center gap-2 rounded-md border border-border bg-white px-3">
+            <Search className="size-4 shrink-0 text-text-tertiary" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={onSearchKeyDown}
+              placeholder="Search products or scan barcode..."
+              className="w-full bg-transparent text-sm focus:outline-none"
+              autoFocus
+            />
+          </div>
+          <Button variant="secondary" size="sm" onClick={() => setShowHeld((v) => !v)} className="relative h-9">
+            <PauseCircle className="size-4" />
+            Held
+            {heldOrders.length > 0 && (
+              <span className="ml-1 rounded-full bg-primary-100 px-1.5 text-xs font-semibold text-primary-700">
+                {heldOrders.length}
+              </span>
+            )}
+          </Button>
         </div>
+
+        {showHeld && heldOrders.length > 0 && (
+          <Card className="flex flex-col gap-1 p-3">
+            {heldOrders.map((held) => {
+              const heldTotal = held.cart.reduce((s, l) => s + l.unit_price * l.quantity, 0);
+              return (
+                <div key={held.id} className="flex items-center gap-3 rounded-md border border-border-subtle px-3 py-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-text-primary">
+                      {held.label || `Order #${held.id.slice(0, 6)}`}
+                    </p>
+                    <p className="text-xs text-text-tertiary">
+                      {held.cart.length} item{held.cart.length === 1 ? "" : "s"} · ${heldTotal.toFixed(2)}
+                      {held.held_by_name ? ` · ${held.held_by_name}` : ""}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => resumeHeldOrder(held)}
+                    disabled={isResuming}
+                    className="inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:underline disabled:opacity-50"
+                  >
+                    <PlayCircle className="size-4" />
+                    Resume
+                  </button>
+                </div>
+              );
+            })}
+          </Card>
+        )}
+
         <div className="grid flex-1 grid-cols-2 gap-3 overflow-y-auto sm:grid-cols-3 xl:grid-cols-4">
           {filtered.map((product) => (
             <button
@@ -176,7 +302,14 @@ function POSCheckoutForm({
                   <button type="button" onClick={() => updateQty(line.productId, -1)} className="text-text-tertiary hover:text-primary-600">
                     <Minus className="size-3.5" />
                   </button>
-                  <span className="w-6 text-center text-sm">{line.quantity}</span>
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={line.quantity}
+                    onChange={(e) => setQty(line.productId, Number(e.target.value))}
+                    className="w-12 rounded border border-border-subtle bg-transparent px-1 py-0.5 text-center text-sm"
+                  />
                   <button type="button" onClick={() => updateQty(line.productId, 1)} className="text-text-tertiary hover:text-primary-600">
                     <Plus className="size-3.5" />
                   </button>
@@ -190,12 +323,38 @@ function POSCheckoutForm({
           )}
         </div>
 
+        <div className="border-t border-border-subtle p-4">
+          <div className="mb-3 flex items-end gap-2">
+            <div className="flex-1">
+              <label className="mb-1 block text-xs font-medium text-text-secondary">Discount ($)</label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={discount}
+                onChange={(e) => setDiscount(Math.min(subtotal, Math.max(0, Number(e.target.value))))}
+              />
+            </div>
+            {discount > 0 && (
+              <div className="flex-1">
+                <label className="mb-1 block text-xs font-medium text-text-secondary">Reason</label>
+                <Input value={discountReason} onChange={(e) => setDiscountReason(e.target.value)} placeholder="e.g. Promo" />
+              </div>
+            )}
+          </div>
+        </div>
+
         <form action={formAction} className="flex flex-col gap-3 border-t border-border-subtle p-4">
           <input type="hidden" name="branchId" value={branchId} />
           <input type="hidden" name="warehouseId" value={warehouseId} />
           <input type="hidden" name="sessionId" value={sessionId} />
           <input type="hidden" name="items" value={itemsPayload} />
           <input type="hidden" name="taxTotal" value={taxTotal} />
+          <input type="hidden" name="discountTotal" value={discount} />
+          <input type="hidden" name="discountReason" value={discountReason} />
+          {/* Hold-order fields — only read when the Hold button submits via formAction */}
+          <input type="hidden" name="cart" value={holdCartPayload} />
+          <input type="hidden" name="registerId" value={registerId} />
 
           <Select value={customerId} onChange={(e) => setCustomerId(e.target.value)} name="customerId">
             <option value="">Walk-in customer</option>
@@ -214,11 +373,54 @@ function POSCheckoutForm({
             ))}
           </Select>
 
+          <label className="flex items-center gap-2 text-xs font-medium text-text-secondary">
+            <input
+              type="checkbox"
+              checked={splitTender}
+              onChange={(e) => setSplitTender(e.target.checked)}
+              className="size-4 rounded border-border"
+            />
+            Split payment across two tenders
+          </label>
+
+          {splitTender && (
+            <div className="flex items-end gap-2">
+              <div className="flex-1">
+                <Select value={paymentMethod2} onChange={(e) => setPaymentMethod2(e.target.value)} name="paymentMethod2">
+                  {PAYMENT_METHODS.filter((m) => m.value !== paymentMethod).map((m) => (
+                    <option key={m.value} value={m.value}>
+                      {m.label}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+              <div className="w-28">
+                <Input
+                  type="number"
+                  name="paymentAmount2"
+                  min="0.01"
+                  max={total}
+                  step="0.01"
+                  value={paymentAmount2}
+                  onChange={(e) => setPaymentAmount2(Number(e.target.value))}
+                  placeholder="Amount"
+                />
+              </div>
+            </div>
+          )}
+          {!splitTender && <input type="hidden" name="paymentMethod2" value="" />}
+
           <div className="flex flex-col gap-1 text-sm">
             <div className="flex justify-between text-text-secondary">
               <span>Subtotal</span>
               <span>${subtotal.toFixed(2)}</span>
             </div>
+            {discount > 0 && (
+              <div className="flex justify-between text-text-secondary">
+                <span>Discount</span>
+                <span>-${discount.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-text-secondary">
               <span>Tax ({taxRatePercent}%)</span>
               <span>${taxTotal.toFixed(2)}</span>
@@ -227,12 +429,34 @@ function POSCheckoutForm({
               <span>Total</span>
               <span>${total.toFixed(2)}</span>
             </div>
+            {splitTender && paymentAmount2 > 0 && (
+              <div className="flex justify-between text-xs text-text-tertiary">
+                <span>First tender covers</span>
+                <span>${(total - paymentAmount2).toFixed(2)}</span>
+              </div>
+            )}
           </div>
 
-          <Button type="submit" size="md" loading={isPending} disabled={cart.length === 0} className="h-11 text-base">
-            Charge ${total.toFixed(2)}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              type="submit"
+              formAction={holdAction}
+              variant="secondary"
+              loading={isHolding}
+              disabled={cart.length === 0}
+              className="flex-1"
+            >
+              <PauseCircle className="size-4" />
+              Hold
+            </Button>
+            <Button type="submit" size="md" loading={isPending} disabled={cart.length === 0} className="h-11 flex-[2] text-base">
+              Charge ${total.toFixed(2)}
+            </Button>
+          </div>
         </form>
+
+        {/* Hidden hold form fields piggyback on the checkout form via formAction;
+            hold needs its own payload names though — provided via form data above. */}
       </Card>
     </div>
   );

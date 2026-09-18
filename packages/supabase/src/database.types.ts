@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -707,6 +702,7 @@ export type Database = {
         Row: {
           address: Json
           created_at: string
+          credit_limit: number | null
           customer_type: string
           email: string | null
           id: string
@@ -714,7 +710,9 @@ export type Database = {
           legacy_id: string | null
           legacy_system: string | null
           name: string
+          notes: string | null
           org_id: string
+          payment_terms_days: number | null
           phone: string | null
           tax_number: string | null
           updated_at: string
@@ -722,6 +720,7 @@ export type Database = {
         Insert: {
           address?: Json
           created_at?: string
+          credit_limit?: number | null
           customer_type?: string
           email?: string | null
           id?: string
@@ -729,7 +728,9 @@ export type Database = {
           legacy_id?: string | null
           legacy_system?: string | null
           name: string
+          notes?: string | null
           org_id: string
+          payment_terms_days?: number | null
           phone?: string | null
           tax_number?: string | null
           updated_at?: string
@@ -737,6 +738,7 @@ export type Database = {
         Update: {
           address?: Json
           created_at?: string
+          credit_limit?: number | null
           customer_type?: string
           email?: string | null
           id?: string
@@ -744,7 +746,9 @@ export type Database = {
           legacy_id?: string | null
           legacy_system?: string | null
           name?: string
+          notes?: string | null
           org_id?: string
+          payment_terms_days?: number | null
           phone?: string | null
           tax_number?: string | null
           updated_at?: string
@@ -1601,6 +1605,8 @@ export type Database = {
         Row: {
           account_id: string | null
           amount: number
+          approved_at: string | null
+          approved_by: string | null
           branch_id: string | null
           created_at: string
           created_by: string | null
@@ -1610,10 +1616,16 @@ export type Database = {
           org_id: string
           payment_method: string
           reference: string | null
+          rejection_reason: string | null
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
         }
         Insert: {
           account_id?: string | null
           amount: number
+          approved_at?: string | null
+          approved_by?: string | null
           branch_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -1623,10 +1635,16 @@ export type Database = {
           org_id: string
           payment_method?: string
           reference?: string | null
+          rejection_reason?: string | null
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
         }
         Update: {
           account_id?: string | null
           amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
           branch_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -1636,6 +1654,10 @@ export type Database = {
           org_id?: string
           payment_method?: string
           reference?: string | null
+          rejection_reason?: string | null
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
         }
         Relationships: [
           {
@@ -1643,6 +1665,13 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -1664,6 +1693,13 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -3608,6 +3644,81 @@ export type Database = {
           },
         ]
       }
+      pos_held_orders: {
+        Row: {
+          cart: Json
+          created_at: string
+          customer_id: string | null
+          held_by: string | null
+          id: string
+          label: string | null
+          org_id: string
+          register_id: string
+          session_id: string
+          updated_at: string
+        }
+        Insert: {
+          cart?: Json
+          created_at?: string
+          customer_id?: string | null
+          held_by?: string | null
+          id?: string
+          label?: string | null
+          org_id: string
+          register_id: string
+          session_id: string
+          updated_at?: string
+        }
+        Update: {
+          cart?: Json
+          created_at?: string
+          customer_id?: string | null
+          held_by?: string | null
+          id?: string
+          label?: string | null
+          org_id?: string
+          register_id?: string
+          session_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pos_held_orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pos_held_orders_held_by_fkey"
+            columns: ["held_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pos_held_orders_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pos_held_orders_register_id_fkey"
+            columns: ["register_id"]
+            isOneToOne: false
+            referencedRelation: "pos_registers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pos_held_orders_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "pos_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pos_registers: {
         Row: {
           branch_id: string
@@ -3739,6 +3850,7 @@ export type Database = {
       }
       products: {
         Row: {
+          barcode: string | null
           category_id: string | null
           cost_price: number
           created_at: string
@@ -3754,6 +3866,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          barcode?: string | null
           category_id?: string | null
           cost_price?: number
           created_at?: string
@@ -3769,6 +3882,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          barcode?: string | null
           category_id?: string | null
           cost_price?: number
           created_at?: string
@@ -4280,6 +4394,7 @@ export type Database = {
           branch_id: string | null
           created_at: string
           created_by: string | null
+          expected_date: string | null
           id: string
           notes: string | null
           org_id: string
@@ -4297,6 +4412,7 @@ export type Database = {
           branch_id?: string | null
           created_at?: string
           created_by?: string | null
+          expected_date?: string | null
           id?: string
           notes?: string | null
           org_id: string
@@ -4314,6 +4430,7 @@ export type Database = {
           branch_id?: string | null
           created_at?: string
           created_by?: string | null
+          expected_date?: string | null
           id?: string
           notes?: string | null
           org_id?: string
@@ -4603,6 +4720,112 @@ export type Database = {
           },
         ]
       }
+      sales_credit_note_items: {
+        Row: {
+          credit_note_id: string
+          description: string
+          id: string
+          line_total: number
+          product_id: string | null
+          quantity: number
+          unit_price: number
+        }
+        Insert: {
+          credit_note_id: string
+          description: string
+          id?: string
+          line_total?: number
+          product_id?: string | null
+          quantity?: number
+          unit_price?: number
+        }
+        Update: {
+          credit_note_id?: string
+          description?: string
+          id?: string
+          line_total?: number
+          product_id?: string | null
+          quantity?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_credit_note_items_credit_note_id_fkey"
+            columns: ["credit_note_id"]
+            isOneToOne: false
+            referencedRelation: "sales_credit_notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_credit_note_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_credit_notes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          credit_note_number: string
+          id: string
+          invoice_id: string
+          org_id: string
+          reason: string | null
+          restock: boolean
+          status: string
+          subtotal: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          credit_note_number: string
+          id?: string
+          invoice_id: string
+          org_id: string
+          reason?: string | null
+          restock?: boolean
+          status?: string
+          subtotal?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          credit_note_number?: string
+          id?: string
+          invoice_id?: string
+          org_id?: string
+          reason?: string | null
+          restock?: boolean
+          status?: string
+          subtotal?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_credit_notes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_credit_notes_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "sales_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_credit_notes_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sales_invoice_items: {
         Row: {
           description: string
@@ -4656,10 +4879,16 @@ export type Database = {
           created_by: string | null
           currency: string
           customer_id: string | null
+          discount_reason: string | null
+          discount_total: number
+          doc_type: string
+          due_date: string | null
           id: string
           invoice_number: string
+          issued_at: string | null
           notes: string | null
           org_id: string
+          overdue_notified_at: string | null
           pos_session_id: string | null
           status: string
           subtotal: number
@@ -4674,10 +4903,16 @@ export type Database = {
           created_by?: string | null
           currency?: string
           customer_id?: string | null
+          discount_reason?: string | null
+          discount_total?: number
+          doc_type?: string
+          due_date?: string | null
           id?: string
           invoice_number: string
+          issued_at?: string | null
           notes?: string | null
           org_id: string
+          overdue_notified_at?: string | null
           pos_session_id?: string | null
           status?: string
           subtotal?: number
@@ -4692,10 +4927,16 @@ export type Database = {
           created_by?: string | null
           currency?: string
           customer_id?: string | null
+          discount_reason?: string | null
+          discount_total?: number
+          doc_type?: string
+          due_date?: string | null
           id?: string
           invoice_number?: string
+          issued_at?: string | null
           notes?: string | null
           org_id?: string
+          overdue_notified_at?: string | null
           pos_session_id?: string | null
           status?: string
           subtotal?: number
@@ -7237,6 +7478,14 @@ export type Database = {
         }
         Returns: string
       }
+      apply_credit_note: {
+        Args: { p_credit_note_id: string; p_org_id: string }
+        Returns: undefined
+      }
+      approve_expense: {
+        Args: { p_expense_id: string; p_org_id: string }
+        Returns: undefined
+      }
       approve_stock_take: {
         Args: { p_stock_take_id: string }
         Returns: undefined
@@ -7245,6 +7494,11 @@ export type Database = {
         Args: { p_award_amount: number; p_bid_id: string; p_tender_id: string }
         Returns: undefined
       }
+      cancel_transfer: {
+        Args: { p_org_id: string; p_transfer_id: string }
+        Returns: undefined
+      }
+      check_overdue_invoices: { Args: { p_org_id: string }; Returns: number }
       close_pos_session: {
         Args: {
           p_closing_float: number
@@ -7284,6 +7538,20 @@ export type Database = {
       }
       convert_lead_to_customer: {
         Args: { p_lead_id: string; p_org_id: string }
+        Returns: string
+      }
+      convert_quote_to_invoice: {
+        Args: { p_org_id: string; p_quote_id: string }
+        Returns: undefined
+      }
+      create_credit_note: {
+        Args: {
+          p_invoice_id: string
+          p_items: Json
+          p_org_id: string
+          p_reason?: string
+          p_restock?: boolean
+        }
         Returns: string
       }
       create_disciplinary_case: {
@@ -7400,17 +7668,30 @@ export type Database = {
         }
         Returns: string
       }
-      create_purchase_order: {
-        Args: {
-          p_branch_id: string
-          p_items?: Json
-          p_notes?: string
-          p_org_id: string
-          p_supplier_id?: string
-          p_tax_total?: number
-        }
-        Returns: string
-      }
+      create_purchase_order:
+        | {
+            Args: {
+              p_branch_id: string
+              p_items?: Json
+              p_notes?: string
+              p_org_id: string
+              p_supplier_id?: string
+              p_tax_total?: number
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_branch_id: string
+              p_expected_date?: string
+              p_items?: Json
+              p_notes?: string
+              p_org_id: string
+              p_supplier_id?: string
+              p_tax_total?: number
+            }
+            Returns: string
+          }
       create_risk_assessment: {
         Args: {
           p_category: string
@@ -7425,18 +7706,52 @@ export type Database = {
         }
         Returns: string
       }
-      create_sales_invoice: {
-        Args: {
-          p_branch_id: string
-          p_customer_id?: string
-          p_items?: Json
-          p_notes?: string
-          p_org_id: string
-          p_tax_total?: number
-          p_warehouse_id?: string
-        }
-        Returns: string
-      }
+      create_sales_invoice:
+        | {
+            Args: {
+              p_branch_id: string
+              p_customer_id?: string
+              p_items?: Json
+              p_notes?: string
+              p_org_id: string
+              p_tax_total?: number
+              p_warehouse_id?: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_branch_id: string
+              p_customer_id?: string
+              p_discount_reason?: string
+              p_discount_total?: number
+              p_due_date?: string
+              p_items?: Json
+              p_notes?: string
+              p_org_id: string
+              p_status?: string
+              p_tax_total?: number
+              p_warehouse_id?: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_branch_id: string
+              p_customer_id?: string
+              p_discount_reason?: string
+              p_discount_total?: number
+              p_doc_type?: string
+              p_due_date?: string
+              p_items?: Json
+              p_notes?: string
+              p_org_id: string
+              p_status?: string
+              p_tax_total?: number
+              p_warehouse_id?: string
+            }
+            Returns: string
+          }
       create_sheq_incident: {
         Args: {
           p_branch_id?: string
@@ -7528,6 +7843,16 @@ export type Database = {
         }
         Returns: string
       }
+      create_transfer_with_lines: {
+        Args: {
+          p_from_warehouse_id: string
+          p_items?: Json
+          p_notes?: string
+          p_org_id: string
+          p_to_warehouse_id: string
+        }
+        Returns: string
+      }
       create_warehouse: {
         Args: {
           p_address?: string
@@ -7579,6 +7904,10 @@ export type Database = {
         Args: { p_account_id: string; p_org_id: string }
         Returns: undefined
       }
+      dispatch_transfer: {
+        Args: { p_org_id: string; p_transfer_id: string }
+        Returns: undefined
+      }
       evaluate_tender_bid: {
         Args: {
           p_bid_id: string
@@ -7626,6 +7955,10 @@ export type Database = {
         Returns: string
       }
       is_org_member: { Args: { target_org_id: string }; Returns: boolean }
+      issue_invoice: {
+        Args: { p_invoice_id: string; p_org_id: string }
+        Returns: undefined
+      }
       list_activated_insurers: {
         Args: { p_org_id: string }
         Returns: {
@@ -7824,9 +8157,28 @@ export type Database = {
           status: string
         }[]
       }
+      mark_expense_paid: {
+        Args: {
+          p_expense_id: string
+          p_org_id: string
+          p_payment_method: string
+          p_reference?: string
+        }
+        Returns: undefined
+      }
       next_number: {
         Args: { p_entity_type: string; target_org_id: string }
         Returns: string
+      }
+      notify_org_holders: {
+        Args: {
+          p_body?: string
+          p_org_id: string
+          p_permission: string
+          p_title: string
+          p_type?: string
+        }
+        Returns: number
       }
       open_pos_session: {
         Args: {
@@ -7854,6 +8206,10 @@ export type Database = {
       }
       receive_purchase_order: {
         Args: { p_org_id: string; p_po_id: string; p_warehouse_id: string }
+        Returns: undefined
+      }
+      receive_transfer: {
+        Args: { p_org_id: string; p_transfer_id: string }
         Returns: undefined
       }
       record_count: {
@@ -7890,6 +8246,10 @@ export type Database = {
           p_org_id: string
         }
         Returns: string
+      }
+      reject_expense: {
+        Args: { p_expense_id: string; p_org_id: string; p_reason?: string }
+        Returns: undefined
       }
       request_iban: {
         Args: { p_currency?: string; p_notes?: string; p_org_id: string }
@@ -7966,7 +8326,25 @@ export type Database = {
         Args: { p_invoice_id: string; p_org_id: string; p_session_id: string }
         Returns: undefined
       }
+      update_draft_invoice: {
+        Args: {
+          p_customer_id?: string
+          p_discount_reason?: string
+          p_discount_total?: number
+          p_due_date?: string
+          p_invoice_id: string
+          p_items?: Json
+          p_notes?: string
+          p_org_id: string
+          p_tax_total?: number
+        }
+        Returns: undefined
+      }
       user_org_ids: { Args: never; Returns: string[] }
+      void_invoice: {
+        Args: { p_invoice_id: string; p_org_id: string; p_reason?: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
@@ -7985,12 +8363,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -8014,11 +8392,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -8039,11 +8417,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -8064,11 +8442,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -8081,11 +8459,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never) = never,
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -8102,3 +8480,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+

@@ -27,6 +27,7 @@ export default async function CompanyPage() {
         timezone={org?.timezone ?? "Africa/Harare"}
         phone={(settings["contact.phone"] as string) ?? ""}
         taxRate={(settings["tax.default_rate"] as string) ?? ""}
+        invoiceFooter={(settings["invoice.footer"] as string) ?? ""}
         currencies={currencies}
         canManage={permissions.has("settings.manage")}
       />

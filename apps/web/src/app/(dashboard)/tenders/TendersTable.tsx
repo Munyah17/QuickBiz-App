@@ -56,8 +56,11 @@ function BidsModal({
   }
 
   useEffect(() => {
-    reload();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Initial load: loading is already true — fetch without a
+    // synchronous setState so this stays a pure external sync.
+    listTenderBidsAction(tender.id)
+      .then(setBids)
+      .finally(() => setLoading(false));
   }, [tender.id]);
 
   const canAward = canEvaluate && tender.status !== "awarded" && tender.status !== "cancelled";

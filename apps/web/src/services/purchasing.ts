@@ -61,6 +61,140 @@ export async function setSupplierActive(supabase: SupabaseClient, supplierId: st
   if (error) throw error;
 }
 
+// Bulk import — existing names are skipped so re-runs are safe.
+export interface SupplierImportResult {
+  created: number;
+  skipped: number;
+  failed: number;
+  errors: Array<{ name: string; reason: string }>;
+}
+
+export async function importSuppliers(
+  supabase: SupabaseClient,
+  orgId: string,
+  rows: SupplierInput[]
+): Promise<SupplierImportResult> {
+  const { data: existing, error } = await supabase.from("suppliers").select("name").eq("org_id", orgId);
+  if (error) throw error;
+
+  const seen = new Set((existing ?? []).map((r: { name: string }) => r.name.toLowerCase()));
+  const result: SupplierImportResult = { created: 0, skipped: 0, failed: 0, errors: [] };
+
+  for (const row of rows) {
+    if (seen.has(row.name.toLowerCase())) {
+      result.skipped += 1;
+      continue;
+    }
+    try {
+      await createSupplier(supabase, orgId, row);
+      seen.add(row.name.toLowerCase());
+      result.created += 1;
+    } catch (err) {
+      result.failed += 1;
+      result.errors.push({ name: row.name || "(no name)", reason: (err as Error).message });
+    }
+  }
+
+  return result;
+}
+
+// ============================================================
+// Supplier 360 — account position: total spend, what we still owe,
+// full PO history, and recent payments.
+// ============================================================
+
+export interface SupplierDetail extends Supplier {
+  totalSpend: number;
+  totalPaid: number;
+  openBalance: number;
+  lateOrders: number;
+  purchaseOrders: Array<{
+    id: string;
+    po_number: string;
+    status: string;
+    total: number;
+    amount_paid: number;
+    expected_date: string | null;
+    created_at: string;
+  }>;
+  recentPayments: Array<{
+    id: string;
+    amount: number;
+    method: string;
+    paid_at: string;
+    reference: string | null;
+    po_number: string;
+  }>;
+}
+
+export async function getSupplierDetail(
+  supabase: SupabaseClient,
+  orgId: string,
+  supplierId: string
+): Promise<SupplierDetail | null> {
+  const { data: supplier, error } = await supabase
+    .from("suppliers")
+    .select("id, name, email, phone, tax_number, address, is_active")
+    .eq("org_id", orgId)
+    .eq("id", supplierId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!supplier) return null;
+
+  const { data: orders, error: ordersError } = await supabase
+    .from("purchase_orders")
+    .select("id, po_number, status, total, amount_paid, expected_date, created_at")
+    .eq("org_id", orgId)
+    .eq("supplier_id", supplierId)
+    .neq("status", "cancelled")
+    .order("created_at", { ascending: false });
+  if (ordersError) throw ordersError;
+
+  const orderRows = (orders ?? []) as SupplierDetail["purchaseOrders"];
+  const today = new Date().toISOString().slice(0, 10);
+
+  const poIds = orderRows.map((o) => o.id);
+  let recentPayments: SupplierDetail["recentPayments"] = [];
+  if (poIds.length > 0) {
+    const { data: payments, error: payError } = await supabase
+      .from("purchase_payments")
+      .select("id, amount, method, paid_at, reference, po_id")
+      .in("po_id", poIds)
+      .order("paid_at", { ascending: false })
+      .limit(10);
+    if (payError) throw payError;
+
+    const numberById = new Map(orderRows.map((o) => [o.id, o.po_number]));
+    recentPayments = ((payments ?? []) as Array<{
+      id: string;
+      amount: number;
+      method: string;
+      paid_at: string;
+      reference: string | null;
+      po_id: string;
+    }>).map((p) => ({
+      id: p.id,
+      amount: p.amount,
+      method: p.method,
+      paid_at: p.paid_at,
+      reference: p.reference,
+      po_number: numberById.get(p.po_id) ?? "",
+    }));
+  }
+
+  const open = orderRows.filter((o) => o.status === "issued");
+
+  return {
+    ...(supplier as unknown as Supplier),
+    totalSpend: orderRows.reduce((sum, o) => sum + o.total, 0),
+    totalPaid: orderRows.reduce((sum, o) => sum + o.amount_paid, 0),
+    openBalance: open.reduce((sum, o) => sum + (o.total - o.amount_paid), 0),
+    lateOrders: open.filter((o) => o.expected_date !== null && o.expected_date < today).length,
+    purchaseOrders: orderRows,
+    recentPayments,
+  };
+}
+
 export interface PurchaseOrderListRow {
   id: string;
   po_number: string;
@@ -68,13 +202,14 @@ export interface PurchaseOrderListRow {
   status: "draft" | "issued" | "received" | "cancelled";
   total: number;
   amount_paid: number;
+  expected_date: string | null;
   created_at: string;
 }
 
 export async function listPurchaseOrders(supabase: SupabaseClient, orgId: string): Promise<PurchaseOrderListRow[]> {
   const { data, error } = await supabase
     .from("purchase_orders")
-    .select("id, po_number, status, total, amount_paid, created_at, suppliers(name)")
+    .select("id, po_number, status, total, amount_paid, expected_date, created_at, suppliers(name)")
     .eq("org_id", orgId)
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -86,6 +221,7 @@ export async function listPurchaseOrders(supabase: SupabaseClient, orgId: string
       status: PurchaseOrderListRow["status"];
       total: number;
       amount_paid: number;
+      expected_date: string | null;
       created_at: string;
       suppliers: { name: string } | null;
     }>
@@ -96,6 +232,7 @@ export async function listPurchaseOrders(supabase: SupabaseClient, orgId: string
     status: row.status,
     total: row.total,
     amount_paid: row.amount_paid,
+    expected_date: row.expected_date,
     created_at: row.created_at,
   }));
 }
@@ -113,6 +250,7 @@ export interface PurchaseOrderDetail {
   notes: string | null;
   created_at: string;
   received_at: string | null;
+  expected_date: string | null;
   items: Array<{ id: string; description: string; quantity: number; unit_cost: number; line_total: number }>;
   payments: Array<{ id: string; amount: number; method: string; paid_at: string; reference: string | null }>;
 }
@@ -121,7 +259,7 @@ export async function getPurchaseOrderDetail(supabase: SupabaseClient, orgId: st
   const { data: po, error } = await supabase
     .from("purchase_orders")
     .select(
-      "id, po_number, status, subtotal, tax_total, total, amount_paid, notes, created_at, received_at, suppliers(name), branches(name)"
+      "id, po_number, status, subtotal, tax_total, total, amount_paid, notes, created_at, received_at, expected_date, suppliers(name), branches(name)"
     )
     .eq("org_id", orgId)
     .eq("id", poId)
@@ -147,6 +285,7 @@ export async function getPurchaseOrderDetail(supabase: SupabaseClient, orgId: st
     notes: string | null;
     created_at: string;
     received_at: string | null;
+    expected_date: string | null;
     suppliers: { name: string } | null;
     branches: { name: string } | null;
   };
@@ -164,6 +303,7 @@ export async function getPurchaseOrderDetail(supabase: SupabaseClient, orgId: st
     notes: row.notes,
     created_at: row.created_at,
     received_at: row.received_at,
+    expected_date: row.expected_date,
     items: (items ?? []) as PurchaseOrderDetail["items"],
     payments: (payments ?? []) as PurchaseOrderDetail["payments"],
   };
@@ -178,7 +318,15 @@ export interface PurchaseOrderLineInput {
 
 export async function createPurchaseOrder(
   supabase: SupabaseClient,
-  input: { orgId: string; branchId: string; supplierId: string | null; items: PurchaseOrderLineInput[]; taxTotal: number; notes: string }
+  input: {
+    orgId: string;
+    branchId: string;
+    supplierId: string | null;
+    items: PurchaseOrderLineInput[];
+    taxTotal: number;
+    notes: string;
+    expectedDate?: string | null;
+  }
 ): Promise<string> {
   const { data, error } = await supabase.rpc("create_purchase_order", {
     p_org_id: input.orgId,
@@ -187,6 +335,7 @@ export async function createPurchaseOrder(
     p_items: input.items as unknown as Json,
     p_tax_total: input.taxTotal,
     p_notes: input.notes || undefined,
+    p_expected_date: input.expectedDate ?? undefined,
   });
   if (error) throw error;
   return data as string;

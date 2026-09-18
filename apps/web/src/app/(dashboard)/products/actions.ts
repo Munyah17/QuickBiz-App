@@ -7,7 +7,10 @@ import {
   updateProduct,
   setProductActive,
   adjustStock,
+  importProducts,
+  bulkUpdatePrices,
   type ProductInput,
+  type ImportResult,
 } from "@/services/products";
 
 export interface ProductActionState {
@@ -27,6 +30,7 @@ function inputFromForm(formData: FormData): ProductInput {
     cost_price: Number(formData.get("cost_price") ?? 0),
     selling_price: Number(formData.get("selling_price") ?? 0),
     reorder_level: Number(formData.get("reorder_level") ?? 0),
+    barcode: String(formData.get("barcode") ?? "").trim(),
   };
 }
 
@@ -102,6 +106,28 @@ export async function setProductActiveAction(
   return { error: null, success: true };
 }
 
+export async function bulkUpdatePricesAction(
+  productIds: string[],
+  mode: "percent" | "fixed",
+  value: number
+): Promise<ProductActionState> {
+  const { supabase, orgId, permissions } = await requireOrgContext();
+
+  if (!permissions.has("inventory.manage")) {
+    return { error: "You don't have permission to manage products.", success: false };
+  }
+  if (productIds.length === 0) return { error: "No products selected.", success: false };
+
+  try {
+    await bulkUpdatePrices(supabase, orgId, productIds, mode, value);
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/products");
+  return { error: null, success: true };
+}
+
 export async function bulkSetProductActiveAction(productIds: string[], isActive: boolean): Promise<ProductActionState> {
   const { supabase, permissions } = await requireOrgContext();
 
@@ -118,6 +144,41 @@ export async function bulkSetProductActiveAction(productIds: string[], isActive:
 
   revalidatePath("/products");
   return { error: null, success: true };
+}
+
+export interface ImportActionState {
+  result: ImportResult | null;
+  error: string | null;
+}
+
+export const initialImportActionState: ImportActionState = { result: null, error: null };
+
+export async function importProductsAction(
+  _prev: ImportActionState,
+  formData: FormData
+): Promise<ImportActionState> {
+  const { supabase, orgId, permissions } = await requireOrgContext();
+
+  if (!permissions.has("inventory.manage")) {
+    return { result: null, error: "You don't have permission to manage products." };
+  }
+
+  let rows: ProductInput[];
+  try {
+    rows = JSON.parse(String(formData.get("rows") ?? "[]"));
+  } catch {
+    return { result: null, error: "Invalid import payload." };
+  }
+  if (rows.length === 0) return { result: null, error: "Nothing to import." };
+  if (rows.length > 500) return { result: null, error: "Import at most 500 products at a time." };
+
+  try {
+    const result = await importProducts(supabase, orgId, rows);
+    revalidatePath("/products");
+    return { result, error: null };
+  } catch (err) {
+    return { result: null, error: (err as Error).message };
+  }
 }
 
 export async function adjustStockAction(

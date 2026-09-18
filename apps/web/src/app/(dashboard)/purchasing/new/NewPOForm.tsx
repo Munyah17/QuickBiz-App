@@ -25,14 +25,46 @@ export function NewPOForm({
   products,
   branchId,
   taxRatePercent,
+  preselectedProductId,
+  preselectedQty,
+  lowStockReorder,
 }: {
   suppliers: Supplier[];
   products: ProductWithStock[];
   branchId: string;
   taxRatePercent: number;
+  preselectedProductId?: string | null;
+  preselectedQty?: number | null;
+  lowStockReorder?: boolean;
 }) {
   const [state, formAction, isPending] = useActionState(createPurchaseOrderAction, initialPurchasingActionState);
-  const [items, setItems] = useState<LineItem[]>([{ key: nextKey++, product_id: "", description: "", quantity: 1, unit_cost: 0 }]);
+  const [items, setItems] = useState<LineItem[]>(() => {
+    if (lowStockReorder) {
+      const lows = products
+        .filter((p) => p.reorder_level > 0 && p.totalStock <= p.reorder_level)
+        .map((p) => ({
+          key: nextKey++,
+          product_id: p.id,
+          description: p.name,
+          quantity: Math.max(p.reorder_level * 2 - p.totalStock, 1),
+          unit_cost: p.cost_price,
+        }));
+      if (lows.length > 0) return lows;
+    }
+    const preselected = preselectedProductId ? products.find((p) => p.id === preselectedProductId) : undefined;
+    if (preselected) {
+      return [
+        {
+          key: nextKey++,
+          product_id: preselected.id,
+          description: preselected.name,
+          quantity: preselectedQty && preselectedQty > 0 ? preselectedQty : Math.max(preselected.reorder_level * 2 - preselected.totalStock, 1),
+          unit_cost: preselected.cost_price,
+        },
+      ];
+    }
+    return [{ key: nextKey++, product_id: "", description: "", quantity: 1, unit_cost: 0 }];
+  });
 
   const subtotal = useMemo(() => items.reduce((sum, i) => sum + i.quantity * i.unit_cost, 0), [items]);
   const taxTotal = useMemo(() => Math.round(subtotal * (taxRatePercent / 100) * 100) / 100, [subtotal, taxRatePercent]);
@@ -67,7 +99,7 @@ export function NewPOForm({
 
       <Card>
         <CardHeader title="Order details" />
-        <div className="p-4">
+        <div className="grid grid-cols-2 gap-4 p-4">
           <FormField label="Supplier" htmlFor="supplierId">
             <Select id="supplierId" name="supplierId">
               <option value="">No supplier on file</option>
@@ -77,6 +109,9 @@ export function NewPOForm({
                 </option>
               ))}
             </Select>
+          </FormField>
+          <FormField label="Expected delivery" htmlFor="expectedDate" hint="Late POs show on the dashboard">
+            <Input id="expectedDate" name="expectedDate" type="date" />
           </FormField>
         </div>
       </Card>

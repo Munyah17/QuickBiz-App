@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useState, useTransition } from "react";
-import { Plus, Pencil, Package, PackagePlus } from "lucide-react";
+import Link from "next/link";
+import { Plus, Pencil, Package, PackagePlus, Upload, ShoppingCart } from "lucide-react";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/Button";
 import { Badge } from "@/components/Badge";
@@ -12,6 +13,8 @@ import { ExportButton } from "@/components/ExportButton";
 import { useToast } from "@/components/Toast";
 import { ProductFormModal } from "./ProductFormModal";
 import { AdjustStockModal } from "./AdjustStockModal";
+import { ImportProductsModal } from "./ImportProductsModal";
+import { BulkPriceModal } from "./BulkPriceModal";
 import { setProductActiveAction, bulkSetProductActiveAction, initialProductActionState } from "./actions";
 import type { ProductWithStock, BranchWarehouse } from "@/services/products";
 
@@ -50,6 +53,8 @@ export function ProductsTable({
   canManage: boolean;
 }) {
   const [formOpen, setFormOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [priceOpen, setPriceOpen] = useState(false);
   const [editing, setEditing] = useState<ProductWithStock | undefined>(undefined);
   const [adjusting, setAdjusting] = useState<ProductWithStock | undefined>(undefined);
   const [query, setQuery] = useState("");
@@ -57,6 +62,11 @@ export function ProductsTable({
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [isBulkPending, startBulkTransition] = useTransition();
   const { push: pushToast } = useToast();
+
+  const lowStockCount = useMemo(
+    () => products.filter((p) => p.is_active && p.reorder_level > 0 && p.totalStock <= p.reorder_level).length,
+    [products]
+  );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -124,6 +134,20 @@ export function ProductsTable({
               Status: p.is_active ? "Active" : "Inactive",
             }))}
           />
+          {canManage && lowStockCount > 0 && (
+            <Link href="/purchasing/new?lowstock=1">
+              <Button size="sm" variant="secondary">
+                <ShoppingCart className="size-4" />
+                Reorder low stock ({lowStockCount})
+              </Button>
+            </Link>
+          )}
+          {canManage && (
+            <Button size="sm" variant="secondary" onClick={() => setImportOpen(true)}>
+              <Upload className="size-4" />
+              Import
+            </Button>
+          )}
           {canManage && (
             <Button
               size="sm"
@@ -147,6 +171,9 @@ export function ProductsTable({
           </Button>
           <Button size="sm" variant="secondary" loading={isBulkPending} onClick={() => runBulk(true)}>
             Reactivate
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => setPriceOpen(true)}>
+            Update prices
           </Button>
           <button type="button" onClick={() => setSelected(new Set())} className="ml-auto text-sm text-text-tertiary hover:text-text-primary">
             Clear selection
@@ -192,7 +219,11 @@ export function ProductsTable({
                       />
                     </td>
                   )}
-                  <td className="px-4 py-2.5 font-medium text-text-primary">{product.name}</td>
+                  <td className="px-4 py-2.5">
+                    <Link href={`/products/${product.id}`} className="font-medium text-primary-600 hover:underline">
+                      {product.name}
+                    </Link>
+                  </td>
                   <td className="px-4 py-2.5 text-text-secondary">{product.sku}</td>
                   <td className="px-4 py-2.5 text-text-secondary">{product.categoryName || "Uncategorized"}</td>
                   <td className="px-4 py-2.5 text-text-secondary">${product.cost_price.toFixed(2)}</td>
@@ -245,6 +276,14 @@ export function ProductsTable({
           onClose={() => setAdjusting(undefined)}
           product={adjusting}
           warehouses={warehouses}
+        />
+      )}
+      {canManage && importOpen && <ImportProductsModal onClose={() => setImportOpen(false)} />}
+      {canManage && priceOpen && (
+        <BulkPriceModal
+          productIds={Array.from(selected)}
+          onClose={() => setPriceOpen(false)}
+          onDone={() => setSelected(new Set())}
         />
       )}
     </Card>

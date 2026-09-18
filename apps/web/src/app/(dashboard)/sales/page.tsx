@@ -6,7 +6,7 @@ import { StatCard } from "@/components/StatCard";
 import { RevenueTrendChart } from "@/components/RevenueTrendChart";
 import { Card, CardHeader } from "@/components/Card";
 import { requireOrgContext, requireModuleEnabled } from "@/lib/session";
-import { listInvoices } from "@/services/sales";
+import { listInvoices, checkOverdueInvoices, isOverdue } from "@/services/sales";
 import { SalesTable } from "./SalesTable";
 
 export default async function SalesPage() {
@@ -14,12 +14,18 @@ export default async function SalesPage() {
   await requireModuleEnabled(supabase, orgId, "sales");
   const canManage = permissions.has("sales.manage");
 
+  // Lazy overdue sweep: flags newly-overdue invoices and notifies
+  // sales.manage holders once each. Cheap no-op when nothing crossed.
+  await checkOverdueInvoices(supabase, orgId);
+
   const invoices = await listInvoices(supabase, orgId);
 
-  const totalRevenue = invoices.reduce((sum, inv) => sum + inv.total, 0);
+  const openInvoices = invoices.filter((inv) => inv.status === "issued" || inv.status === "partially_paid");
+  const totalRevenue = invoices.filter((inv) => inv.status !== "cancelled").reduce((sum, inv) => sum + inv.total, 0);
   const paidInvoices = invoices.filter((inv) => inv.status === "paid").length;
-  const issuedInvoices = invoices.filter((inv) => inv.status === "issued").length;
-  const unpaidBalance = invoices.reduce((sum, inv) => sum + (inv.total - inv.amount_paid), 0);
+  const unpaidBalance = openInvoices.reduce((sum, inv) => sum + (inv.total - inv.amount_paid), 0);
+  const overdueInvoices = invoices.filter(isOverdue);
+  const overdueBalance = overdueInvoices.reduce((sum, inv) => sum + (inv.total - inv.amount_paid), 0);
   const totalInvoices = invoices.length;
 
   // Daily revenue trend over the last 14 days, matching the Dashboard's own
@@ -64,18 +70,20 @@ export default async function SalesPage() {
         <StatCard
           label="Total invoices"
           value={totalInvoices.toString()}
+          delta={{ label: `${paidInvoices} paid`, direction: "flat" }}
           tone="info"
         />
         <StatCard
-          label="Paid"
-          value={paidInvoices.toString()}
-          tone="success"
+          label="Outstanding"
+          value={`$${unpaidBalance.toLocaleString()}`}
+          delta={openInvoices.length > 0 ? { label: `${openInvoices.length} open invoice${openInvoices.length === 1 ? "" : "s"}`, direction: "flat" } : undefined}
+          tone="warning"
         />
         <StatCard
-          label="Issued, unpaid"
-          value={issuedInvoices.toString()}
-          delta={unpaidBalance > 0 ? { label: `$${unpaidBalance.toLocaleString()} outstanding`, direction: "down" } : undefined}
-          tone={issuedInvoices > 0 ? "warning" : undefined}
+          label="Overdue"
+          value={overdueInvoices.length.toString()}
+          delta={overdueBalance > 0 ? { label: `$${overdueBalance.toLocaleString()} past due`, direction: "down" } : undefined}
+          tone={overdueInvoices.length > 0 ? "warning" : "success"}
         />
       </div>
 

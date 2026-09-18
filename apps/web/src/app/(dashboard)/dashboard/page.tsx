@@ -3,12 +3,13 @@ import { LayoutGrid } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { StatCard, type StatCardTone } from "@/components/StatCard";
 import { Card, CardHeader } from "@/components/Card";
+import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { RevenueTrendChart } from "@/components/RevenueTrendChart";
 import { CategoryDonutChart } from "@/components/CategoryDonutChart";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { requireOrgContext } from "@/lib/session";
-import { getDashboardStats, getDashboardOverview } from "@/services/dashboard";
+import { getDashboardStats, getDashboardOverview, getAttentionItems } from "@/services/dashboard";
 import { getBillingSummary } from "@/services/billing";
 import { listAuditLogs } from "@/services/audit";
 
@@ -24,11 +25,12 @@ const HEADLINE_TONES: StatCardTone[] = ["primary", "success", "info", "warning"]
 
 export default async function DashboardPage() {
   const { supabase, orgId, orgName, permissions } = await requireOrgContext();
-  const [stats, overview, billing, activity] = await Promise.all([
+  const [stats, overview, billing, activity, attention] = await Promise.all([
     getDashboardStats(supabase, orgId),
     getDashboardOverview(supabase, orgId),
     getBillingSummary(supabase, orgId),
     permissions.has("audit.view") ? listAuditLogs(supabase, orgId, 8) : Promise.resolve([]),
+    getAttentionItems(supabase, orgId),
   ]);
 
   const hasRevenueData = overview.revenueTrend && overview.revenueTrend.some((p) => p.revenue > 0);
@@ -89,6 +91,26 @@ export default async function DashboardPage() {
           <ActivityFeed logs={activity} />
         </Card>
 
+        <div className="flex flex-col gap-4">
+          {attention.length > 0 && (
+            <Card className="flex flex-col gap-1 p-4">
+              <p className="mb-2 text-sm font-semibold text-text-primary">Needs attention</p>
+              {attention.map((item) => (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  className="flex items-center justify-between gap-2 rounded-md border border-border-subtle px-3 py-2 hover:border-primary-300 hover:bg-primary-50"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-text-primary">{item.label}</p>
+                    <p className="text-xs text-text-tertiary">{item.detail}</p>
+                  </div>
+                  <Badge tone={item.severity}>{item.severity === "danger" ? "Urgent" : "Review"}</Badge>
+                </Link>
+              ))}
+            </Card>
+          )}
+
         <Card className="flex flex-col gap-3 p-4">
           <div className="flex items-center gap-3">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary-50">
@@ -109,6 +131,7 @@ export default async function DashboardPage() {
             </Button>
           </Link>
         </Card>
+        </div>
       </div>
     </div>
   );

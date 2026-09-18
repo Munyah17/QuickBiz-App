@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useState, useTransition } from "react";
-import { Plus, Pencil, Contact as ContactIcon } from "lucide-react";
+import Link from "next/link";
+import { Plus, Pencil, Contact as ContactIcon, Upload } from "lucide-react";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/Button";
 import { Badge } from "@/components/Badge";
@@ -11,6 +12,7 @@ import { Select } from "@/components/Input";
 import { ExportButton } from "@/components/ExportButton";
 import { useToast } from "@/components/Toast";
 import { CustomerFormModal } from "./CustomerFormModal";
+import { ImportCustomersModal } from "./ImportCustomersModal";
 import { setCustomerActiveAction, bulkSetCustomerActiveAction, initialCustomerActionState } from "./actions";
 import type { Customer } from "@/services/customers";
 
@@ -41,6 +43,7 @@ function ActiveToggle({ customer }: { customer: Customer }) {
 
 export function CustomersTable({ customers, canManage }: { customers: Customer[]; canManage: boolean }) {
   const [modalOpen, setModalOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [editing, setEditing] = useState<Customer | undefined>(undefined);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -113,6 +116,12 @@ export function CustomersTable({ customers, canManage }: { customers: Customer[]
             }))}
           />
           {canManage && (
+            <Button size="sm" variant="secondary" onClick={() => setImportOpen(true)}>
+              <Upload className="size-4" />
+              Import
+            </Button>
+          )}
+          {canManage && (
             <Button
               size="sm"
               onClick={() => {
@@ -177,7 +186,11 @@ export function CustomersTable({ customers, canManage }: { customers: Customer[]
                     />
                   </td>
                 )}
-                <td className="px-4 py-2.5 font-medium text-text-primary">{customer.name}</td>
+                <td className="px-4 py-2.5">
+                  <Link href={`/customers/${customer.id}`} className="font-medium text-primary-600 hover:underline">
+                    {customer.name}
+                  </Link>
+                </td>
                 <td className="px-4 py-2.5 capitalize text-text-secondary">{customer.customer_type}</td>
                 <td className="px-4 py-2.5 text-text-secondary">{customer.email || "No email"}</td>
                 <td className="px-4 py-2.5 text-text-secondary">{customer.phone || "No phone"}</td>
@@ -215,6 +228,7 @@ export function CustomersTable({ customers, canManage }: { customers: Customer[]
       {canManage && modalOpen && (
         <CustomerFormModal key={editing?.id ?? "new"} open={modalOpen} onClose={() => setModalOpen(false)} customer={editing} />
       )}
+      {canManage && importOpen && <ImportCustomersModal onClose={() => setImportOpen(false)} />}
     </Card>
   );
 }

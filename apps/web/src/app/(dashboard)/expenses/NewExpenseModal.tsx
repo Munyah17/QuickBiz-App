@@ -18,14 +18,14 @@ function ExpenseForm({ accounts, branchId, onClose }: { accounts: Account[]; bra
 
   useEffect(() => {
     if (state.success) {
-      push("Expense recorded");
+      push("Expense submitted for approval");
       onClose();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.success]);
 
   return (
-    <Modal open onClose={onClose} title="Record expense">
+    <Modal open onClose={onClose} title="Submit expense">
       <form action={formAction} className="flex flex-col gap-4">
         <input type="hidden" name="branchId" value={branchId} />
 
@@ -77,7 +77,7 @@ function ExpenseForm({ accounts, branchId, onClose }: { accounts: Account[]; bra
             Cancel
           </Button>
           <Button type="submit" loading={isPending}>
-            Record expense
+            Submit for approval
           </Button>
         </div>
       </form>

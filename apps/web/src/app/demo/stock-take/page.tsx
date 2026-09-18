@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ClipboardCheck, Plus } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
-import { Card, CardHeader } from "@/components/Card";
+import { Card } from "@/components/Card";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { Input, Select } from "@/components/Input";

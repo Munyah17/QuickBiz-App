@@ -52,8 +52,11 @@ function ClaimsModal({
   }
 
   useEffect(() => {
-    reload();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Initial load: loading is already true — fetch without a
+    // synchronous setState so this stays a pure external sync.
+    listPolicyClaimsAction(policy.id)
+      .then(setClaims)
+      .finally(() => setLoading(false));
   }, [policy.id]);
 
   return (

@@ -11,6 +11,8 @@ import { closeSessionAction, initialPosActionState } from "./actions";
 function CloseForm({ sessionId, summary, openingFloat, onClose }: { sessionId: string; summary: SessionSummary; openingFloat: number; onClose: () => void }) {
   const [state, formAction, isPending] = useActionState(closeSessionAction, initialPosActionState);
   const expectedCash = openingFloat + summary.cashSales;
+  const [counted, setCounted] = useState(expectedCash);
+  const variance = counted - expectedCash;
 
   return (
     <Modal open onClose={onClose} title="Close register">
@@ -41,8 +43,23 @@ function CloseForm({ sessionId, summary, openingFloat, onClose }: { sessionId: s
         </div>
 
         <FormField label="Cash counted" htmlFor="closingFloat" required hint="Count the actual drawer and enter it here">
-          <Input id="closingFloat" name="closingFloat" type="number" min="0" step="0.01" required defaultValue={expectedCash} />
+          <Input
+            id="closingFloat"
+            name="closingFloat"
+            type="number"
+            min="0"
+            step="0.01"
+            required
+            value={counted}
+            onChange={(e) => setCounted(Number(e.target.value))}
+          />
         </FormField>
+
+        {variance !== 0 && (
+          <p className={`text-sm font-medium ${variance > 0 ? "text-success-600" : "text-danger-600"}`}>
+            Drawer is ${Math.abs(variance).toFixed(2)} {variance > 0 ? "over" : "short"} — double-check the count before closing.
+          </p>
+        )}
 
         {state.error && <p className="text-sm text-danger-600">{state.error}</p>}
 

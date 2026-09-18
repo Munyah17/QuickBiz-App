@@ -18,7 +18,6 @@ export function ReceiptModal({
   onClose: () => void;
 }) {
   const changeDue = receipt.amount_paid > receipt.total ? receipt.amount_paid - receipt.total : 0;
-  const lastPayment = receipt.payments[receipt.payments.length - 1];
 
   return (
     <Modal open onClose={onClose} title="Receipt">
@@ -67,6 +66,12 @@ export function ReceiptModal({
             <span>Subtotal</span>
             <span>${receipt.subtotal.toFixed(2)}</span>
           </div>
+          {receipt.discount_total > 0 && (
+            <div className="flex justify-between">
+              <span>Discount{receipt.discount_reason ? ` (${receipt.discount_reason})` : ""}</span>
+              <span>-${receipt.discount_total.toFixed(2)}</span>
+            </div>
+          )}
           <div className="flex justify-between">
             <span>Tax</span>
             <span>${receipt.tax_total.toFixed(2)}</span>
@@ -78,10 +83,18 @@ export function ReceiptModal({
         </div>
 
         <div className="border-t border-dashed border-border-subtle pt-2 text-xs">
-          <div className="flex justify-between">
-            <span>Paid via</span>
-            <span>{lastPayment ? paymentMethodLabel(lastPayment.method) : "Not recorded"}</span>
-          </div>
+          {receipt.payments.map((p) => (
+            <div key={p.id} className="flex justify-between">
+              <span>{paymentMethodLabel(p.method)}</span>
+              <span>${p.amount.toFixed(2)}</span>
+            </div>
+          ))}
+          {receipt.payments.length === 0 && (
+            <div className="flex justify-between">
+              <span>Paid via</span>
+              <span>Not recorded</span>
+            </div>
+          )}
           <div className="flex justify-between">
             <span>Amount tendered</span>
             <span>${receipt.amount_paid.toFixed(2)}</span>

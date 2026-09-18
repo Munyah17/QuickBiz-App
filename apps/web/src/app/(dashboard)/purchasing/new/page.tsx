@@ -5,7 +5,12 @@ import { listProductsWithStock } from "@/services/products";
 import { getOrgSettings } from "@/services/org";
 import { NewPOForm } from "./NewPOForm";
 
-export default async function NewPurchaseOrderPage() {
+export default async function NewPurchaseOrderPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ product?: string; qty?: string; lowstock?: string }>;
+}) {
+  const { product: preselectedProduct, qty: preselectedQty, lowstock } = await searchParams;
   const { supabase, orgId, permissions } = await requireOrgContext();
   await requireModuleEnabled(supabase, orgId, "purchasing");
   requirePermission(permissions, "purchasing.manage");
@@ -29,6 +34,9 @@ export default async function NewPurchaseOrderPage() {
         products={products.filter((p) => p.is_active)}
         branchId={(member?.branch_id as string) ?? ""}
         taxRatePercent={taxRatePercent}
+        preselectedProductId={preselectedProduct ?? null}
+        preselectedQty={preselectedQty ? Number(preselectedQty) : null}
+        lowStockReorder={lowstock === "1"}
       />
     </div>
   );

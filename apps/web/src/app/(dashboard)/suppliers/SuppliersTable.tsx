@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useState, useTransition } from "react";
-import { Plus, Pencil, Truck } from "lucide-react";
+import Link from "next/link";
+import { Plus, Pencil, Truck, Upload } from "lucide-react";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/Button";
 import { Badge } from "@/components/Badge";
@@ -11,6 +12,7 @@ import { Select } from "@/components/Input";
 import { ExportButton } from "@/components/ExportButton";
 import { useToast } from "@/components/Toast";
 import { SupplierFormModal } from "./SupplierFormModal";
+import { ImportSuppliersModal } from "./ImportSuppliersModal";
 import { setSupplierActiveAction, bulkSetSupplierActiveAction, initialSupplierActionState } from "./actions";
 import type { Supplier } from "@/services/purchasing";
 
@@ -37,6 +39,7 @@ function ActiveToggle({ supplier }: { supplier: Supplier }) {
 
 export function SuppliersTable({ suppliers, canManage }: { suppliers: Supplier[]; canManage: boolean }) {
   const [modalOpen, setModalOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [editing, setEditing] = useState<Supplier | undefined>(undefined);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -108,6 +111,12 @@ export function SuppliersTable({ suppliers, canManage }: { suppliers: Supplier[]
             }))}
           />
           {canManage && (
+            <Button size="sm" variant="secondary" onClick={() => setImportOpen(true)}>
+              <Upload className="size-4" />
+              Import
+            </Button>
+          )}
+          {canManage && (
             <Button
               size="sm"
               onClick={() => {
@@ -171,7 +180,11 @@ export function SuppliersTable({ suppliers, canManage }: { suppliers: Supplier[]
                     />
                   </td>
                 )}
-                <td className="px-4 py-2.5 font-medium text-text-primary">{supplier.name}</td>
+                <td className="px-4 py-2.5">
+                  <Link href={`/suppliers/${supplier.id}`} className="font-medium text-primary-600 hover:underline">
+                    {supplier.name}
+                  </Link>
+                </td>
                 <td className="px-4 py-2.5 text-text-secondary">{supplier.email || "No email"}</td>
                 <td className="px-4 py-2.5 text-text-secondary">{supplier.phone || "No phone"}</td>
                 <td className="px-4 py-2.5 text-text-secondary">
@@ -206,6 +219,7 @@ export function SuppliersTable({ suppliers, canManage }: { suppliers: Supplier[]
       {canManage && modalOpen && (
         <SupplierFormModal key={editing?.id ?? "new"} open={modalOpen} onClose={() => setModalOpen(false)} supplier={editing} />
       )}
+      {canManage && importOpen && <ImportSuppliersModal onClose={() => setImportOpen(false)} />}
     </Card>
   );
 }

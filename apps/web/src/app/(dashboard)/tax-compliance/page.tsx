@@ -21,7 +21,7 @@ export default async function TaxCompliancePage() {
 
       <p className="text-sm text-text-tertiary">
         QuickBiz tracks your tax filing obligations and deadlines - it does not file with ZIMRA on your behalf.
-        "Mark as Filed" records that you submitted the return through ZIMRA's own e-Services/FDMS, not an actual
+        &quot;Mark as Filed&quot; records that you submitted the return through ZIMRA&apos;s own e-Services/FDMS, not an actual
         submission made by QuickBiz. Due days shown are a verified starting point - VAT due dates vary by taxpayer
         category (A/B/C), so always confirm against current ZIMRA notices.
       </p>

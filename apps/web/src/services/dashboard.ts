@@ -101,6 +101,7 @@ export async function getDashboardOverview(supabase: SupabaseClient, orgId: stri
       .from("sales_invoices")
       .select("total, amount_paid, status, created_at")
       .eq("org_id", orgId)
+      .eq("doc_type", "invoice")
       .neq("status", "cancelled")
       .gte("created_at", since14.toISOString());
 
@@ -187,4 +188,128 @@ export async function getDashboardOverview(supabase: SupabaseClient, orgId: stri
   }
 
   return { enabledModules, moduleKpis, revenueTrend, donut };
+}
+
+// ============================================================
+// Attention items — things that need a human decision today.
+// Surfaced as a dashboard card with deep links into each module.
+// ============================================================
+
+export interface AttentionItem {
+  key: string;
+  label: string;
+  detail: string;
+  href: string;
+  severity: "danger" | "warning";
+}
+
+export async function getAttentionItems(supabase: SupabaseClient, orgId: string): Promise<AttentionItem[]> {
+  const items: AttentionItem[] = [];
+  const today = new Date().toISOString().slice(0, 10);
+
+  const { data: orgModules } = await supabase
+    .from("org_modules")
+    .select("module_key")
+    .eq("org_id", orgId)
+    .eq("status", "enabled");
+  const enabled = new Set((orgModules ?? []).map((m: { module_key: string }) => m.module_key));
+
+  const fetches: Array<Promise<void>> = [];
+
+  if (enabled.has("sales") || enabled.has("pos")) {
+    fetches.push(
+      (async () => {
+        const { data } = await supabase
+          .from("sales_invoices")
+          .select("total, amount_paid")
+          .eq("org_id", orgId)
+          .eq("doc_type", "invoice")
+          .in("status", ["issued", "partially_paid"])
+          .lt("due_date", today);
+        const rows = (data ?? []) as Array<{ total: number; amount_paid: number }>;
+        const overdue = rows.filter((r) => r.total - r.amount_paid > 0);
+        if (overdue.length > 0) {
+          const amount = overdue.reduce((s, r) => s + (r.total - r.amount_paid), 0);
+          items.push({
+            key: "overdue_ar",
+            label: `${overdue.length} overdue invoice${overdue.length === 1 ? "" : "s"}`,
+            detail: currency(amount),
+            href: "/sales",
+            severity: "danger",
+          });
+        }
+      })()
+    );
+  }
+
+  if (enabled.has("inventory")) {
+    fetches.push(
+      (async () => {
+        const { data } = await supabase
+          .from("stock_levels")
+          .select("quantity_on_hand, products(reorder_level, is_active)")
+          .eq("org_id", orgId);
+        const low = (
+          (data ?? []) as unknown as Array<{
+            quantity_on_hand: number;
+            products: { reorder_level: number; is_active: boolean } | null;
+          }>
+        ).filter((s) => s.products?.is_active && s.quantity_on_hand <= (s.products?.reorder_level ?? 0));
+        if (low.length > 0) {
+          items.push({
+            key: "low_stock",
+            label: `${low.length} low-stock item${low.length === 1 ? "" : "s"}`,
+            detail: "at or below reorder level",
+            href: "/products",
+            severity: "warning",
+          });
+        }
+      })()
+    );
+  }
+
+  if (enabled.has("finance")) {
+    fetches.push(
+      (async () => {
+        const { data } = await supabase.from("expenses").select("amount").eq("org_id", orgId).eq("status", "submitted");
+        const rows = (data ?? []) as Array<{ amount: number }>;
+        if (rows.length > 0) {
+          const amount = rows.reduce((s, r) => s + r.amount, 0);
+          items.push({
+            key: "pending_expenses",
+            label: `${rows.length} expense${rows.length === 1 ? "" : "s"} awaiting approval`,
+            detail: currency(amount),
+            href: "/expenses",
+            severity: "warning",
+          });
+        }
+      })()
+    );
+  }
+
+  if (enabled.has("purchasing")) {
+    fetches.push(
+      (async () => {
+        const { count } = await supabase
+          .from("purchase_orders")
+          .select("id", { count: "exact", head: true })
+          .eq("org_id", orgId)
+          .eq("status", "issued")
+          .lt("expected_date", today);
+        if ((count ?? 0) > 0) {
+          items.push({
+            key: "late_pos",
+            label: `${count} late purchase order${count === 1 ? "" : "s"}`,
+            detail: "expected date passed",
+            href: "/purchasing",
+            severity: "warning",
+          });
+        }
+      })()
+    );
+  }
+
+  await Promise.all(fetches);
+  // Danger first, then warnings — most urgent floats to the top.
+  return items.sort((a) => (a.severity === "danger" ? -1 : 1));
 }

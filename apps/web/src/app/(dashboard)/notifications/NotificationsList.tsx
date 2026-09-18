@@ -6,7 +6,7 @@ import { Card } from "@/components/Card";
 import { Badge } from "@/components/Badge";
 import { EmptyState } from "@/components/EmptyState";
 import { cn } from "@/lib/cn";
-import { markNotificationReadAction } from "@/app/actions/notifications";
+import { markNotificationReadAction, markAllNotificationsReadAction } from "@/app/actions/notifications";
 import type { NotificationRow } from "@/services/notifications";
 
 const typeTone: Record<NotificationRow["type"], "neutral" | "success" | "warning" | "danger" | "info"> = {
@@ -27,8 +27,24 @@ export function NotificationsList({ notifications }: { notifications: Notificati
     );
   }
 
+  const unreadCount = notifications.filter((n) => !n.read_at).length;
+
   return (
-    <Card className="divide-y divide-border-subtle">
+    <div className="flex flex-col gap-3">
+      {unreadCount > 0 && (
+        <div className="flex justify-end">
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => startTransition(() => markAllNotificationsReadAction())}
+            className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-workspace disabled:opacity-50"
+          >
+            <Check className="size-3.5" />
+            Mark all as read ({unreadCount})
+          </button>
+        </div>
+      )}
+      <Card className="divide-y divide-border-subtle">
       {notifications.map((n) => (
         <div
           key={n.id}
@@ -58,6 +74,7 @@ export function NotificationsList({ notifications }: { notifications: Notificati
           )}
         </div>
       ))}
-    </Card>
+      </Card>
+    </div>
   );
 }

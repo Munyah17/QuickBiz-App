@@ -29,6 +29,8 @@ export async function setAccountActive(supabase: SupabaseClient, accountId: stri
   if (error) throw error;
 }
 
+export type ExpenseStatus = "submitted" | "approved" | "rejected" | "paid";
+
 export interface ExpenseRow {
   id: string;
   description: string;
@@ -36,21 +38,28 @@ export interface ExpenseRow {
   expense_date: string;
   payment_method: string;
   reference: string | null;
+  status: ExpenseStatus;
+  rejection_reason: string | null;
+  submitted_by_name: string | null;
   accountName: string | null;
 }
 
 export async function listExpenses(supabase: SupabaseClient, orgId: string, limit = 100): Promise<ExpenseRow[]> {
   const { data, error } = await supabase
     .from("expenses")
-    .select("id, description, amount, expense_date, payment_method, reference, accounts(name)")
+    .select("id, description, amount, expense_date, payment_method, reference, status, rejection_reason, accounts(name), submitted_by:profiles!expenses_submitted_by_fkey(full_name)")
     .eq("org_id", orgId)
     .order("expense_date", { ascending: false })
     .limit(limit);
   if (error) throw error;
 
-  return (data as unknown as Array<ExpenseRow & { accounts: { name: string } | null }>).map((row) => ({
+  return (data as unknown as Array<Omit<ExpenseRow, "accountName" | "submitted_by_name"> & {
+    accounts: { name: string } | null;
+    submitted_by: { full_name: string | null } | null;
+  }>).map((row) => ({
     ...row,
     accountName: row.accounts?.name ?? null,
+    submitted_by_name: row.submitted_by?.full_name ?? null,
   }));
 }
 
@@ -59,6 +68,7 @@ export async function createExpense(
   orgId: string,
   input: { branchId: string; accountId: string; description: string; amount: number; expenseDate: string; paymentMethod: string; reference: string }
 ) {
+  const { data: userData } = await supabase.auth.getUser();
   const { error } = await supabase.from("expenses").insert({
     org_id: orgId,
     branch_id: input.branchId || null,
@@ -68,6 +78,39 @@ export async function createExpense(
     expense_date: input.expenseDate,
     payment_method: input.paymentMethod,
     reference: input.reference || null,
+    status: "submitted",
+    submitted_by: userData.user?.id ?? null,
+    submitted_at: new Date().toISOString(),
+  });
+  if (error) throw error;
+}
+
+export async function approveExpense(supabase: SupabaseClient, orgId: string, expenseId: string) {
+  const { error } = await supabase.rpc("approve_expense", { p_org_id: orgId, p_expense_id: expenseId });
+  if (error) throw error;
+}
+
+export async function rejectExpense(supabase: SupabaseClient, orgId: string, expenseId: string, reason: string) {
+  const { error } = await supabase.rpc("reject_expense", {
+    p_org_id: orgId,
+    p_expense_id: expenseId,
+    p_reason: reason || undefined,
+  });
+  if (error) throw error;
+}
+
+export async function markExpensePaid(
+  supabase: SupabaseClient,
+  orgId: string,
+  expenseId: string,
+  paymentMethod: string,
+  reference: string
+) {
+  const { error } = await supabase.rpc("mark_expense_paid", {
+    p_org_id: orgId,
+    p_expense_id: expenseId,
+    p_payment_method: paymentMethod,
+    p_reference: reference || undefined,
   });
   if (error) throw error;
 }
@@ -86,6 +129,7 @@ export async function getPnLSummary(supabase: SupabaseClient, orgId: string, fro
     .from("sales_invoices")
     .select("id, total, status")
     .eq("org_id", orgId)
+    .eq("doc_type", "invoice")
     .neq("status", "cancelled")
     .gte("created_at", from)
     .lte("created_at", to);
@@ -106,10 +150,13 @@ export async function getPnLSummary(supabase: SupabaseClient, orgId: string, fro
     }
   }
 
+  // Only approved/paid expenses hit the P&L — submitted claims and
+  // rejections aren't spend yet.
   const { data: expenses, error: expError } = await supabase
     .from("expenses")
     .select("amount, accounts(name)")
     .eq("org_id", orgId)
+    .in("status", ["approved", "paid"])
     .gte("expense_date", from.slice(0, 10))
     .lte("expense_date", to.slice(0, 10));
   if (expError) throw expError;

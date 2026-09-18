@@ -60,8 +60,11 @@ function CountEntryModal({
   }
 
   useEffect(() => {
-    reload();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Initial load: loading is already true — fetch without a
+    // synchronous setState so this stays a pure external sync.
+    listStockTakeLinesAction(stockTake.id)
+      .then(setLines)
+      .finally(() => setLoading(false));
   }, [stockTake.id]);
 
   async function saveCount(lineId: string) {

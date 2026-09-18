@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireOrgContext, requireModuleEnabled } from "@/lib/session";
-import { createSupplier, updateSupplier, setSupplierActive, type SupplierInput } from "@/services/purchasing";
+import { createSupplier, updateSupplier, setSupplierActive, importSuppliers, type SupplierInput, type SupplierImportResult } from "@/services/purchasing";
 
 export interface SupplierActionState {
   error: string | null;
@@ -82,6 +82,41 @@ export async function setSupplierActiveAction(_prev: SupplierActionState, formDa
 
   revalidatePath("/suppliers");
   return { error: null, success: true };
+}
+
+export interface SupplierImportActionState {
+  result: SupplierImportResult | null;
+  error: string | null;
+}
+
+export const initialSupplierImportActionState: SupplierImportActionState = { result: null, error: null };
+
+export async function importSuppliersAction(
+  _prev: SupplierImportActionState,
+  formData: FormData
+): Promise<SupplierImportActionState> {
+  const { supabase, orgId, permissions } = await requireOrgContext();
+
+  if (!permissions.has("purchasing.manage")) {
+    return { result: null, error: "You don't have permission to manage suppliers." };
+  }
+
+  let rows: SupplierInput[];
+  try {
+    rows = JSON.parse(String(formData.get("rows") ?? "[]"));
+  } catch {
+    return { result: null, error: "Invalid import payload." };
+  }
+  if (rows.length === 0) return { result: null, error: "Nothing to import." };
+  if (rows.length > 500) return { result: null, error: "Import at most 500 suppliers at a time." };
+
+  try {
+    const result = await importSuppliers(supabase, orgId, rows);
+    revalidatePath("/suppliers");
+    return { result, error: null };
+  } catch (err) {
+    return { result: null, error: (err as Error).message };
+  }
 }
 
 export async function bulkSetSupplierActiveAction(supplierIds: string[], isActive: boolean): Promise<SupplierActionState> {
