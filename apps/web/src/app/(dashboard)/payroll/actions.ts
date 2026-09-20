@@ -14,7 +14,7 @@ export const initialPayrollActionState: PayrollActionState = { error: null, succ
 
 export async function createPayrollRunAction(_prev: PayrollActionState, formData: FormData): Promise<PayrollActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "payroll");
+  await requireModuleEnabled(supabase, orgId, "hr");
 
   if (!permissions.has("payroll.manage")) {
     return { error: "You don't have permission to run payroll.", success: false };

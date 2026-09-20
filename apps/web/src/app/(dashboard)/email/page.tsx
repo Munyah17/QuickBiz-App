@@ -6,7 +6,7 @@ import { EmailLogTable } from "./EmailLogTable";
 
 export default async function EmailPage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "email");
+  await requireModuleEnabled(supabase, orgId, "documents");
   requirePermission(permissions, "email.view");
 
   const canManage = permissions.has("email.manage");

@@ -17,7 +17,7 @@ const statusTone: Record<string, "success" | "info" | "neutral"> = {
 export default async function PayrollRunPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { supabase, orgId, orgName, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "payroll");
+  await requireModuleEnabled(supabase, orgId, "hr");
   const canManage = permissions.has("payroll.manage");
   if (!canManage) notFound();
 

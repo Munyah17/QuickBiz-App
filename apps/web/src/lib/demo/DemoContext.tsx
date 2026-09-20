@@ -113,6 +113,19 @@ export interface DemoEmployee {
   employmentStatus: "active" | "on_leave" | "terminated";
 }
 
+export interface DemoPayrollRun {
+  id: string;
+  runNumber: string;
+  periodStart: string;
+  periodEnd: string;
+  payDate: string | null;
+  employeeCount: number;
+  totalGross: number;
+  totalDeductions: number;
+  totalNet: number;
+  status: "draft" | "finalized" | "paid";
+}
+
 export interface DemoLead {
   id: string;
   name: string;
@@ -508,37 +521,23 @@ export const DEMO_PERMISSIONS = [
   { key: "inventory.manage", label: "Manage inventory" },
 ];
 
+// Mirrors the consolidated module_catalog — one entry per sidebar group.
 const MODULE_CATALOG: Array<Omit<DemoModule, "enabled">> = [
-  { key: "sales", name: "Sales", description: "Customers, quotations, sales orders, invoices, payments", category: "sales", monthlyPriceUsd: 15 },
+  { key: "sales", name: "Sales & Purchasing", description: "Customers, quotations, sales orders, invoices, payments, suppliers, purchase orders, goods received, tenders", category: "sales", monthlyPriceUsd: 15 },
   { key: "pos", name: "Point of Sale", description: "Cashiers, registers, sessions, receipts, returns", category: "sales", monthlyPriceUsd: 20 },
-  { key: "inventory", name: "Inventory", description: "Products, warehouses, stock, transfers, adjustments", category: "operations", monthlyPriceUsd: 15 },
-  { key: "purchasing", name: "Purchasing", description: "Suppliers, purchase orders, goods received", category: "operations", monthlyPriceUsd: 12 },
-  { key: "finance", name: "Finance", description: "Chart of accounts, general ledger, cashbook, reconciliation", category: "finance", monthlyPriceUsd: 25 },
-  { key: "crm", name: "CRM", description: "Leads, opportunities, activities, campaigns", category: "sales", monthlyPriceUsd: 12 },
-  { key: "hr", name: "HR", description: "Employees, attendance, leave, payroll", category: "people", monthlyPriceUsd: 18 },
-  { key: "payroll", name: "Payroll", description: "Salary structures, payroll runs, printable payslips", category: "people", monthlyPriceUsd: 15 },
-  { key: "manufacturing", name: "Manufacturing", description: "Bills of materials, work orders, production planning", category: "operations", monthlyPriceUsd: 25 },
-  { key: "projects", name: "Projects", description: "Projects, tasks, milestones, timesheets", category: "operations", monthlyPriceUsd: 15 },
-  { key: "assets", name: "Assets", description: "Fixed assets, maintenance, depreciation", category: "operations", monthlyPriceUsd: 10 },
-  { key: "service_management", name: "Service Management", description: "Tickets, service requests, SLAs, warranty", category: "operations", monthlyPriceUsd: 15 },
-  { key: "fleet", name: "Fleet", description: "Vehicles, drivers, fuel, maintenance", category: "operations", monthlyPriceUsd: 12 },
-  { key: "documents", name: "Document Management", description: "Documents, folders, versions, approvals", category: "platform", monthlyPriceUsd: 8 },
-  { key: "marketing", name: "Marketing", description: "Campaigns, SMS, email, WhatsApp, loyalty", category: "sales", monthlyPriceUsd: 12 },
-  { key: "reporting", name: "Reporting / BI", description: "Custom dashboards, KPIs, scheduled reports", category: "platform", monthlyPriceUsd: 15 },
+  { key: "crm", name: "CRM & Marketing", description: "Leads, opportunities, campaigns, loyalty, social media", category: "sales", monthlyPriceUsd: 12 },
   { key: "ecommerce", name: "Ecommerce", description: "Online products, orders, delivery sync", category: "sales", monthlyPriceUsd: 20 },
-  { key: "local_services", name: "Local Services", description: "Pre-integrated Zimbabwean and regional payment, mobile money, banking, SMS, and tax services", category: "platform", monthlyPriceUsd: 15 },
-  { key: "logistics", name: "Logistics", description: "Shipments, deliveries, carriers, and dispatch tracking", category: "operations", monthlyPriceUsd: 15 },
+  { key: "inventory", name: "Inventory", description: "Products, warehouses, zones, stock, transfers, adjustments, stock takes", category: "operations", monthlyPriceUsd: 15 },
+  { key: "manufacturing", name: "Manufacturing", description: "Bills of materials, work orders, production planning", category: "operations", monthlyPriceUsd: 25 },
+  { key: "projects", name: "Projects", description: "Projects, tasks, milestones, timesheets, petty cash", category: "operations", monthlyPriceUsd: 15 },
+  { key: "assets", name: "Assets", description: "Fixed assets, maintenance, depreciation", category: "operations", monthlyPriceUsd: 10 },
+  { key: "hr", name: "HR & Payroll", description: "Employees, attendance, leave, salary structures, payroll runs, payslips, disciplinary", category: "people", monthlyPriceUsd: 18 },
+  { key: "finance", name: "Finance", description: "Chart of accounts, general ledger, cashbook, reconciliation, expenses, IBAN, tax compliance", category: "finance", monthlyPriceUsd: 25 },
+  { key: "service_management", name: "Service Management", description: "Tickets, service requests, SLAs, warranty, and integrated local payment, SMS, and tax services", category: "operations", monthlyPriceUsd: 15 },
+  { key: "logistics", name: "Logistics & Fleet", description: "Shipments, deliveries, carriers, dispatch, vehicles, drivers, fuel, maintenance", category: "operations", monthlyPriceUsd: 15 },
+  { key: "risk_insurance", name: "Risk & Compliance", description: "Insurers, policies, claims, risk register, SHEQ incidents, inspections", category: "operations", monthlyPriceUsd: 18 },
+  { key: "documents", name: "Documents & Reporting", description: "Documents, folders, versions, reports, dashboards, email log", category: "platform", monthlyPriceUsd: 8 },
   { key: "custom_code", name: "Custom Code", description: "Custom CSS and HTML for your workspace, versioned with rollback", category: "platform", monthlyPriceUsd: 10 },
-  { key: "iban", name: "International Payments (IBAN)", description: "Request your own IBAN to receive international payments, provisioned through a banking partner", category: "finance", monthlyPriceUsd: 25 },
-  { key: "social_media", name: "Social Media", description: "Connect social accounts and queue posts across platforms from one place", category: "marketing", monthlyPriceUsd: 12 },
-  { key: "tax_compliance", name: "Tax Compliance & ZIMRA", description: "Track tax periods, filings, payments, and fiscal device registrations aligned to ZIMRA's tax calendar", category: "finance", monthlyPriceUsd: 15 },
-  { key: "tender_bidding", name: "Tender & Bidding", description: "Create tenders when sourcing suppliers, receive and evaluate bids, and track the tender lifecycle through to award", category: "procurement", monthlyPriceUsd: 15 },
-  { key: "risk_insurance", name: "Risk & Insurance", description: "Onboard insurers, manage policies, process claims, and maintain a risk register with mitigation plans", category: "operations", monthlyPriceUsd: 18 },
-  { key: "warehousing", name: "Warehousing", description: "Manage warehouses, storage zones, and bins, and track exactly where stock sits inside each site", category: "operations", monthlyPriceUsd: 15 },
-  { key: "stock_take", name: "Stock Take", description: "Schedule physical inventory counts, record counted quantities against system quantities, and resolve variances", category: "operations", monthlyPriceUsd: 12 },
-  { key: "sheq", name: "SHEQ", description: "Track safety, health, environment, and quality incidents, conduct inspections and audits, and manage corrective actions", category: "operations", monthlyPriceUsd: 15 },
-  { key: "disciplinary", name: "Disciplinary", description: "Manage employee disciplinary cases, warnings, hearings, and conduct records", category: "operations", monthlyPriceUsd: 15 },
-  { key: "email", name: "Email", description: "Configure your own SMTP settings and keep a log of emails sent from the system", category: "platform", monthlyPriceUsd: 8 },
 ];
 
 // The demo exists to show a prospective client everything they would get —
@@ -652,6 +651,23 @@ function seedEmployees(): DemoEmployee[] {
   ];
 }
 
+function seedPayrollRuns(): DemoPayrollRun[] {
+  return [
+    {
+      id: "prun-1",
+      runNumber: "PR-0001",
+      periodStart: new Date(Date.now() - 35 * 86400000).toISOString().slice(0, 10),
+      periodEnd: new Date(Date.now() - 6 * 86400000).toISOString().slice(0, 10),
+      payDate: new Date(Date.now() - 5 * 86400000).toISOString().slice(0, 10),
+      employeeCount: 2,
+      totalGross: 1600,
+      totalDeductions: 320,
+      totalNet: 1280,
+      status: "paid",
+    },
+  ];
+}
+
 function seedLeads(): DemoLead[] {
   return [{ id: "ld-1", name: "Farai Gumbo", company: "Gumbo Hardware", status: "qualified" }];
 }
@@ -731,6 +747,7 @@ interface DemoState {
   accounts: DemoAccount[];
   expenses: DemoExpense[];
   employees: DemoEmployee[];
+  payrollRuns: DemoPayrollRun[];
   leads: DemoLead[];
   opportunities: DemoOpportunity[];
   projects: DemoProject[];
@@ -785,6 +802,7 @@ interface DemoContextValue extends DemoState {
   addExpense: (input: { description: string; amount: number; accountName: string }) => void;
   addAccount: (input: { code: string; name: string; type: DemoAccount["type"] }) => void;
   addEmployee: (input: { fullName: string; position: string; department: string }) => void;
+  createPayrollRun: (input: { periodStart: string; periodEnd: string; payDate: string; grossPerEmployee: number }) => void;
   addLead: (input: { name: string; company: string }) => void;
   convertLead: (leadId: string) => void;
   addOpportunity: (input: { name: string; customerName: string; value: number }) => void;
@@ -1221,6 +1239,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     accounts: seedAccounts(),
     expenses: seedExpenses(),
     employees: seedEmployees(),
+    payrollRuns: seedPayrollRuns(),
     leads: seedLeads(),
     opportunities: seedOpportunities(),
     projects: seedProjects(),
@@ -1361,6 +1380,33 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       employees: [...s.employees, { id: nextId("em"), employeeNumber: numbered("EMP", s.employees.length), ...input, employmentStatus: "active" }],
     }));
     log(`Added employee "${input.fullName}"`);
+  }, [log]);
+
+  const createPayrollRun = useCallback((input: { periodStart: string; periodEnd: string; payDate: string; grossPerEmployee: number }) => {
+    setState((s) => {
+      const active = s.employees.filter((e) => e.employmentStatus === "active");
+      const gross = Math.round(input.grossPerEmployee * active.length * 100) / 100;
+      const deductions = Math.round(gross * 0.2 * 100) / 100;
+      return {
+        ...s,
+        payrollRuns: [
+          {
+            id: nextId("prun"),
+            runNumber: numbered("PR", s.payrollRuns.length),
+            periodStart: input.periodStart,
+            periodEnd: input.periodEnd,
+            payDate: input.payDate || null,
+            employeeCount: active.length,
+            totalGross: gross,
+            totalDeductions: deductions,
+            totalNet: gross - deductions,
+            status: "draft",
+          },
+          ...s.payrollRuns,
+        ],
+      };
+    });
+    log("Created a payroll run");
   }, [log]);
 
   const addLead = useCallback((input: { name: string; company: string }) => {
@@ -2018,6 +2064,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       addExpense,
       addAccount,
       addEmployee,
+      createPayrollRun,
       addLead,
       convertLead,
       addOpportunity,
@@ -2093,6 +2140,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       addExpense,
       addAccount,
       addEmployee,
+      createPayrollRun,
       addLead,
       convertLead,
       addOpportunity,

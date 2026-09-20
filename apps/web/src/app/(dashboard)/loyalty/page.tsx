@@ -6,7 +6,7 @@ import { LoyaltyPanels } from "./LoyaltyPanels";
 
 export default async function LoyaltyPage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "marketing");
+  await requireModuleEnabled(supabase, orgId, "crm");
   const canManage = permissions.has("marketing.manage");
 
   const [balances, transactions] = await Promise.all([

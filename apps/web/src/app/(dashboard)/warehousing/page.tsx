@@ -9,7 +9,7 @@ import { TransfersTable } from "./TransfersTable";
 
 export default async function WarehousingPage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "warehousing");
+  await requireModuleEnabled(supabase, orgId, "inventory");
 
   const canManage = permissions.has("warehousing.manage");
   const canTransfer = permissions.has("warehousing.transfer");

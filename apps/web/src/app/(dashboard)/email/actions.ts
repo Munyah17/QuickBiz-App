@@ -13,7 +13,7 @@ export const initialEmailActionState: EmailActionState = { error: null, success:
 
 export async function updateEmailSettingsAction(_prev: EmailActionState, formData: FormData): Promise<EmailActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "email");
+  await requireModuleEnabled(supabase, orgId, "documents");
 
   if (!permissions.has("email.manage")) {
     return { error: "You don't have permission to manage email settings.", success: false };
@@ -57,7 +57,7 @@ export async function updateEmailSettingsAction(_prev: EmailActionState, formDat
 // deliberately does not claim to send or log anything.
 export async function sendTestEmailAction(_prev: EmailActionState, formData: FormData): Promise<EmailActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "email");
+  await requireModuleEnabled(supabase, orgId, "documents");
 
   if (!permissions.has("email.send")) {
     return { error: "You don't have permission to send email.", success: false };

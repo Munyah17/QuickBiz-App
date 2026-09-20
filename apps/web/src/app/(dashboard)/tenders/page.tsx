@@ -7,7 +7,7 @@ import { TendersTable } from "./TendersTable";
 
 export default async function TendersPage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "tender_bidding");
+  await requireModuleEnabled(supabase, orgId, "sales");
   const canManage = permissions.has("tender_bidding.manage");
   const canBid = permissions.has("tender_bidding.bid");
   const canEvaluate = permissions.has("tender_bidding.evaluate");

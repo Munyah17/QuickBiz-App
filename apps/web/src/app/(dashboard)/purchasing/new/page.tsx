@@ -12,7 +12,7 @@ export default async function NewPurchaseOrderPage({
 }) {
   const { product: preselectedProduct, qty: preselectedQty, lowstock } = await searchParams;
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "purchasing");
+  await requireModuleEnabled(supabase, orgId, "sales");
   requirePermission(permissions, "purchasing.manage");
 
   const { data: member } = await supabase.from("org_members").select("branch_id").eq("status", "active").limit(1).maybeSingle();

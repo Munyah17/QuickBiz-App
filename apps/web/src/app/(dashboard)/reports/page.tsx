@@ -36,7 +36,7 @@ function StatRow({ stats }: { stats: ReportStat[] }) {
 
 export default async function ReportsPage({ searchParams }: { searchParams: Promise<{ from?: string; to?: string }> }) {
   const { supabase, orgId } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "reporting");
+  await requireModuleEnabled(supabase, orgId, "documents");
 
   const params = await searchParams;
   const from = params.from || daysAgo(29);

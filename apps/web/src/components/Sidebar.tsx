@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Package, ChevronsUpDown, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { NAV_STRUCTURE, isNavGroup, type NavLeaf } from "@/config/nav";
+import { NAV_STRUCTURE, isNavGroup, type NavGroup, type NavLeaf } from "@/config/nav";
 
 function isLeafActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(href + "/");
@@ -54,6 +54,10 @@ export function Sidebar({
   const leafVisible = (leaf: NavLeaf) =>
     (!leaf.moduleKey || enabledModules.includes(leaf.moduleKey)) && (!leaf.permission || permissions.includes(leaf.permission));
 
+  // A group's moduleKey gates the whole collapsible section — one group per
+  // Module Store module, hidden entirely when that module isn't enabled.
+  const groupVisible = (group: NavGroup) => !group.moduleKey || enabledModules.includes(group.moduleKey);
+
   return (
     <aside className="flex h-full w-60 shrink-0 flex-col bg-sidebar text-sidebar-text">
       <div className="flex items-center gap-2 px-4 py-4">
@@ -69,6 +73,8 @@ export function Sidebar({
             if (!leafVisible(entry)) return null;
             return <LeafLink key={entry.key} item={entry} active={isLeafActive(pathname, entry.href)} />;
           }
+
+          if (!groupVisible(entry)) return null;
 
           const visibleChildren = entry.children.filter(leafVisible);
           if (visibleChildren.length === 0) return null;

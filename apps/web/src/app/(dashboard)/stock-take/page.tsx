@@ -6,7 +6,7 @@ import { StockTakesTable } from "./StockTakesTable";
 
 export default async function StockTakePage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "stock_take");
+  await requireModuleEnabled(supabase, orgId, "inventory");
 
   const canManage = permissions.has("stock_take.manage");
   const canExecute = permissions.has("stock_take.execute");

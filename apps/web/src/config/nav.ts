@@ -1,54 +1,53 @@
-import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard,
+  Receipt,
+  ShoppingCart,
+  Target,
+  Store,
+  Package,
+  Factory,
+  FolderKanban,
+  Archive,
+  IdCard,
+  Wallet,
+  LifeBuoy,
+  Truck,
+  ShieldAlert,
+  BarChart3,
+  Code,
+  Settings,
+  Contact,
+  ClipboardList,
+  Gavel,
+  UserPlus,
+  Megaphone,
+  Star,
+  Share2,
+  ShoppingBag,
+  Warehouse,
+  ClipboardCheck,
+  Layers,
+  HandCoins,
+  Banknote,
+  FileWarning,
+  TrendingUp,
+  BadgeDollarSign,
+  Landmark,
+  ReceiptText,
+  Plug,
+  Car,
+  HardHat,
+  FileText,
+  Mail,
   Building2,
   GitBranch,
   Users,
   ShieldCheck,
   LayoutGrid,
   ScrollText,
-  Contact,
-  Package,
-  Receipt,
-  ShoppingCart,
-  Truck,
-  ClipboardList,
-  Wallet,
-  BadgeDollarSign,
-  TrendingUp,
-  IdCard,
-  UserPlus,
-  Target,
-  FolderKanban,
-  Archive,
-  LifeBuoy,
-  Car,
-  FileText,
-  BarChart3,
-  Megaphone,
-  Star,
-  Layers,
-  Factory,
-  Store,
-  ShoppingBag,
-  Boxes,
-  Settings,
-  Plug,
-  Truck as TruckIcon,
-  Code,
   Palette,
-  Banknote,
-  Landmark,
-  Share2,
-  ReceiptText,
-  Gavel,
-  ShieldAlert,
-  Warehouse,
-  ClipboardCheck,
-  HardHat,
-  FileWarning,
-  Mail,
-  HandCoins,
+  Printer,
+  type LucideIcon,
 } from "lucide-react";
 
 export interface NavLeaf {
@@ -56,16 +55,21 @@ export interface NavLeaf {
   href: string;
   label: string;
   icon: LucideIcon;
-  /** Permission key required to see this item; undefined = visible to every member. */
-  permission?: string;
-  /** org_modules key required to be 'enabled' for this item to show; undefined = always (Core). */
+  /** Only used for standalone (non-grouped) leaves — grouped leaves inherit
+   *  their group's moduleKey. */
   moduleKey?: string;
+  permission?: string;
 }
 
 export interface NavGroup {
   key: string;
   label: string;
   icon: LucideIcon;
+  /** The Module Store key this group belongs to. Groups with a moduleKey are
+   *  hidden entirely unless that module is enabled — one collapsible group
+   *  per module, children are that module's functions. Groups without a
+   *  moduleKey (Administration) are always visible. */
+  moduleKey?: string;
   children: NavLeaf[];
 }
 
@@ -75,101 +79,164 @@ export function isNavGroup(entry: NavEntry): entry is NavGroup {
   return "children" in entry;
 }
 
-// `permission` only gates items whose underlying RLS policy actually
-// restricts *reads* (only audit_logs does — see 000010_audit_logs.sql).
-// Everything else is readable by any active member; the "manage" permissions
-// only gate the write actions inside each page, not visibility of the page.
-//
-// `moduleKey` implements the module-aware-nav principle (spec §58) and lives
-// on each LEAF, not the group — a group is visible whenever at least one of
-// its children is (so e.g. Customers, which has no moduleKey and is always
-// on, keeps the "Sales" group visible even with every sales module
-// disabled). Grouped by business area (matches module_catalog's own
-// `category` column) rather than 1:1 per module, so the sidebar reads as a
-// handful of sections instead of a 24-item flat list.
+// One collapsible group per Module Store module — the group name is the
+// module name and its children are the module's functions, so the sidebar
+// mirrors the store 1:1. Dashboard and Administration are platform chrome,
+// not modules, so they carry no moduleKey.
 export const NAV_STRUCTURE: NavEntry[] = [
   { key: "dashboard", href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { key: "local-services", href: "/integrations", label: "Local Services", icon: Plug, moduleKey: "local_services" },
   {
-    key: "sales-group",
-    label: "Sales",
+    key: "sales",
+    label: "Sales & Purchasing",
     icon: Receipt,
+    moduleKey: "sales",
     children: [
       { key: "customers", href: "/customers", label: "Customers", icon: Contact },
-      { key: "pos", href: "/pos", label: "Point of Sale", icon: ShoppingCart, moduleKey: "pos" },
-      { key: "sales", href: "/sales", label: "Sales", icon: Receipt, moduleKey: "sales" },
-      { key: "leads", href: "/leads", label: "Leads", icon: UserPlus, moduleKey: "crm" },
-      { key: "opportunities", href: "/opportunities", label: "Opportunities", icon: Target, moduleKey: "crm" },
-      { key: "campaigns", href: "/campaigns", label: "Campaigns", icon: Megaphone, moduleKey: "marketing" },
-      { key: "loyalty", href: "/loyalty", label: "Loyalty", icon: Star, moduleKey: "marketing" },
-      { key: "social-media", href: "/social-media", label: "Social Media", icon: Share2, moduleKey: "social_media" },
-      { key: "catalog", href: "/ecommerce/catalog", label: "Online Catalog", icon: Store, moduleKey: "ecommerce" },
-      { key: "online-orders", href: "/ecommerce/orders", label: "Online Orders", icon: ShoppingBag, moduleKey: "ecommerce" },
+      { key: "sales", href: "/sales", label: "Invoices & Sales", icon: Receipt },
+      { key: "suppliers", href: "/suppliers", label: "Suppliers", icon: Truck },
+      { key: "purchase-orders", href: "/purchasing", label: "Purchase Orders", icon: ClipboardList },
+      { key: "tenders", href: "/tenders", label: "Tenders", icon: Gavel },
     ],
   },
   {
-    key: "operations-group",
-    label: "Operations",
-    icon: Boxes,
+    key: "pos",
+    label: "Point of Sale",
+    icon: ShoppingCart,
+    moduleKey: "pos",
+    children: [{ key: "pos", href: "/pos", label: "Point of Sale", icon: ShoppingCart }],
+  },
+  {
+    key: "crm",
+    label: "CRM & Marketing",
+    icon: Target,
+    moduleKey: "crm",
     children: [
-      { key: "inventory", href: "/products", label: "Products", icon: Package, moduleKey: "inventory" },
-      { key: "warehousing", href: "/warehousing", label: "Warehousing", icon: Warehouse, moduleKey: "warehousing" },
-      { key: "stock-take", href: "/stock-take", label: "Stock Take", icon: ClipboardCheck, moduleKey: "stock_take" },
-      { key: "suppliers", href: "/suppliers", label: "Suppliers", icon: Truck, moduleKey: "purchasing" },
-      { key: "purchase-orders", href: "/purchasing", label: "Purchase Orders", icon: ClipboardList, moduleKey: "purchasing" },
-      { key: "tenders", href: "/tenders", label: "Tenders", icon: Gavel, moduleKey: "tender_bidding" },
-      { key: "boms", href: "/manufacturing/boms", label: "Bills of Materials", icon: Layers, moduleKey: "manufacturing" },
-      { key: "work-orders", href: "/manufacturing/work-orders", label: "Work Orders", icon: Factory, moduleKey: "manufacturing" },
-      { key: "projects", href: "/projects", label: "Projects", icon: FolderKanban, moduleKey: "projects" },
-      { key: "petty-cash", href: "/petty-cash", label: "Petty Cash", icon: HandCoins, moduleKey: "projects", permission: "projects.petty_cash" },
-      { key: "assets", href: "/assets", label: "Fixed Assets", icon: Archive, moduleKey: "assets" },
-      { key: "service", href: "/tickets", label: "Service Tickets", icon: LifeBuoy, moduleKey: "service_management" },
-      { key: "hr", href: "/employees", label: "Employees", icon: IdCard, moduleKey: "hr" },
-      { key: "payroll", href: "/payroll", label: "Payroll", icon: Banknote, moduleKey: "payroll" },
-      { key: "risk-insurance", href: "/risk-insurance", label: "Risk & Insurance", icon: ShieldAlert, moduleKey: "risk_insurance" },
-      { key: "sheq", href: "/sheq", label: "SHEQ", icon: HardHat, moduleKey: "sheq" },
-      { key: "disciplinary", href: "/disciplinary", label: "Disciplinary", icon: FileWarning, moduleKey: "disciplinary", permission: "disciplinary.view" },
+      { key: "leads", href: "/leads", label: "Leads", icon: UserPlus },
+      { key: "opportunities", href: "/opportunities", label: "Opportunities", icon: Target },
+      { key: "campaigns", href: "/campaigns", label: "Campaigns", icon: Megaphone },
+      { key: "loyalty", href: "/loyalty", label: "Loyalty", icon: Star },
+      { key: "social-media", href: "/social-media", label: "Social Media", icon: Share2 },
     ],
   },
   {
-    key: "logistics-group",
-    label: "Logistics",
-    icon: TruckIcon,
+    key: "ecommerce",
+    label: "Ecommerce",
+    icon: Store,
+    moduleKey: "ecommerce",
     children: [
-      { key: "shipments", href: "/shipments", label: "Shipments", icon: TruckIcon, moduleKey: "logistics" },
-      { key: "fleet", href: "/vehicles", label: "Fleet", icon: Car, moduleKey: "fleet" },
+      { key: "catalog", href: "/ecommerce/catalog", label: "Online Catalog", icon: Store },
+      { key: "online-orders", href: "/ecommerce/orders", label: "Online Orders", icon: ShoppingBag },
     ],
   },
   {
-    key: "finance-group",
+    key: "inventory",
+    label: "Inventory",
+    icon: Package,
+    moduleKey: "inventory",
+    children: [
+      { key: "products", href: "/products", label: "Products", icon: Package },
+      { key: "warehousing", href: "/warehousing", label: "Warehouses", icon: Warehouse },
+      { key: "stock-take", href: "/stock-take", label: "Stock Take", icon: ClipboardCheck },
+    ],
+  },
+  {
+    key: "manufacturing",
+    label: "Manufacturing",
+    icon: Factory,
+    moduleKey: "manufacturing",
+    children: [
+      { key: "boms", href: "/manufacturing/boms", label: "Bills of Materials", icon: Layers },
+      { key: "work-orders", href: "/manufacturing/work-orders", label: "Work Orders", icon: Factory },
+    ],
+  },
+  {
+    key: "projects",
+    label: "Projects",
+    icon: FolderKanban,
+    moduleKey: "projects",
+    children: [
+      { key: "projects", href: "/projects", label: "Projects", icon: FolderKanban },
+      { key: "petty-cash", href: "/petty-cash", label: "Petty Cash", icon: HandCoins, permission: "projects.petty_cash" },
+    ],
+  },
+  {
+    key: "assets",
+    label: "Assets",
+    icon: Archive,
+    moduleKey: "assets",
+    children: [{ key: "assets", href: "/assets", label: "Fixed Assets", icon: Archive }],
+  },
+  {
+    key: "hr",
+    label: "HR & Payroll",
+    icon: IdCard,
+    moduleKey: "hr",
+    children: [
+      { key: "employees", href: "/employees", label: "Employees", icon: IdCard },
+      { key: "payroll", href: "/payroll", label: "Payroll Runs", icon: Banknote },
+      { key: "disciplinary", href: "/disciplinary", label: "Disciplinary", icon: FileWarning, permission: "disciplinary.view" },
+    ],
+  },
+  {
+    key: "finance",
     label: "Finance",
     icon: Wallet,
+    moduleKey: "finance",
     children: [
-      { key: "pnl", href: "/finance", label: "Profit & Loss", icon: TrendingUp, moduleKey: "finance" },
-      { key: "accounts", href: "/accounts", label: "Chart of Accounts", icon: Wallet, moduleKey: "finance" },
-      { key: "expenses", href: "/expenses", label: "Expenses", icon: BadgeDollarSign, moduleKey: "finance" },
-      { key: "iban", href: "/iban", label: "IBAN", icon: Landmark, moduleKey: "iban" },
-      { key: "tax-compliance", href: "/tax-compliance", label: "Tax Compliance", icon: ReceiptText, moduleKey: "tax_compliance" },
+      { key: "pnl", href: "/finance", label: "Profit & Loss", icon: TrendingUp },
+      { key: "accounts", href: "/accounts", label: "Chart of Accounts", icon: Wallet },
+      { key: "expenses", href: "/expenses", label: "Expenses", icon: BadgeDollarSign },
+      { key: "iban", href: "/iban", label: "IBAN", icon: Landmark },
+      { key: "tax-compliance", href: "/tax-compliance", label: "Tax Compliance", icon: ReceiptText },
     ],
   },
   {
-    key: "insights-group",
-    label: "Reports & Documents",
+    key: "service_management",
+    label: "Service Management",
+    icon: LifeBuoy,
+    moduleKey: "service_management",
+    children: [
+      { key: "tickets", href: "/tickets", label: "Service Tickets", icon: LifeBuoy },
+      { key: "integrations", href: "/integrations", label: "Local Services", icon: Plug },
+    ],
+  },
+  {
+    key: "logistics",
+    label: "Logistics & Fleet",
+    icon: Truck,
+    moduleKey: "logistics",
+    children: [
+      { key: "shipments", href: "/shipments", label: "Shipments", icon: Truck },
+      { key: "fleet", href: "/vehicles", label: "Fleet", icon: Car },
+    ],
+  },
+  {
+    key: "risk_insurance",
+    label: "Risk & Compliance",
+    icon: ShieldAlert,
+    moduleKey: "risk_insurance",
+    children: [
+      { key: "risk-insurance", href: "/risk-insurance", label: "Risk & Insurance", icon: ShieldAlert },
+      { key: "sheq", href: "/sheq", label: "SHEQ", icon: HardHat },
+    ],
+  },
+  {
+    key: "documents",
+    label: "Documents & Reporting",
     icon: BarChart3,
+    moduleKey: "documents",
     children: [
-      { key: "documents", href: "/documents", label: "Documents", icon: FileText, moduleKey: "documents" },
-      { key: "reporting", href: "/reports", label: "Reports", icon: BarChart3, moduleKey: "reporting" },
-      { key: "email", href: "/email", label: "Email", icon: Mail, moduleKey: "email" },
+      { key: "documents", href: "/documents", label: "Documents", icon: FileText },
+      { key: "reporting", href: "/reports", label: "Reports", icon: BarChart3 },
+      { key: "email", href: "/email", label: "Email", icon: Mail },
     ],
   },
   {
-    key: "appearance-group",
-    label: "Appearance",
-    icon: Palette,
-    children: [
-      { key: "theme-options", href: "/appearance", label: "Theme Options", icon: Palette },
-      { key: "custom-code", href: "/custom-code", label: "Custom Code", icon: Code, moduleKey: "custom_code" },
-    ],
+    key: "custom_code",
+    label: "Custom Code",
+    icon: Code,
+    moduleKey: "custom_code",
+    children: [{ key: "custom-code", href: "/custom-code", label: "Custom Code", icon: Code }],
   },
   {
     key: "admin-group",
@@ -181,11 +248,15 @@ export const NAV_STRUCTURE: NavEntry[] = [
       { key: "users", href: "/users", label: "Users", icon: Users },
       { key: "roles", href: "/roles", label: "Roles", icon: ShieldCheck },
       { key: "modules", href: "/modules", label: "Module Store", icon: LayoutGrid },
+      { key: "printers", href: "/printers", label: "Printers", icon: Printer },
+      { key: "theme-options", href: "/appearance", label: "Theme Options", icon: Palette },
       { key: "audit-logs", href: "/audit-logs", label: "Audit Logs", icon: ScrollText, permission: "audit.view" },
     ],
   },
 ];
 
+// Demo mode reuses the same structure with /demo-prefixed hrefs so the demo
+// sidebar mirrors production exactly.
 export function prefixNavStructure(entries: NavEntry[], prefix: string): NavEntry[] {
   return entries.map((entry) =>
     isNavGroup(entry)

@@ -60,31 +60,39 @@ export default async function SalesPage() {
         )}
       </div>
 
-      {/* Statistics Cards */}
+      {/* Statistics Cards — each drills into the matching table filter */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="Total revenue"
-          value={`$${totalRevenue.toLocaleString()}`}
-          tone="primary"
-        />
-        <StatCard
-          label="Total invoices"
-          value={totalInvoices.toString()}
-          delta={{ label: `${paidInvoices} paid`, direction: "flat" }}
-          tone="info"
-        />
-        <StatCard
-          label="Outstanding"
-          value={`$${unpaidBalance.toLocaleString()}`}
-          delta={openInvoices.length > 0 ? { label: `${openInvoices.length} open invoice${openInvoices.length === 1 ? "" : "s"}`, direction: "flat" } : undefined}
-          tone="warning"
-        />
-        <StatCard
-          label="Overdue"
-          value={overdueInvoices.length.toString()}
-          delta={overdueBalance > 0 ? { label: `$${overdueBalance.toLocaleString()} past due`, direction: "down" } : undefined}
-          tone={overdueInvoices.length > 0 ? "warning" : "success"}
-        />
+        <Link href="/sales?status=all" className="transition-opacity hover:opacity-80">
+          <StatCard
+            label="Total revenue"
+            value={`$${totalRevenue.toLocaleString()}`}
+            tone="primary"
+          />
+        </Link>
+        <Link href="/sales?status=invoice" className="transition-opacity hover:opacity-80">
+          <StatCard
+            label="Total invoices"
+            value={totalInvoices.toString()}
+            delta={{ label: `${paidInvoices} paid`, direction: "flat" }}
+            tone="info"
+          />
+        </Link>
+        <Link href="/sales?status=issued" className="transition-opacity hover:opacity-80">
+          <StatCard
+            label="Outstanding"
+            value={`$${unpaidBalance.toLocaleString()}`}
+            delta={openInvoices.length > 0 ? { label: `${openInvoices.length} open invoice${openInvoices.length === 1 ? "" : "s"}`, direction: "flat" } : undefined}
+            tone="warning"
+          />
+        </Link>
+        <Link href="/sales?status=overdue" className="transition-opacity hover:opacity-80">
+          <StatCard
+            label="Overdue"
+            value={overdueInvoices.length.toString()}
+            delta={overdueBalance > 0 ? { label: `$${overdueBalance.toLocaleString()} past due`, direction: "down" } : undefined}
+            tone={overdueInvoices.length > 0 ? "warning" : "success"}
+          />
+        </Link>
       </div>
 
       {hasRevenueData && (

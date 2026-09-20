@@ -21,7 +21,7 @@ export async function updateTaxSettingsAction(
   formData: FormData
 ): Promise<PayrollSettingsActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "payroll");
+  await requireModuleEnabled(supabase, orgId, "hr");
 
   if (!permissions.has("payroll.manage")) {
     return { error: "You don't have permission to manage payroll tax settings.", success: false };

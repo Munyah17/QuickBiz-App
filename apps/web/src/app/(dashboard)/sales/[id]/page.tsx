@@ -85,19 +85,33 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border-subtle text-left text-xs font-medium uppercase tracking-wide text-text-tertiary">
-                  <th className="px-4 py-2.5">Description</th>
+                  <th className="px-4 py-2.5">Item</th>
                   <th className="px-4 py-2.5">Qty</th>
                   <th className="px-4 py-2.5">Unit price</th>
-                  <th className="px-4 py-2.5">Line total</th>
+                  <th className="px-4 py-2.5">Discount</th>
+                  <th className="px-4 py-2.5">Tax</th>
+                  <th className="px-4 py-2.5 text-right">Line total</th>
                 </tr>
               </thead>
               <tbody>
                 {invoice.items.map((item) => (
                   <tr key={item.id} className="border-b border-border-subtle last:border-b-0">
-                    <td className="px-4 py-2.5 text-text-primary">{item.description}</td>
-                    <td className="px-4 py-2.5 text-text-secondary">{item.quantity}</td>
+                    <td className="px-4 py-2.5">
+                      <p className="text-text-primary">{item.description}</p>
+                      {item.sku && <p className="font-mono text-[11px] text-text-tertiary">{item.sku}</p>}
+                    </td>
+                    <td className="px-4 py-2.5 text-text-secondary">
+                      {item.quantity}
+                      {item.unit ? ` ${item.unit}` : ""}
+                    </td>
                     <td className="px-4 py-2.5 text-text-secondary">${item.unit_price.toFixed(2)}</td>
-                    <td className="px-4 py-2.5 text-text-secondary">${item.line_total.toFixed(2)}</td>
+                    <td className="px-4 py-2.5 text-text-secondary">
+                      {item.discount > 0 ? `-$${item.discount.toFixed(2)}` : "—"}
+                    </td>
+                    <td className="px-4 py-2.5 text-text-secondary">
+                      {item.tax_rate != null ? `${item.tax_rate}%` : "—"}
+                    </td>
+                    <td className="px-4 py-2.5 text-right text-text-secondary">${item.line_total.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -111,6 +125,12 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                 <div className="flex justify-between text-text-secondary">
                   <span>Discount{invoice.discount_reason ? ` (${invoice.discount_reason})` : ""}</span>
                   <span>-${invoice.discount_total.toFixed(2)}</span>
+                </div>
+              )}
+              {invoice.shipping_total > 0 && (
+                <div className="flex justify-between text-text-secondary">
+                  <span>Shipping</span>
+                  <span>${invoice.shipping_total.toFixed(2)}</span>
                 </div>
               )}
               <div className="flex justify-between text-text-secondary">
@@ -222,6 +242,12 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             <span className="text-sm text-text-primary">{invoice.branchName ?? "No branch"}</span>
           </div>
           <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-text-secondary">Invoice date</span>
+            <span className="text-sm text-text-primary">
+              {new Date(invoice.invoice_date).toLocaleDateString()}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-text-secondary">Issued</span>
             <span className="text-sm text-text-primary">
               {invoice.issued_at ? new Date(invoice.issued_at).toLocaleDateString() : "Not issued yet"}
@@ -233,10 +259,44 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               {invoice.due_date ? new Date(invoice.due_date).toLocaleDateString() : "Not set"}
             </span>
           </div>
+          {invoice.payment_terms && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-text-secondary">Payment terms</span>
+              <span className="text-sm text-text-primary">{invoice.payment_terms.replace(/_/g, " ")}</span>
+            </div>
+          )}
+          {invoice.reference && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-text-secondary">PO / reference</span>
+              <span className="text-sm text-text-primary">{invoice.reference}</span>
+            </div>
+          )}
+          {invoice.salesperson && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-text-secondary">Salesperson</span>
+              <span className="text-sm text-text-primary">{invoice.salesperson}</span>
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-text-secondary">Balance due</span>
             <span className="text-sm font-semibold text-text-primary">${balanceDue.toFixed(2)}</span>
           </div>
+          {(invoice.billing_address || invoice.delivery_address) && (
+            <div className="border-t border-border-subtle pt-3">
+              {invoice.billing_address && (
+                <div className="mb-2">
+                  <p className="text-xs font-medium uppercase tracking-wide text-text-tertiary">Bill to</p>
+                  <p className="whitespace-pre-line text-sm text-text-primary">{invoice.billing_address}</p>
+                </div>
+              )}
+              {invoice.delivery_address && (
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-text-tertiary">Deliver to</p>
+                  <p className="whitespace-pre-line text-sm text-text-primary">{invoice.delivery_address}</p>
+                </div>
+              )}
+            </div>
+          )}
           {invoice.notes && (
             <div className="border-t border-border-subtle pt-3">
               <p className="text-sm font-medium text-text-secondary">Notes</p>

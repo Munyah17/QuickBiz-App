@@ -10,7 +10,7 @@ import { PayrollRunsTable } from "./PayrollRunsTable";
 
 export default async function PayrollPage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "payroll");
+  await requireModuleEnabled(supabase, orgId, "hr");
   const canManage = permissions.has("payroll.manage");
 
   const [runs, employees, branches] = await Promise.all([

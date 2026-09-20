@@ -20,7 +20,7 @@ const statusTone: Record<string, "success" | "info" | "warning" | "danger" | "ne
 export default async function PurchaseOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "purchasing");
+  await requireModuleEnabled(supabase, orgId, "sales");
 
   const po = await getPurchaseOrderDetail(supabase, orgId, id);
   if (!po) notFound();

@@ -7,7 +7,7 @@ import { SalaryComponentsCard } from "./SalaryComponentsCard";
 
 export default async function PayrollSettingsPage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "payroll");
+  await requireModuleEnabled(supabase, orgId, "hr");
   if (!permissions.has("payroll.manage")) redirect("/payroll");
 
   const [taxSettings, components] = await Promise.all([

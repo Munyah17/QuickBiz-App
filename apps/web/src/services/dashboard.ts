@@ -178,7 +178,7 @@ export async function getDashboardOverview(supabase: SupabaseClient, orgId: stri
     moduleKpis.push({ key: "active_projects", label: "Active projects", value: String(count ?? 0) });
   }
 
-  if (enabledModules.has("purchasing")) {
+  if (enabledModules.has("sales")) {
     const { count } = await supabase
       .from("purchase_orders")
       .select("id", { count: "exact", head: true })
@@ -287,7 +287,7 @@ export async function getAttentionItems(supabase: SupabaseClient, orgId: string)
     );
   }
 
-  if (enabled.has("purchasing")) {
+  if (enabled.has("sales")) {
     fetches.push(
       (async () => {
         const { count } = await supabase

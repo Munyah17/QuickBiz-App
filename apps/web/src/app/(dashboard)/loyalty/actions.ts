@@ -16,7 +16,7 @@ export async function recordLoyaltyTransactionAction(
   formData: FormData
 ): Promise<LoyaltyActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "marketing");
+  await requireModuleEnabled(supabase, orgId, "crm");
 
   if (!permissions.has("marketing.manage")) {
     return { error: "You don't have permission to adjust loyalty points.", success: false };

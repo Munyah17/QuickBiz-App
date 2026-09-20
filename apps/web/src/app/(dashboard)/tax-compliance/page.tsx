@@ -6,7 +6,7 @@ import { TaxFilingsTable } from "./TaxFilingsTable";
 
 export default async function TaxCompliancePage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "tax_compliance");
+  await requireModuleEnabled(supabase, orgId, "finance");
   const canManage = permissions.has("tax_compliance.manage");
   const canFile = permissions.has("tax_compliance.file");
 

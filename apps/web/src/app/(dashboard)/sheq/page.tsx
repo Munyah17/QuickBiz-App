@@ -6,7 +6,7 @@ import { InspectionsTable } from "./InspectionsTable";
 
 export default async function SheqPage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "sheq");
+  await requireModuleEnabled(supabase, orgId, "risk_insurance");
 
   const canManage = permissions.has("sheq.manage");
   const canAudit = permissions.has("sheq.audit");

@@ -20,7 +20,7 @@ export async function setEmployeeBasicSalaryAction(
   formData: FormData
 ): Promise<SalarySetupActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "payroll");
+  await requireModuleEnabled(supabase, orgId, "hr");
 
   if (!permissions.has("payroll.manage")) {
     return { error: "You don't have permission to manage salaries.", success: false };

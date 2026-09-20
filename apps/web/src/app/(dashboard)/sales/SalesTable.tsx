@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Receipt } from "lucide-react";
 import { Card } from "@/components/Card";
 import { Badge } from "@/components/Badge";
@@ -37,8 +38,16 @@ function formatDue(dueDate: string | null): { text: string; overdue: boolean } {
 }
 
 export function SalesTable({ invoices }: { invoices: InvoiceListRow[] }) {
+  const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+
+  // Stat-card drill-down links land here as ?status=... — keep the filter in
+  // sync so the table reflects whichever card was clicked.
+  useEffect(() => {
+    const s = searchParams.get("status");
+    if (s) setStatusFilter(s);
+  }, [searchParams]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();

@@ -412,7 +412,7 @@ export async function getReportingData(
     });
   }
 
-  if (enabledModules.has("fleet")) {
+  if (enabledModules.has("logistics")) {
     const [{ data: vehicles }, { data: fuel }] = await Promise.all([
       supabase.from("vehicles").select("status").eq("org_id", orgId),
       supabase.from("fuel_logs").select("cost, fuel_date").eq("org_id", orgId).gte("fuel_date", fromIso.slice(0, 10)).lte("fuel_date", toIso.slice(0, 10)),
@@ -484,7 +484,7 @@ export async function getReportingData(
     });
   }
 
-  if (enabledModules.has("purchasing")) {
+  if (enabledModules.has("sales")) {
     const { data } = await supabase
       .from("purchase_orders")
       .select("status, total, created_at, suppliers(name)")

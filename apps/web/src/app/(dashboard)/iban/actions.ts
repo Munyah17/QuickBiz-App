@@ -13,7 +13,7 @@ export const initialIbanActionState: IbanActionState = { error: null, success: f
 
 export async function requestIbanAction(_prev: IbanActionState, formData: FormData): Promise<IbanActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "iban");
+  await requireModuleEnabled(supabase, orgId, "finance");
 
   if (!permissions.has("iban.manage")) {
     return { error: "You don't have permission to request an IBAN.", success: false };

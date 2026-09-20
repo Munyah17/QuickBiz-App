@@ -16,7 +16,7 @@ export async function createTaxFilingAction(
   formData: FormData
 ): Promise<TaxComplianceActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "tax_compliance");
+  await requireModuleEnabled(supabase, orgId, "finance");
 
   if (!permissions.has("tax_compliance.manage")) {
     return { error: "You don't have permission to create tax filings.", success: false };
@@ -47,7 +47,7 @@ export async function markTaxFilingSubmittedAction(
   formData: FormData
 ): Promise<TaxComplianceActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "tax_compliance");
+  await requireModuleEnabled(supabase, orgId, "finance");
 
   if (!permissions.has("tax_compliance.file")) {
     return { error: "You don't have permission to record tax filing submissions.", success: false };

@@ -41,7 +41,15 @@ function ActiveToggle({ customer }: { customer: Customer }) {
   );
 }
 
-export function CustomersTable({ customers, canManage }: { customers: Customer[]; canManage: boolean }) {
+export function CustomersTable({
+  customers,
+  balances,
+  canManage,
+}: {
+  customers: Customer[];
+  balances: Map<string, { open: number; overdue: number }>;
+  canManage: boolean;
+}) {
   const [modalOpen, setModalOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [editing, setEditing] = useState<Customer | undefined>(undefined);
@@ -169,6 +177,7 @@ export function CustomersTable({ customers, canManage }: { customers: Customer[]
               <th className="px-4 py-2.5">Email</th>
               <th className="px-4 py-2.5">Phone</th>
               <th className="px-4 py-2.5">Location</th>
+              <th className="px-4 py-2.5 text-right">Open balance</th>
               <th className="px-4 py-2.5">Status</th>
               {canManage && <th className="px-4 py-2.5" />}
             </tr>
@@ -196,6 +205,18 @@ export function CustomersTable({ customers, canManage }: { customers: Customer[]
                 <td className="px-4 py-2.5 text-text-secondary">{customer.phone || "No phone"}</td>
                 <td className="px-4 py-2.5 text-text-secondary">
                   {[customer.address?.city, customer.address?.country].filter(Boolean).join(", ") || "No address"}
+                </td>
+                <td className="px-4 py-2.5 text-right">
+                  {(() => {
+                    const bal = balances.get(customer.id);
+                    if (!bal || bal.open <= 0) return <span className="text-text-tertiary">—</span>;
+                    return (
+                      <span className={bal.overdue > 0 ? "font-medium text-danger-600" : "font-medium text-text-primary"}>
+                        ${bal.open.toFixed(2)}
+                        {bal.overdue > 0 && <span className="block text-[11px] font-normal">${bal.overdue.toFixed(2)} overdue</span>}
+                      </span>
+                    );
+                  })()}
                 </td>
                 <td className="px-4 py-2.5">
                   <Badge tone={customer.is_active ? "success" : "neutral"}>

@@ -13,7 +13,7 @@ export const initialVehicleActionState: VehicleActionState = { error: null, succ
 
 export async function createVehicleAction(_prev: VehicleActionState, formData: FormData): Promise<VehicleActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "fleet");
+  await requireModuleEnabled(supabase, orgId, "logistics");
 
   if (!permissions.has("fleet.manage")) {
     return { error: "You don't have permission to manage vehicles.", success: false };

@@ -13,7 +13,7 @@ export const initialTenderActionState: TenderActionState = { error: null, succes
 
 export async function listTenderBidsAction(tenderId: string): Promise<TenderBidRow[]> {
   const { supabase, orgId } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "tender_bidding");
+  await requireModuleEnabled(supabase, orgId, "sales");
   return listTenderBids(supabase, tenderId);
 }
 
@@ -22,7 +22,7 @@ export async function createTenderAction(
   formData: FormData
 ): Promise<TenderActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "tender_bidding");
+  await requireModuleEnabled(supabase, orgId, "sales");
 
   if (!permissions.has("tender_bidding.manage")) {
     return { error: "You don't have permission to create tenders.", success: false };
@@ -54,7 +54,7 @@ export async function submitTenderBidAction(
   formData: FormData
 ): Promise<TenderActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "tender_bidding");
+  await requireModuleEnabled(supabase, orgId, "sales");
 
   if (!permissions.has("tender_bidding.bid")) {
     return { error: "You don't have permission to submit bids.", success: false };
@@ -83,7 +83,7 @@ export async function awardTenderAction(
   formData: FormData
 ): Promise<TenderActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "tender_bidding");
+  await requireModuleEnabled(supabase, orgId, "sales");
 
   if (!permissions.has("tender_bidding.evaluate")) {
     return { error: "You don't have permission to award tenders.", success: false };

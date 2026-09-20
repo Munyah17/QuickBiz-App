@@ -7,7 +7,7 @@ import { CampaignsTable } from "./CampaignsTable";
 
 export default async function CampaignsPage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "marketing");
+  await requireModuleEnabled(supabase, orgId, "crm");
   const canManage = permissions.has("marketing.manage");
 
   const [campaigns, branches] = await Promise.all([listCampaigns(supabase, orgId), listBranches(supabase, orgId)]);

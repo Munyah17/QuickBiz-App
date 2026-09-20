@@ -8,7 +8,7 @@ import { WarningsTable } from "./WarningsTable";
 
 export default async function DisciplinaryPage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "disciplinary");
+  await requireModuleEnabled(supabase, orgId, "hr");
   requirePermission(permissions, "disciplinary.view");
 
   const canManage = permissions.has("disciplinary.manage");

@@ -19,7 +19,7 @@ export const initialSheqActionState: SheqActionState = { error: null, success: f
 
 export async function createIncidentAction(_prev: SheqActionState, formData: FormData): Promise<SheqActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "sheq");
+  await requireModuleEnabled(supabase, orgId, "risk_insurance");
 
   if (!permissions.has("sheq.manage")) {
     return { error: "You don't have permission to report incidents.", success: false };
@@ -48,7 +48,7 @@ export async function createIncidentAction(_prev: SheqActionState, formData: For
 
 export async function recordCorrectiveActionAction(_prev: SheqActionState, formData: FormData): Promise<SheqActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "sheq");
+  await requireModuleEnabled(supabase, orgId, "risk_insurance");
 
   if (!permissions.has("sheq.manage")) {
     return { error: "You don't have permission to record corrective actions.", success: false };
@@ -76,7 +76,7 @@ export async function recordCorrectiveActionAction(_prev: SheqActionState, formD
 
 export async function closeIncidentAction(incidentId: string): Promise<void> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "sheq");
+  await requireModuleEnabled(supabase, orgId, "risk_insurance");
 
   if (!permissions.has("sheq.manage")) {
     throw new Error("You don't have permission to close incidents.");
@@ -88,7 +88,7 @@ export async function closeIncidentAction(incidentId: string): Promise<void> {
 
 export async function createInspectionAction(_prev: SheqActionState, formData: FormData): Promise<SheqActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "sheq");
+  await requireModuleEnabled(supabase, orgId, "risk_insurance");
 
   if (!permissions.has("sheq.audit")) {
     return { error: "You don't have permission to schedule inspections.", success: false };
@@ -115,7 +115,7 @@ export async function createInspectionAction(_prev: SheqActionState, formData: F
 
 export async function completeInspectionAction(_prev: SheqActionState, formData: FormData): Promise<SheqActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "sheq");
+  await requireModuleEnabled(supabase, orgId, "risk_insurance");
 
   if (!permissions.has("sheq.audit")) {
     return { error: "You don't have permission to complete inspections.", success: false };

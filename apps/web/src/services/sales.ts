@@ -72,14 +72,32 @@ export interface InvoiceDetail {
   tax_total: number;
   discount_total: number;
   discount_reason: string | null;
+  shipping_total: number;
   total: number;
   amount_paid: number;
   currency: string;
   notes: string | null;
   due_date: string | null;
+  invoice_date: string;
+  reference: string | null;
+  salesperson: string | null;
+  payment_terms: string | null;
+  billing_address: string | null;
+  delivery_address: string | null;
   issued_at: string | null;
   created_at: string;
-  items: Array<{ id: string; product_id: string | null; description: string; quantity: number; unit_price: number; line_total: number }>;
+  items: Array<{
+    id: string;
+    product_id: string | null;
+    description: string;
+    sku: string | null;
+    unit: string | null;
+    quantity: number;
+    unit_price: number;
+    discount: number;
+    tax_rate: number | null;
+    line_total: number;
+  }>;
   payments: Array<{ id: string; amount: number; method: string; paid_at: string; reference: string | null }>;
   creditNotes: Array<{ id: string; credit_note_number: string; status: string; subtotal: number; reason: string | null; created_at: string }>;
 }
@@ -92,7 +110,7 @@ export async function getInvoiceDetail(
   const { data: invoice, error } = await supabase
     .from("sales_invoices")
     .select(
-      "id, invoice_number, status, doc_type, customer_id, subtotal, tax_total, discount_total, discount_reason, total, amount_paid, currency, notes, due_date, issued_at, created_at, customers(name), branches(name)"
+      "id, invoice_number, status, doc_type, customer_id, subtotal, tax_total, discount_total, discount_reason, shipping_total, total, amount_paid, currency, notes, due_date, invoice_date, reference, salesperson, payment_terms, billing_address, delivery_address, issued_at, created_at, customers(name), branches(name)"
     )
     .eq("org_id", orgId)
     .eq("id", invoiceId)
@@ -106,7 +124,7 @@ export async function getInvoiceDetail(
     { data: payments, error: paymentsError },
     { data: creditNotes, error: cnError },
   ] = await Promise.all([
-    supabase.from("sales_invoice_items").select("id, product_id, description, quantity, unit_price, line_total").eq("invoice_id", invoiceId),
+    supabase.from("sales_invoice_items").select("id, product_id, description, sku, unit, quantity, unit_price, discount, tax_rate, line_total").eq("invoice_id", invoiceId),
     supabase.from("sales_payments").select("id, amount, method, paid_at, reference").eq("invoice_id", invoiceId).order("paid_at"),
     supabase
       .from("sales_credit_notes")
@@ -129,11 +147,18 @@ export async function getInvoiceDetail(
     tax_total: number;
     discount_total: number;
     discount_reason: string | null;
+    shipping_total: number;
     total: number;
     amount_paid: number;
     currency: string;
     notes: string | null;
     due_date: string | null;
+    invoice_date: string;
+    reference: string | null;
+    salesperson: string | null;
+    payment_terms: string | null;
+    billing_address: string | null;
+    delivery_address: string | null;
     issued_at: string | null;
     created_at: string;
     customers: { name: string } | null;
@@ -152,11 +177,18 @@ export async function getInvoiceDetail(
     tax_total: row.tax_total,
     discount_total: row.discount_total,
     discount_reason: row.discount_reason,
+    shipping_total: row.shipping_total,
     total: row.total,
     amount_paid: row.amount_paid,
     currency: row.currency,
     notes: row.notes,
     due_date: row.due_date,
+    invoice_date: row.invoice_date,
+    reference: row.reference,
+    salesperson: row.salesperson,
+    payment_terms: row.payment_terms,
+    billing_address: row.billing_address,
+    delivery_address: row.delivery_address,
     issued_at: row.issued_at,
     created_at: row.created_at,
     items: (items ?? []) as InvoiceDetail["items"],
@@ -170,6 +202,10 @@ export interface InvoiceLineInput {
   description: string;
   quantity: number;
   unit_price: number;
+  sku?: string | null;
+  unit?: string | null;
+  discount?: number;
+  tax_rate?: number | null;
 }
 
 export async function createInvoice(
@@ -187,6 +223,13 @@ export async function createInvoice(
     discountReason?: string;
     status?: "draft" | "issued";
     docType?: SalesDocType;
+    invoiceDate?: string | null;
+    reference?: string;
+    salesperson?: string;
+    paymentTerms?: string;
+    shippingTotal?: number;
+    billingAddress?: string;
+    deliveryAddress?: string;
   }
 ): Promise<string> {
   const { data, error } = await supabase.rpc("create_sales_invoice", {
@@ -202,6 +245,13 @@ export async function createInvoice(
     p_discount_reason: input.discountReason || undefined,
     p_status: input.status ?? "issued",
     p_doc_type: input.docType ?? "invoice",
+    p_invoice_date: input.invoiceDate ?? undefined,
+    p_reference: input.reference || undefined,
+    p_salesperson: input.salesperson || undefined,
+    p_payment_terms: input.paymentTerms || undefined,
+    p_shipping_total: input.shippingTotal ?? 0,
+    p_billing_address: input.billingAddress || undefined,
+    p_delivery_address: input.deliveryAddress || undefined,
   });
   if (error) throw error;
   return data as string;
@@ -230,6 +280,13 @@ export async function updateDraftInvoice(
     dueDate?: string | null;
     discountTotal?: number;
     discountReason?: string;
+    invoiceDate?: string | null;
+    reference?: string;
+    salesperson?: string;
+    paymentTerms?: string;
+    shippingTotal?: number;
+    billingAddress?: string;
+    deliveryAddress?: string;
   }
 ) {
   const { error } = await supabase.rpc("update_draft_invoice", {
@@ -242,6 +299,13 @@ export async function updateDraftInvoice(
     p_due_date: input.dueDate ?? undefined,
     p_discount_total: input.discountTotal ?? 0,
     p_discount_reason: input.discountReason || undefined,
+    p_invoice_date: input.invoiceDate ?? undefined,
+    p_reference: input.reference || undefined,
+    p_salesperson: input.salesperson || undefined,
+    p_payment_terms: input.paymentTerms || undefined,
+    p_shipping_total: input.shippingTotal ?? 0,
+    p_billing_address: input.billingAddress || undefined,
+    p_delivery_address: input.deliveryAddress || undefined,
   });
   if (error) throw error;
 }
@@ -258,7 +322,7 @@ export async function duplicateInvoice(
 ): Promise<string> {
   const { data: source, error } = await supabase
     .from("sales_invoices")
-    .select("branch_id, customer_id, tax_total, notes, due_date, discount_total, discount_reason, doc_type")
+    .select("branch_id, customer_id, tax_total, notes, due_date, discount_total, discount_reason, doc_type, invoice_date, reference, salesperson, payment_terms, shipping_total, billing_address, delivery_address")
     .eq("org_id", orgId)
     .eq("id", invoiceId)
     .single();
@@ -266,7 +330,7 @@ export async function duplicateInvoice(
 
   const { data: items, error: itemsError } = await supabase
     .from("sales_invoice_items")
-    .select("product_id, description, quantity, unit_price")
+    .select("product_id, description, sku, unit, quantity, unit_price, discount, tax_rate")
     .eq("invoice_id", invoiceId);
   if (itemsError) throw itemsError;
 
@@ -279,14 +343,39 @@ export async function duplicateInvoice(
     discount_total: number;
     discount_reason: string | null;
     doc_type: SalesDocType;
+    invoice_date: string | null;
+    reference: string | null;
+    salesperson: string | null;
+    payment_terms: string | null;
+    shipping_total: number;
+    billing_address: string | null;
+    delivery_address: string | null;
   };
 
   const { data: newId, error: createError } = await supabase.rpc("create_sales_invoice", {
     p_org_id: orgId,
     p_branch_id: row.branch_id,
     p_customer_id: row.customer_id ?? undefined,
-    p_items: ((items ?? []) as Array<{ product_id: string | null; description: string; quantity: number; unit_price: number }>).map(
-      (i) => ({ product_id: i.product_id, description: i.description, quantity: i.quantity, unit_price: i.unit_price })
+    p_items: ((items ?? []) as Array<{
+      product_id: string | null;
+      description: string;
+      sku: string | null;
+      unit: string | null;
+      quantity: number;
+      unit_price: number;
+      discount: number;
+      tax_rate: number | null;
+    }>).map(
+      (i) => ({
+        product_id: i.product_id,
+        description: i.description,
+        sku: i.sku,
+        unit: i.unit,
+        quantity: i.quantity,
+        unit_price: i.unit_price,
+        discount: i.discount,
+        tax_rate: i.tax_rate,
+      })
     ) as unknown as Json,
     p_tax_total: row.tax_total,
     p_notes: row.notes || undefined,
@@ -295,6 +384,13 @@ export async function duplicateInvoice(
     p_discount_reason: row.discount_reason || undefined,
     p_status: "draft",
     p_doc_type: row.doc_type,
+    p_invoice_date: row.invoice_date ?? undefined,
+    p_reference: row.reference || undefined,
+    p_salesperson: row.salesperson || undefined,
+    p_payment_terms: row.payment_terms || undefined,
+    p_shipping_total: row.shipping_total,
+    p_billing_address: row.billing_address || undefined,
+    p_delivery_address: row.delivery_address || undefined,
   });
   if (createError) throw createError;
   return newId as string;

@@ -6,7 +6,7 @@ import { SalarySetupTable } from "./SalarySetupTable";
 
 export default async function SalarySetupPage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "payroll");
+  await requireModuleEnabled(supabase, orgId, "hr");
   if (!permissions.has("payroll.manage")) redirect("/payroll");
 
   const [employees, assignmentsByEmployee, components] = await Promise.all([

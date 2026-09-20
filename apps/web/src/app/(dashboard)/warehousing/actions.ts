@@ -25,7 +25,7 @@ export async function createWarehouseAction(
   formData: FormData
 ): Promise<WarehousingActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "warehousing");
+  await requireModuleEnabled(supabase, orgId, "inventory");
 
   if (!permissions.has("warehousing.manage")) {
     return { error: "You don't have permission to manage warehouses.", success: false };
@@ -54,7 +54,7 @@ export async function createWarehouseZoneAction(
   formData: FormData
 ): Promise<WarehousingActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "warehousing");
+  await requireModuleEnabled(supabase, orgId, "inventory");
 
   if (!permissions.has("warehousing.manage")) {
     return { error: "You don't have permission to manage warehouse zones.", success: false };
@@ -86,7 +86,7 @@ export async function createWarehouseBinAction(
   formData: FormData
 ): Promise<WarehousingActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "warehousing");
+  await requireModuleEnabled(supabase, orgId, "inventory");
 
   if (!permissions.has("warehousing.manage")) {
     return { error: "You don't have permission to manage warehouse bins.", success: false };
@@ -135,7 +135,7 @@ export async function createTransferAction(
   formData: FormData
 ): Promise<WarehousingActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "warehousing");
+  await requireModuleEnabled(supabase, orgId, "inventory");
 
   if (!permissions.has("warehousing.transfer")) {
     return { error: "You don't have permission to create transfers.", success: false };
@@ -170,7 +170,7 @@ export async function dispatchTransferAction(
   formData: FormData
 ): Promise<WarehousingActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "warehousing");
+  await requireModuleEnabled(supabase, orgId, "inventory");
   return transferTransition(orgId, permissions, supabase, String(formData.get("transferId") ?? ""), dispatchTransfer);
 }
 
@@ -179,7 +179,7 @@ export async function receiveTransferAction(
   formData: FormData
 ): Promise<WarehousingActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "warehousing");
+  await requireModuleEnabled(supabase, orgId, "inventory");
   return transferTransition(orgId, permissions, supabase, String(formData.get("transferId") ?? ""), receiveTransfer);
 }
 
@@ -188,6 +188,6 @@ export async function cancelTransferAction(
   formData: FormData
 ): Promise<WarehousingActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "warehousing");
+  await requireModuleEnabled(supabase, orgId, "inventory");
   return transferTransition(orgId, permissions, supabase, String(formData.get("transferId") ?? ""), cancelTransfer);
 }

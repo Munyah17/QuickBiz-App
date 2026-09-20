@@ -1,9 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { Printer } from "lucide-react";
 import { Modal } from "@/components/Modal";
 import { Button } from "@/components/Button";
+import { useToast } from "@/components/Toast";
 import { paymentMethodLabel } from "@/config/paymentMethods";
+import { printReceipt } from "@/lib/printing/printer";
+import type { ReceiptData } from "@/lib/printing/receipt";
 import type { InvoiceDetail } from "@/services/sales";
 
 export function ReceiptModal({
@@ -18,6 +22,46 @@ export function ReceiptModal({
   onClose: () => void;
 }) {
   const changeDue = receipt.amount_paid > receipt.total ? receipt.amount_paid - receipt.total : 0;
+  const { push } = useToast();
+  const [printing, setPrinting] = useState(false);
+
+  // Routes through the configured print method — thermal printer (USB/BLE/
+  // rawBT) when one is set up, system print dialog otherwise.
+  async function handlePrint() {
+    setPrinting(true);
+    const data: ReceiptData = {
+      orgName,
+      title: "Sales Receipt",
+      receiptNumber: receipt.invoice_number,
+      date: new Date(receipt.created_at).toLocaleString(),
+      cashier: cashierName,
+      branch: receipt.branchName ?? undefined,
+      customer: receipt.customerName ?? "Walk-in",
+      lines: receipt.items.map((i) => ({
+        description: i.description,
+        quantity: i.quantity,
+        lineTotal: i.line_total,
+      })),
+      subtotal: receipt.subtotal,
+      discount:
+        receipt.discount_total > 0
+          ? { amount: receipt.discount_total, reason: receipt.discount_reason ?? undefined }
+          : undefined,
+      tax: receipt.tax_total > 0 ? { label: "Tax", amount: receipt.tax_total } : undefined,
+      total: receipt.total,
+      payments: receipt.payments.map((p) => ({ label: paymentMethodLabel(p.method), amount: p.amount })),
+      amountTendered: receipt.amount_paid,
+      changeDue: changeDue > 0 ? changeDue : undefined,
+      barcode: receipt.invoice_number,
+    };
+    const result = await printReceipt(data);
+    setPrinting(false);
+    if (result.ok) {
+      push(`Receipt sent via ${result.via}`);
+    } else {
+      push(result.error ?? "Print failed", "error");
+    }
+  }
 
   return (
     <Modal open onClose={onClose} title="Receipt">
@@ -116,7 +160,7 @@ export function ReceiptModal({
         <Button type="button" variant="secondary" onClick={onClose}>
           Close
         </Button>
-        <Button type="button" onClick={() => window.print()}>
+        <Button type="button" onClick={handlePrint} loading={printing}>
           <Printer className="size-4" />
           Print
         </Button>

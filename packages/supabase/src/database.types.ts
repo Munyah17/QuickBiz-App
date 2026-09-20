@@ -72,6 +72,159 @@ export type Database = {
           },
         ]
       }
+      api_keys: {
+        Row: {
+          created_at: string
+          developer_id: string
+          expires_at: string | null
+          id: string
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+          org_id: string | null
+          scope: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          developer_id: string
+          expires_at?: string | null
+          id?: string
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          name: string
+          org_id?: string | null
+          scope: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          developer_id?: string
+          expires_at?: string | null
+          id?: string
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+          org_id?: string | null
+          scope?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_keys_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_usage: {
+        Row: {
+          api_key_id: string
+          created_at: string
+          developer_id: string
+          endpoint: string
+          id: number
+          method: string
+          status_code: number
+          tokens_used: number
+        }
+        Insert: {
+          api_key_id: string
+          created_at?: string
+          developer_id: string
+          endpoint: string
+          id?: never
+          method: string
+          status_code: number
+          tokens_used: number
+        }
+        Update: {
+          api_key_id?: string
+          created_at?: string
+          developer_id?: string
+          endpoint?: string
+          id?: never
+          method?: string
+          status_code?: number
+          tokens_used?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_usage_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_usage_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_webhooks: {
+        Row: {
+          api_key_id: string | null
+          created_at: string
+          events: string[]
+          id: string
+          org_id: string
+          secret: string
+          status: string
+          url: string
+        }
+        Insert: {
+          api_key_id?: string | null
+          created_at?: string
+          events?: string[]
+          id?: string
+          org_id: string
+          secret: string
+          status?: string
+          url: string
+        }
+        Update: {
+          api_key_id?: string | null
+          created_at?: string
+          events?: string[]
+          id?: string
+          org_id?: string
+          secret?: string
+          status?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_webhooks_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_webhooks_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asset_maintenance: {
         Row: {
           asset_id: string
@@ -804,6 +957,191 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      developer_notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          developer_id: string
+          id: string
+          read_at: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          developer_id: string
+          id?: string
+          read_at?: string | null
+          title: string
+          type?: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          developer_id?: string
+          id?: string
+          read_at?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "developer_notifications_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      developer_payouts: {
+        Row: {
+          created_at: string
+          developer_id: string
+          gross_usd: number
+          id: string
+          net_usd: number
+          period: string
+          platform_share_usd: number
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          developer_id: string
+          gross_usd?: number
+          id?: string
+          net_usd?: number
+          period: string
+          platform_share_usd?: number
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          developer_id?: string
+          gross_usd?: number
+          id?: string
+          net_usd?: number
+          period?: string
+          platform_share_usd?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "developer_payouts_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      developer_support_tickets: {
+        Row: {
+          body: string
+          created_at: string
+          developer_id: string
+          id: string
+          status: string
+          subject: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          developer_id: string
+          id?: string
+          status?: string
+          subject: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          developer_id?: string
+          id?: string
+          status?: string
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "developer_support_tickets_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      developer_wallets: {
+        Row: {
+          depleted_notified: boolean
+          developer_id: string
+          last_topup_tokens: number
+          lifetime_tokens_purchased: number
+          lifetime_tokens_used: number
+          low_balance_notified: boolean
+          token_balance: number
+          updated_at: string
+        }
+        Insert: {
+          depleted_notified?: boolean
+          developer_id: string
+          last_topup_tokens?: number
+          lifetime_tokens_purchased?: number
+          lifetime_tokens_used?: number
+          low_balance_notified?: boolean
+          token_balance?: number
+          updated_at?: string
+        }
+        Update: {
+          depleted_notified?: boolean
+          developer_id?: string
+          last_topup_tokens?: number
+          lifetime_tokens_purchased?: number
+          lifetime_tokens_used?: number
+          low_balance_notified?: boolean
+          token_balance?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "developer_wallets_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: true
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      developers: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          display_name: string
+          email: string
+          id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          display_name: string
+          email: string
+          id?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          display_name?: string
+          email?: string
+          id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       disciplinary_cases: {
         Row: {
@@ -2583,6 +2921,110 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      module_licenses: {
+        Row: {
+          activated_at: string
+          created_at: string
+          id: string
+          monthly_price_usd: number
+          org_id: string
+          status: string
+          submission_id: string
+        }
+        Insert: {
+          activated_at?: string
+          created_at?: string
+          id?: string
+          monthly_price_usd: number
+          org_id: string
+          status?: string
+          submission_id: string
+        }
+        Update: {
+          activated_at?: string
+          created_at?: string
+          id?: string
+          monthly_price_usd?: number
+          org_id?: string
+          status?: string
+          submission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_licenses_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_licenses_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "module_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      module_submissions: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          developer_id: string
+          id: string
+          manifest: Json
+          module_key: string
+          monthly_price_usd: number
+          name: string
+          review_notes: string | null
+          reviewed_at: string | null
+          status: string
+          submitted_at: string | null
+          version: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description: string
+          developer_id: string
+          id?: string
+          manifest?: Json
+          module_key: string
+          monthly_price_usd?: number
+          name: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          version?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          developer_id?: string
+          id?: string
+          manifest?: Json
+          module_key?: string
+          monthly_price_usd?: number
+          name?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_submissions_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -4829,29 +5271,41 @@ export type Database = {
       sales_invoice_items: {
         Row: {
           description: string
+          discount: number
           id: string
           invoice_id: string
           line_total: number
           product_id: string | null
           quantity: number
+          sku: string | null
+          tax_rate: number | null
+          unit: string | null
           unit_price: number
         }
         Insert: {
           description: string
+          discount?: number
           id?: string
           invoice_id: string
           line_total?: number
           product_id?: string | null
           quantity?: number
+          sku?: string | null
+          tax_rate?: number | null
+          unit?: string | null
           unit_price?: number
         }
         Update: {
           description?: string
+          discount?: number
           id?: string
           invoice_id?: string
           line_total?: number
           product_id?: string | null
           quantity?: number
+          sku?: string | null
+          tax_rate?: number | null
+          unit?: string | null
           unit_price?: number
         }
         Relationships: [
@@ -4874,22 +5328,29 @@ export type Database = {
       sales_invoices: {
         Row: {
           amount_paid: number
+          billing_address: string | null
           branch_id: string | null
           created_at: string
           created_by: string | null
           currency: string
           customer_id: string | null
+          delivery_address: string | null
           discount_reason: string | null
           discount_total: number
           doc_type: string
           due_date: string | null
           id: string
+          invoice_date: string
           invoice_number: string
           issued_at: string | null
           notes: string | null
           org_id: string
           overdue_notified_at: string | null
+          payment_terms: string | null
           pos_session_id: string | null
+          reference: string | null
+          salesperson: string | null
+          shipping_total: number
           status: string
           subtotal: number
           tax_total: number
@@ -4898,22 +5359,29 @@ export type Database = {
         }
         Insert: {
           amount_paid?: number
+          billing_address?: string | null
           branch_id?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
           customer_id?: string | null
+          delivery_address?: string | null
           discount_reason?: string | null
           discount_total?: number
           doc_type?: string
           due_date?: string | null
           id?: string
+          invoice_date?: string
           invoice_number: string
           issued_at?: string | null
           notes?: string | null
           org_id: string
           overdue_notified_at?: string | null
+          payment_terms?: string | null
           pos_session_id?: string | null
+          reference?: string | null
+          salesperson?: string | null
+          shipping_total?: number
           status?: string
           subtotal?: number
           tax_total?: number
@@ -4922,22 +5390,29 @@ export type Database = {
         }
         Update: {
           amount_paid?: number
+          billing_address?: string | null
           branch_id?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
           customer_id?: string | null
+          delivery_address?: string | null
           discount_reason?: string | null
           discount_total?: number
           doc_type?: string
           due_date?: string | null
           id?: string
+          invoice_date?: string
           invoice_number?: string
           issued_at?: string | null
           notes?: string | null
           org_id?: string
           overdue_notified_at?: string | null
+          payment_terms?: string | null
           pos_session_id?: string | null
+          reference?: string | null
+          salesperson?: string | null
+          shipping_total?: number
           status?: string
           subtotal?: number
           tax_total?: number
@@ -6860,6 +7335,50 @@ export type Database = {
           },
         ]
       }
+      wallet_transactions: {
+        Row: {
+          amount_usd: number
+          created_at: string
+          developer_id: string
+          id: string
+          method: string | null
+          reference: string | null
+          status: string
+          tokens: number
+          type: string
+        }
+        Insert: {
+          amount_usd?: number
+          created_at?: string
+          developer_id: string
+          id?: string
+          method?: string | null
+          reference?: string | null
+          status?: string
+          tokens?: number
+          type: string
+        }
+        Update: {
+          amount_usd?: number
+          created_at?: string
+          developer_id?: string
+          id?: string
+          method?: string | null
+          reference?: string | null
+          status?: string
+          tokens?: number
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       warehouse_aisles: {
         Row: {
           aisle_type: string | null
@@ -7498,6 +8017,21 @@ export type Database = {
         Args: { p_org_id: string; p_transfer_id: string }
         Returns: undefined
       }
+      charge_api_tokens: {
+        Args: {
+          p_api_key_id: string
+          p_developer_id: string
+          p_endpoint: string
+          p_method: string
+          p_status_code: number
+          p_tokens: number
+        }
+        Returns: number
+      }
+      check_balance_alerts: {
+        Args: { p_developer_id: string }
+        Returns: undefined
+      }
       check_overdue_invoices: { Args: { p_org_id: string }; Returns: number }
       close_pos_session: {
         Args: {
@@ -7752,6 +8286,30 @@ export type Database = {
             }
             Returns: string
           }
+        | {
+            Args: {
+              p_billing_address?: string
+              p_branch_id: string
+              p_customer_id?: string
+              p_delivery_address?: string
+              p_discount_reason?: string
+              p_discount_total?: number
+              p_doc_type?: string
+              p_due_date?: string
+              p_invoice_date?: string
+              p_items?: Json
+              p_notes?: string
+              p_org_id: string
+              p_payment_terms?: string
+              p_reference?: string
+              p_salesperson?: string
+              p_shipping_total?: number
+              p_status?: string
+              p_tax_total?: number
+              p_warehouse_id?: string
+            }
+            Returns: string
+          }
       create_sheq_incident: {
         Args: {
           p_branch_id?: string
@@ -7896,6 +8454,18 @@ export type Database = {
         }
         Returns: string
       }
+      credit_wallet_topup: {
+        Args: { p_transaction_id: string }
+        Returns: number
+      }
+      developer_licensed_orgs: {
+        Args: { p_developer_id: string }
+        Returns: {
+          module_key: string
+          org_id: string
+          org_name: string
+        }[]
+      }
       disconnect_integration: {
         Args: { p_org_id: string; p_provider_key: string }
         Returns: undefined
@@ -7916,6 +8486,17 @@ export type Database = {
           p_technical_score: number
         }
         Returns: undefined
+      }
+      get_api_key_by_hash: {
+        Args: { p_key_hash: string }
+        Returns: {
+          developer_id: string
+          developer_status: string
+          id: string
+          org_id: string
+          scope: string
+          status: string
+        }[]
       }
       get_platform_staff_context: {
         Args: never
@@ -8326,20 +8907,42 @@ export type Database = {
         Args: { p_invoice_id: string; p_org_id: string; p_session_id: string }
         Returns: undefined
       }
-      update_draft_invoice: {
-        Args: {
-          p_customer_id?: string
-          p_discount_reason?: string
-          p_discount_total?: number
-          p_due_date?: string
-          p_invoice_id: string
-          p_items?: Json
-          p_notes?: string
-          p_org_id: string
-          p_tax_total?: number
-        }
-        Returns: undefined
-      }
+      update_draft_invoice:
+        | {
+            Args: {
+              p_customer_id?: string
+              p_discount_reason?: string
+              p_discount_total?: number
+              p_due_date?: string
+              p_invoice_id: string
+              p_items?: Json
+              p_notes?: string
+              p_org_id: string
+              p_tax_total?: number
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              p_billing_address?: string
+              p_customer_id?: string
+              p_delivery_address?: string
+              p_discount_reason?: string
+              p_discount_total?: number
+              p_due_date?: string
+              p_invoice_date?: string
+              p_invoice_id: string
+              p_items?: Json
+              p_notes?: string
+              p_org_id: string
+              p_payment_terms?: string
+              p_reference?: string
+              p_salesperson?: string
+              p_shipping_total?: number
+              p_tax_total?: number
+            }
+            Returns: undefined
+          }
       user_org_ids: { Args: never; Returns: string[] }
       void_invoice: {
         Args: { p_invoice_id: string; p_org_id: string; p_reason?: string }

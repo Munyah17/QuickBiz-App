@@ -20,7 +20,7 @@ export const initialDisciplinaryActionState: DisciplinaryActionState = { error: 
 
 export async function createCaseAction(_prev: DisciplinaryActionState, formData: FormData): Promise<DisciplinaryActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "disciplinary");
+  await requireModuleEnabled(supabase, orgId, "hr");
 
   if (!permissions.has("disciplinary.manage")) {
     return { error: "You don't have permission to open disciplinary cases.", success: false };
@@ -49,7 +49,7 @@ export async function createCaseAction(_prev: DisciplinaryActionState, formData:
 
 export async function recordCaseActionAction(_prev: DisciplinaryActionState, formData: FormData): Promise<DisciplinaryActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "disciplinary");
+  await requireModuleEnabled(supabase, orgId, "hr");
 
   if (!permissions.has("disciplinary.manage")) {
     return { error: "You don't have permission to record disciplinary actions.", success: false };
@@ -76,7 +76,7 @@ export async function recordCaseActionAction(_prev: DisciplinaryActionState, for
 
 export async function closeCaseAction(caseId: string): Promise<void> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "disciplinary");
+  await requireModuleEnabled(supabase, orgId, "hr");
 
   if (!permissions.has("disciplinary.manage")) {
     throw new Error("You don't have permission to close disciplinary cases.");
@@ -88,7 +88,7 @@ export async function closeCaseAction(caseId: string): Promise<void> {
 
 export async function scheduleHearingAction(_prev: DisciplinaryActionState, formData: FormData): Promise<DisciplinaryActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "disciplinary");
+  await requireModuleEnabled(supabase, orgId, "hr");
 
   if (!permissions.has("disciplinary.manage")) {
     return { error: "You don't have permission to schedule hearings.", success: false };
@@ -115,7 +115,7 @@ export async function scheduleHearingAction(_prev: DisciplinaryActionState, form
 
 export async function recordHearingOutcomeAction(_prev: DisciplinaryActionState, formData: FormData): Promise<DisciplinaryActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "disciplinary");
+  await requireModuleEnabled(supabase, orgId, "hr");
 
   if (!permissions.has("disciplinary.manage")) {
     return { error: "You don't have permission to record hearing outcomes.", success: false };
@@ -141,7 +141,7 @@ export async function recordHearingOutcomeAction(_prev: DisciplinaryActionState,
 
 export async function issueWarningAction(_prev: DisciplinaryActionState, formData: FormData): Promise<DisciplinaryActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "disciplinary");
+  await requireModuleEnabled(supabase, orgId, "hr");
 
   if (!permissions.has("disciplinary.manage")) {
     return { error: "You don't have permission to issue warnings.", success: false };

@@ -18,7 +18,7 @@ const statusTone: Record<string, "success" | "info" | "warning" | "danger" | "ne
 export default async function SupplierDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { supabase, orgId } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "purchasing");
+  await requireModuleEnabled(supabase, orgId, "sales");
 
   const supplier = await getSupplierDetail(supabase, orgId, id);
   if (!supplier) notFound();

@@ -6,7 +6,7 @@ import { SuppliersTable } from "./SuppliersTable";
 
 export default async function SuppliersPage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "purchasing");
+  await requireModuleEnabled(supabase, orgId, "sales");
   const suppliers = await listSuppliers(supabase, orgId);
 
   // Calculate statistics

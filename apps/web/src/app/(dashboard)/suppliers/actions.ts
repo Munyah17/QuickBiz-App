@@ -24,7 +24,7 @@ function inputFromForm(formData: FormData): SupplierInput {
 
 export async function createSupplierAction(_prev: SupplierActionState, formData: FormData): Promise<SupplierActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "purchasing");
+  await requireModuleEnabled(supabase, orgId, "sales");
 
   if (!permissions.has("purchasing.manage")) {
     return { error: "You don't have permission to manage suppliers.", success: false };

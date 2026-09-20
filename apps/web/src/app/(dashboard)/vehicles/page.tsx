@@ -11,7 +11,7 @@ import { VehiclesTable } from "./VehiclesTable";
 
 export default async function VehiclesPage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "fleet");
+  await requireModuleEnabled(supabase, orgId, "logistics");
   const canManage = permissions.has("fleet.manage");
 
   const [vehicles, branches, employees] = await Promise.all([

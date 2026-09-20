@@ -23,7 +23,7 @@ const SECTION_ORDER: Array<{ title: string; categories: string[] }> = [
 
 export default async function IntegrationsPage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "local_services");
+  await requireModuleEnabled(supabase, orgId, "service_management");
   const canManage = permissions.has("integrations.manage");
 
   const [providers, connections] = await Promise.all([listProviders(supabase), listConnections(supabase, orgId)]);

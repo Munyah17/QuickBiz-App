@@ -13,7 +13,7 @@ export const initialCampaignActionState: CampaignActionState = { error: null, su
 
 export async function createCampaignAction(_prev: CampaignActionState, formData: FormData): Promise<CampaignActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "marketing");
+  await requireModuleEnabled(supabase, orgId, "crm");
 
   if (!permissions.has("marketing.manage")) {
     return { error: "You don't have permission to create campaigns.", success: false };

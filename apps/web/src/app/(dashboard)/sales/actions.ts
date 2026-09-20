@@ -39,6 +39,13 @@ export async function createInvoiceAction(_prev: SalesActionState, formData: For
   const discountTotal = Number(formData.get("discountTotal") ?? 0);
   const discountReason = String(formData.get("discountReason") ?? "").trim();
   const saveAs = String(formData.get("saveAs") ?? "issued");
+  const invoiceDate = String(formData.get("invoiceDate") ?? "").trim() || null;
+  const reference = String(formData.get("reference") ?? "").trim();
+  const salesperson = String(formData.get("salesperson") ?? "").trim();
+  const paymentTerms = String(formData.get("paymentTerms") ?? "").trim();
+  const shippingTotal = Number(formData.get("shippingTotal") ?? 0);
+  const billingAddress = String(formData.get("billingAddress") ?? "").trim();
+  const deliveryAddress = String(formData.get("deliveryAddress") ?? "").trim();
 
   let items: InvoiceLineInput[];
   try {
@@ -53,6 +60,7 @@ export async function createInvoiceAction(_prev: SalesActionState, formData: For
     return { error: "Every line needs a description and a quantity greater than zero.", success: false };
   }
   if (discountTotal < 0) return { error: "Discount cannot be negative.", success: false };
+  if (shippingTotal < 0) return { error: "Shipping cannot be negative.", success: false };
 
   let invoiceId: string;
   try {
@@ -69,6 +77,13 @@ export async function createInvoiceAction(_prev: SalesActionState, formData: For
       discountReason,
       status: saveAs === "issued" ? "issued" : "draft",
       docType: saveAs === "quote" ? "quote" : "invoice",
+      invoiceDate,
+      reference,
+      salesperson,
+      paymentTerms,
+      shippingTotal,
+      billingAddress,
+      deliveryAddress,
     });
   } catch (err) {
     return { error: (err as Error).message, success: false };
@@ -163,6 +178,13 @@ export async function updateDraftInvoiceAction(
   const dueDate = String(formData.get("dueDate") ?? "") || null;
   const discountTotal = Number(formData.get("discountTotal") ?? 0);
   const discountReason = String(formData.get("discountReason") ?? "").trim();
+  const invoiceDate = String(formData.get("invoiceDate") ?? "").trim() || null;
+  const reference = String(formData.get("reference") ?? "").trim();
+  const salesperson = String(formData.get("salesperson") ?? "").trim();
+  const paymentTerms = String(formData.get("paymentTerms") ?? "").trim();
+  const shippingTotal = Number(formData.get("shippingTotal") ?? 0);
+  const billingAddress = String(formData.get("billingAddress") ?? "").trim();
+  const deliveryAddress = String(formData.get("deliveryAddress") ?? "").trim();
 
   let items: InvoiceLineInput[];
   try {
@@ -177,6 +199,7 @@ export async function updateDraftInvoiceAction(
     return { error: "Every line needs a description and a quantity greater than zero.", success: false };
   }
   if (discountTotal < 0) return { error: "Discount cannot be negative.", success: false };
+  if (shippingTotal < 0) return { error: "Shipping cannot be negative.", success: false };
 
   try {
     await updateDraftInvoice(supabase, {
@@ -189,6 +212,13 @@ export async function updateDraftInvoiceAction(
       dueDate,
       discountTotal,
       discountReason,
+      invoiceDate,
+      reference,
+      salesperson,
+      paymentTerms,
+      shippingTotal,
+      billingAddress,
+      deliveryAddress,
     });
   } catch (err) {
     return { error: (err as Error).message, success: false };

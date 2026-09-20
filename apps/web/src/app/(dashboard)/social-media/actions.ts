@@ -16,7 +16,7 @@ export async function connectSocialAccountAction(
   formData: FormData
 ): Promise<SocialMediaActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "social_media");
+  await requireModuleEnabled(supabase, orgId, "crm");
 
   if (!permissions.has("social_media.manage")) {
     return { error: "You don't have permission to connect social accounts.", success: false };
@@ -45,7 +45,7 @@ export async function queueSocialPostAction(
   formData: FormData
 ): Promise<SocialMediaActionState> {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "social_media");
+  await requireModuleEnabled(supabase, orgId, "crm");
 
   if (!permissions.has("social_media.manage")) {
     return { error: "You don't have permission to queue social media posts.", success: false };

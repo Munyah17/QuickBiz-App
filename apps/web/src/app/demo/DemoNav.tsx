@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Package, ChevronsUpDown, ChevronDown, LogOut, User, Settings } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { NAV_STRUCTURE, isNavGroup, prefixNavStructure, type NavLeaf } from "@/config/nav";
+import { NAV_STRUCTURE, isNavGroup, prefixNavStructure, type NavGroup, type NavLeaf } from "@/config/nav";
 import { useDemo } from "@/lib/demo/DemoContext";
 
 const DEMO_NAV = prefixNavStructure(NAV_STRUCTURE, "/demo");
@@ -48,6 +48,9 @@ export function DemoSidebar() {
 
   const enabledKeys = new Set(modules.filter((m) => m.enabled).map((m) => m.key));
   const leafVisible = (leaf: NavLeaf) => !leaf.moduleKey || enabledKeys.has(leaf.moduleKey);
+  // Groups carry the moduleKey — one collapsible group per Module Store
+  // module, hidden entirely when that module isn't enabled.
+  const groupVisible = (group: NavGroup) => !group.moduleKey || enabledKeys.has(group.moduleKey);
 
   return (
     <aside className="flex h-full w-60 shrink-0 flex-col bg-sidebar text-sidebar-text">
@@ -64,6 +67,8 @@ export function DemoSidebar() {
             if (!leafVisible(entry)) return null;
             return <LeafLink key={entry.key} item={entry} active={isLeafActive(pathname, entry.href)} />;
           }
+
+          if (!groupVisible(entry)) return null;
 
           const visibleChildren = entry.children.filter(leafVisible);
           if (visibleChildren.length === 0) return null;

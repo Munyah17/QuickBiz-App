@@ -6,7 +6,7 @@ import { IbanRequestsTable } from "./IbanRequestsTable";
 
 export default async function IbanPage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "iban");
+  await requireModuleEnabled(supabase, orgId, "finance");
   const canManage = permissions.has("iban.manage");
 
   const requests = await listIbanRequests(supabase, orgId);

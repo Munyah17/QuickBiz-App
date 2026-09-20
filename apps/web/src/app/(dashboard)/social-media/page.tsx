@@ -8,7 +8,7 @@ import { SocialPostsTable } from "./SocialPostsTable";
 
 export default async function SocialMediaPage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
-  await requireModuleEnabled(supabase, orgId, "social_media");
+  await requireModuleEnabled(supabase, orgId, "crm");
   const canManage = permissions.has("social_media.manage");
 
   const [accounts, posts] = await Promise.all([
