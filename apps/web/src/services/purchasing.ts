@@ -203,13 +203,14 @@ export interface PurchaseOrderListRow {
   total: number;
   amount_paid: number;
   expected_date: string | null;
+  buyer_name: string | null;
   created_at: string;
 }
 
 export async function listPurchaseOrders(supabase: SupabaseClient, orgId: string): Promise<PurchaseOrderListRow[]> {
   const { data, error } = await supabase
     .from("purchase_orders")
-    .select("id, po_number, status, total, amount_paid, expected_date, created_at, suppliers(name)")
+    .select("id, po_number, status, total, amount_paid, expected_date, buyer_name, created_at, suppliers(name)")
     .eq("org_id", orgId)
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -222,6 +223,7 @@ export async function listPurchaseOrders(supabase: SupabaseClient, orgId: string
       total: number;
       amount_paid: number;
       expected_date: string | null;
+      buyer_name: string | null;
       created_at: string;
       suppliers: { name: string } | null;
     }>
@@ -233,6 +235,7 @@ export async function listPurchaseOrders(supabase: SupabaseClient, orgId: string
     total: row.total,
     amount_paid: row.amount_paid,
     expected_date: row.expected_date,
+    buyer_name: row.buyer_name,
     created_at: row.created_at,
   }));
 }
@@ -326,6 +329,7 @@ export async function createPurchaseOrder(
     taxTotal: number;
     notes: string;
     expectedDate?: string | null;
+    buyerName?: string;
   }
 ): Promise<string> {
   const { data, error } = await supabase.rpc("create_purchase_order", {
@@ -338,7 +342,18 @@ export async function createPurchaseOrder(
     p_expected_date: input.expectedDate ?? undefined,
   });
   if (error) throw error;
-  return data as string;
+  const poId = data as string;
+
+  // buyer_name isn't an RPC param — set it directly (purchasing.manage write
+  // policy covers the update).
+  if (input.buyerName) {
+    const { error: buyerError } = await supabase
+      .from("purchase_orders")
+      .update({ buyer_name: input.buyerName })
+      .eq("id", poId);
+    if (buyerError) throw buyerError;
+  }
+  return poId;
 }
 
 export async function receivePurchaseOrder(supabase: SupabaseClient, orgId: string, poId: string, warehouseId: string) {
@@ -348,7 +363,7 @@ export async function receivePurchaseOrder(supabase: SupabaseClient, orgId: stri
 
 export async function recordPurchasePayment(
   supabase: SupabaseClient,
-  input: { orgId: string; poId: string; amount: number; method: string; reference: string }
+  input: { orgId: string; poId: string; amount: number; method: string; reference: string; proofUrl?: string }
 ) {
   const { error } = await supabase.rpc("record_purchase_payment", {
     p_org_id: input.orgId,
@@ -356,6 +371,229 @@ export async function recordPurchasePayment(
     p_amount: input.amount,
     p_method: input.method,
     p_reference: input.reference || undefined,
+    p_proof_url: input.proofUrl || undefined,
   });
+  if (error) throw error;
+}
+
+// ============================================================
+// Creditors — AP aging: what we owe each supplier, bucketed by
+// days past the PO's expected date.
+// ============================================================
+
+export interface APAgingRow {
+  supplierId: string;
+  supplierName: string;
+  current: number;
+  days1to30: number;
+  days31to60: number;
+  days61to90: number;
+  over90: number;
+  total: number;
+}
+
+export async function getAPAging(supabase: SupabaseClient, orgId: string): Promise<APAgingRow[]> {
+  const { data, error } = await supabase
+    .from("purchase_orders")
+    .select("supplier_id, total, amount_paid, expected_date, created_at, suppliers(name)")
+    .eq("org_id", orgId)
+    .in("status", ["issued", "received"]);
+  if (error) throw error;
+
+  const today = new Date().toISOString().slice(0, 10);
+  const bySupplier = new Map<string, APAgingRow>();
+
+  for (const row of (data ?? []) as unknown as Array<{
+    supplier_id: string | null;
+    total: number;
+    amount_paid: number;
+    expected_date: string | null;
+    created_at: string;
+    suppliers: { name: string } | null;
+  }>) {
+    const balance = row.total - row.amount_paid;
+    if (balance <= 0) continue;
+
+    const key = row.supplier_id ?? "none";
+    const existing = bySupplier.get(key) ?? {
+      supplierId: key,
+      supplierName: row.suppliers?.name ?? "No supplier",
+      current: 0,
+      days1to30: 0,
+      days31to60: 0,
+      days61to90: 0,
+      over90: 0,
+      total: 0,
+    };
+
+    // Age from expected_date when set, otherwise from PO creation.
+    const ref = row.expected_date ?? row.created_at.slice(0, 10);
+    const daysPast = Math.floor((Date.parse(today) - Date.parse(ref)) / 86400000);
+    if (daysPast <= 0) existing.current += balance;
+    else if (daysPast <= 30) existing.days1to30 += balance;
+    else if (daysPast <= 60) existing.days31to60 += balance;
+    else if (daysPast <= 90) existing.days61to90 += balance;
+    else existing.over90 += balance;
+    existing.total += balance;
+    bySupplier.set(key, existing);
+  }
+
+  return [...bySupplier.values()].sort((a, b) => b.total - a.total);
+}
+
+// ============================================================
+// Purchase requisitions — internal ask → approve → convert to PO.
+// ============================================================
+
+export type RequisitionStatus = "pending" | "approved" | "rejected" | "converted" | "cancelled";
+
+export interface RequisitionItem {
+  id: string;
+  product_id: string | null;
+  description: string;
+  quantity: number;
+  estimated_cost: number;
+}
+
+export interface Requisition {
+  id: string;
+  requisition_number: string;
+  status: RequisitionStatus;
+  needed_by: string | null;
+  justification: string | null;
+  requestedByName: string | null;
+  po_id: string | null;
+  created_at: string;
+  items: RequisitionItem[];
+  estimatedTotal: number;
+}
+
+export async function listRequisitions(supabase: SupabaseClient, orgId: string): Promise<Requisition[]> {
+  const { data, error } = await supabase
+    .from("purchase_requisitions")
+    .select(
+      "id, requisition_number, status, needed_by, justification, requested_by, po_id, created_at, purchase_requisition_items(id, product_id, description, quantity, estimated_cost)"
+    )
+    .eq("org_id", orgId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+
+  const rows = (data ?? []) as unknown as Array<{
+    id: string;
+    requisition_number: string;
+    status: RequisitionStatus;
+    needed_by: string | null;
+    justification: string | null;
+    requested_by: string | null;
+    po_id: string | null;
+    created_at: string;
+    purchase_requisition_items: RequisitionItem[];
+  }>;
+
+  const ids = [...new Set(rows.map((r) => r.requested_by).filter((x): x is string => !!x))];
+  const nameById = new Map<string, string>();
+  if (ids.length > 0) {
+    const { data: profiles } = await supabase.from("profiles").select("id, full_name").in("id", ids);
+    for (const p of (profiles ?? []) as Array<{ id: string; full_name: string | null }>) {
+      if (p.full_name) nameById.set(p.id, p.full_name);
+    }
+  }
+
+  return rows.map((r) => ({
+    id: r.id,
+    requisition_number: r.requisition_number,
+    status: r.status,
+    needed_by: r.needed_by,
+    justification: r.justification,
+    requestedByName: r.requested_by ? (nameById.get(r.requested_by) ?? null) : null,
+    po_id: r.po_id,
+    created_at: r.created_at,
+    items: r.purchase_requisition_items ?? [],
+    estimatedTotal: (r.purchase_requisition_items ?? []).reduce((s, i) => s + i.quantity * i.estimated_cost, 0),
+  }));
+}
+
+export async function getRequisition(supabase: SupabaseClient, orgId: string, requisitionId: string): Promise<Requisition | null> {
+  const { data, error } = await supabase
+    .from("purchase_requisitions")
+    .select(
+      "id, requisition_number, status, needed_by, justification, requested_by, po_id, created_at, purchase_requisition_items(id, product_id, description, quantity, estimated_cost)"
+    )
+    .eq("org_id", orgId)
+    .eq("id", requisitionId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+
+  const r = data as unknown as {
+    id: string;
+    requisition_number: string;
+    status: RequisitionStatus;
+    needed_by: string | null;
+    justification: string | null;
+    requested_by: string | null;
+    po_id: string | null;
+    created_at: string;
+    purchase_requisition_items: RequisitionItem[];
+  };
+
+  return {
+    id: r.id,
+    requisition_number: r.requisition_number,
+    status: r.status,
+    needed_by: r.needed_by,
+    justification: r.justification,
+    requestedByName: null,
+    po_id: r.po_id,
+    created_at: r.created_at,
+    items: r.purchase_requisition_items ?? [],
+    estimatedTotal: (r.purchase_requisition_items ?? []).reduce((s, i) => s + i.quantity * i.estimated_cost, 0),
+  };
+}
+
+export async function createRequisition(
+  supabase: SupabaseClient,
+  input: {
+    orgId: string;
+    branchId: string | null;
+    items: Array<{ product_id: string; description: string; quantity: number; estimated_cost: number }>;
+    neededBy?: string | null;
+    justification?: string;
+  }
+) {
+  const { data, error } = await supabase.rpc("create_purchase_requisition", {
+    p_org_id: input.orgId,
+    // Generated types mark p_branch_id required, but the function accepts
+    // NULL (branch is optional) — cast keeps the runtime null intact.
+    p_branch_id: input.branchId as string,
+    p_items: input.items as unknown as Json,
+    p_needed_by: input.neededBy ?? undefined,
+    p_justification: input.justification || undefined,
+  });
+  if (error) throw error;
+  return data as string;
+}
+
+export async function decideRequisition(
+  supabase: SupabaseClient,
+  orgId: string,
+  requisitionId: string,
+  decision: "approved" | "rejected"
+) {
+  const { error } = await supabase.rpc("decide_purchase_requisition", {
+    p_org_id: orgId,
+    p_requisition_id: requisitionId,
+    p_decision: decision,
+  });
+  if (error) throw error;
+}
+
+/** Link an approved requisition to the PO created from it. */
+export async function markRequisitionConverted(supabase: SupabaseClient, requisitionId: string, poId: string) {
+  const { error } = await supabase
+    .from("purchase_requisitions")
+    .update({ status: "converted", po_id: poId })
+    .eq("id", requisitionId)
+    .eq("status", "approved");
   if (error) throw error;
 }

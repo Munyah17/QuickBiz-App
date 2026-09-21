@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireOrgContext } from "@/lib/session";
 import { getInvoiceDetail } from "@/services/sales";
-import { getOrgSettings } from "@/services/org";
 import { paymentMethodLabel } from "@/config/paymentMethods";
+import { getDocumentBranding, Letterhead, DocumentFooter } from "@/components/print/DocumentBranding";
 import { PrintButton } from "./PrintButton";
 
 const statusLabel: Record<string, string> = {
@@ -47,10 +47,17 @@ export default async function InvoicePrintPage({
   const invoice = await getInvoiceDetail(supabase, orgId, id);
   if (!invoice) notFound();
 
-  const settings = await getOrgSettings(supabase, orgId);
-  const footerNote = typeof settings["invoice.footer"] === "string" ? (settings["invoice.footer"] as string) : null;
+  const branding = await getDocumentBranding(supabase, orgId);
   const balanceDue = invoice.total - invoice.amount_paid;
-  const docTitle = pickingSlip ? "Picking Slip" : invoice.doc_type === "quote" ? "Quotation" : "Tax Invoice";
+  const docTitle = pickingSlip
+    ? "Picking Slip"
+    : invoice.doc_type === "quote"
+      ? "Quotation"
+      : invoice.doc_type === "debit_note"
+        ? "Debit Note"
+        : invoice.doc_type === "boq"
+          ? "Bill of Quantities"
+          : "Tax Invoice";
   const accent = themeColor || "#1e293b";
 
   return (
@@ -66,10 +73,8 @@ export default async function InvoicePrintPage({
         {/* ---- Letterhead ---- */}
         <div className="flex items-start justify-between pb-6" style={{ borderBottom: `3px solid ${accent}` }}>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight" style={{ color: accent }}>
-              {orgName}
-            </h1>
-            <p className="mt-1 text-sm font-medium uppercase tracking-widest text-slate-500">{docTitle}</p>
+            <Letterhead orgName={orgName} branding={branding} accent={accent} />
+            <p className="mt-2 text-sm font-medium uppercase tracking-widest text-slate-500">{docTitle}</p>
           </div>
           <div className="text-right">
             <p className="text-2xl font-semibold text-slate-900">{invoice.invoice_number}</p>
@@ -77,7 +82,13 @@ export default async function InvoicePrintPage({
               className="mt-2 inline-block rounded px-2.5 py-1 text-xs font-bold tracking-widest text-white"
               style={{ backgroundColor: accent }}
             >
-              {invoice.doc_type === "quote" ? "QUOTATION" : (statusLabel[invoice.status] ?? invoice.status.toUpperCase())}
+              {invoice.doc_type === "quote"
+                ? "QUOTATION"
+                : invoice.doc_type === "debit_note"
+                  ? "DEBIT NOTE"
+                  : invoice.doc_type === "boq"
+                    ? "BOQ"
+                    : (statusLabel[invoice.status] ?? invoice.status.toUpperCase())}
             </p>
           </div>
         </div>
@@ -257,11 +268,7 @@ export default async function InvoicePrintPage({
           </div>
         )}
 
-        {footerNote && <p className="mt-8 text-center text-xs italic text-slate-500">{footerNote}</p>}
-
-        <p className="mt-10 border-t border-slate-200 pt-4 text-center text-xs text-slate-400">
-          {orgName} · {invoice.invoice_number} · {invoice.currency}
-        </p>
+        <DocumentFooter branding={branding} orgName={orgName} docRef={invoice.invoice_number} currency={invoice.currency} />
       </div>
     </div>
   );

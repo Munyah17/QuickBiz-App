@@ -7,7 +7,7 @@ import { Button } from "@/components/Button";
 import { Input, Select, Textarea } from "@/components/Input";
 import { FormField } from "@/components/FormField";
 import { createPurchaseOrderAction, initialPurchasingActionState } from "../actions";
-import type { Supplier } from "@/services/purchasing";
+import type { Supplier, Requisition } from "@/services/purchasing";
 import type { ProductWithStock } from "@/services/products";
 
 interface LineItem {
@@ -28,6 +28,7 @@ export function NewPOForm({
   preselectedProductId,
   preselectedQty,
   lowStockReorder,
+  requisition,
 }: {
   suppliers: Supplier[];
   products: ProductWithStock[];
@@ -36,9 +37,19 @@ export function NewPOForm({
   preselectedProductId?: string | null;
   preselectedQty?: number | null;
   lowStockReorder?: boolean;
+  requisition?: Requisition | null;
 }) {
   const [state, formAction, isPending] = useActionState(createPurchaseOrderAction, initialPurchasingActionState);
   const [items, setItems] = useState<LineItem[]>(() => {
+    if (requisition && requisition.items.length > 0) {
+      return requisition.items.map((i) => ({
+        key: nextKey++,
+        product_id: i.product_id ?? "",
+        description: i.description,
+        quantity: i.quantity,
+        unit_cost: i.estimated_cost,
+      }));
+    }
     if (lowStockReorder) {
       const lows = products
         .filter((p) => p.reorder_level > 0 && p.totalStock <= p.reorder_level)
@@ -96,6 +107,7 @@ export function NewPOForm({
       <input type="hidden" name="items" value={serializedItems} />
       <input type="hidden" name="taxTotal" value={taxTotal} />
       <input type="hidden" name="branchId" value={branchId} />
+      {requisition && <input type="hidden" name="requisitionId" value={requisition.id} />}
 
       <Card>
         <CardHeader title="Order details" />
@@ -113,6 +125,14 @@ export function NewPOForm({
           <FormField label="Expected delivery" htmlFor="expectedDate" hint="Late POs show on the dashboard">
             <Input id="expectedDate" name="expectedDate" type="date" />
           </FormField>
+          <FormField label="Buyer" htmlFor="buyerName" hint="Internal buyer handling this order">
+            <Input id="buyerName" name="buyerName" placeholder="e.g. T. Moyo" />
+          </FormField>
+          {requisition && (
+            <div className="flex items-end pb-1 text-sm text-text-secondary">
+              From requisition <span className="ml-1 font-mono font-medium">{requisition.requisition_number}</span>
+            </div>
+          )}
         </div>
       </Card>
 

@@ -109,13 +109,36 @@ function ShipmentForm({
           </FormField>
         </div>
 
-        <FormField label="Tracking number" htmlFor="trackingNumber" hint="Optional, your own or the courier's reference">
-          <Input id="trackingNumber" name="trackingNumber" />
+        <div className="grid grid-cols-2 gap-4">
+          <FormField label="Tracking number" htmlFor="trackingNumber" hint="Optional, your own or the courier's reference">
+            <Input id="trackingNumber" name="trackingNumber" />
+          </FormField>
+          <FormField label="Priority" htmlFor="priority">
+            <Select id="priority" name="priority" defaultValue="normal">
+              <option value="low">Low</option>
+              <option value="normal">Normal</option>
+              <option value="high">High</option>
+              <option value="urgent">Urgent</option>
+            </Select>
+          </FormField>
+        </div>
+
+        <FormField label="Origin / pickup address" htmlFor="originAddress" hint="Optional — where the shipment is collected">
+          <Textarea id="originAddress" name="originAddress" rows={2} />
         </FormField>
 
         <FormField label="Delivery address" htmlFor="deliveryAddress" required>
           <Textarea id="deliveryAddress" name="deliveryAddress" required rows={2} />
         </FormField>
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField label="Route" htmlFor="routeDescription" hint="Optional — e.g. via A5, depot → CBD">
+            <Input id="routeDescription" name="routeDescription" />
+          </FormField>
+          <FormField label="ETA" htmlFor="eta" hint="Optional expected arrival">
+            <Input id="eta" name="eta" type="datetime-local" />
+          </FormField>
+        </div>
 
         <FormField label="Notes" htmlFor="notes" hint="Optional, e.g. access instructions, fragile handling">
           <Textarea id="notes" name="notes" rows={2} />

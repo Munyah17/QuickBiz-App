@@ -4,15 +4,21 @@ import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/Button";
 import { StatCard } from "@/components/StatCard";
 import { requireOrgContext, requireModuleEnabled } from "@/lib/session";
-import { listPurchaseOrders } from "@/services/purchasing";
+import { listPurchaseOrders, listRequisitions } from "@/services/purchasing";
 import { PurchasingTable } from "./PurchasingTable";
+import { RequisitionsSection } from "./RequisitionsSection";
 
 export default async function PurchasingPage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
   await requireModuleEnabled(supabase, orgId, "sales");
   const canManage = permissions.has("purchasing.manage");
 
-  const orders = await listPurchaseOrders(supabase, orgId);
+  const { data: member } = await supabase.from("org_members").select("branch_id").eq("status", "active").limit(1).maybeSingle();
+
+  const [orders, requisitions] = await Promise.all([
+    listPurchaseOrders(supabase, orgId),
+    listRequisitions(supabase, orgId),
+  ]);
 
   const today = new Date().toISOString().slice(0, 10);
   const isLate = (o: (typeof orders)[number]) =>
@@ -73,6 +79,12 @@ export default async function PurchasingPage() {
       </div>
 
       <PurchasingTable orders={orders} />
+
+      <RequisitionsSection
+        requisitions={requisitions}
+        branchId={(member?.branch_id as string) ?? ""}
+        canManage={canManage}
+      />
     </div>
   );
 }

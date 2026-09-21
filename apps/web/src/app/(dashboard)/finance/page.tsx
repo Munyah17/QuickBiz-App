@@ -2,6 +2,8 @@ import { PageHeader } from "@/components/PageHeader";
 import { Card, CardHeader } from "@/components/Card";
 import { requireOrgContext, requireModuleEnabled } from "@/lib/session";
 import { getPnLSummary } from "@/services/finance";
+import { listSubscriptions } from "@/services/subscriptions";
+import { SubscriptionsSection } from "./SubscriptionsSection";
 
 // Date.UTC rather than local getFullYear/getMonth: this server runs in
 // Africa/Harare (UTC+2), and local-midnight math shifts the UTC date by the
@@ -28,14 +30,19 @@ function Row({ label, value, bold, indent }: { label: string; value: number; bol
 }
 
 export default async function FinancePage({ searchParams }: { searchParams: Promise<{ from?: string; to?: string }> }) {
-  const { supabase, orgId } = await requireOrgContext();
+  const { supabase, orgId, permissions } = await requireOrgContext();
   await requireModuleEnabled(supabase, orgId, "finance");
+  const canManage = permissions.has("finance.manage");
 
   const params = await searchParams;
   const from = params.from || firstOfMonth();
   const to = params.to || today();
 
-  const pnl = await getPnLSummary(supabase, orgId, `${from}T00:00:00Z`, `${to}T23:59:59Z`);
+  const [pnl, incoming, outgoing] = await Promise.all([
+    getPnLSummary(supabase, orgId, `${from}T00:00:00Z`, `${to}T23:59:59Z`),
+    listSubscriptions(supabase, orgId, "incoming"),
+    listSubscriptions(supabase, orgId, "outgoing"),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -75,6 +82,8 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
         Revenue comes from issued Sales invoices, cost of goods sold from each sold product&apos;s recorded cost
         price, and operating expenses from the Expenses log. This is a simple P&amp;L, not a full general ledger.
       </p>
+
+      <SubscriptionsSection incoming={incoming} outgoing={outgoing} canManage={canManage} />
     </div>
   );
 }

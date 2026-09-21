@@ -6,7 +6,11 @@ export interface ShipmentRow {
   status: "pending" | "dispatched" | "in_transit" | "delivered" | "failed" | "returned";
   carrier: string | null;
   tracking_number: string | null;
+  origin_address: string | null;
   delivery_address: string | null;
+  route_description: string | null;
+  eta: string | null;
+  priority: "low" | "normal" | "high" | "urgent";
   dispatched_at: string | null;
   delivered_at: string | null;
   notes: string | null;
@@ -22,7 +26,7 @@ export async function listShipments(supabase: SupabaseClient, orgId: string): Pr
   const { data, error } = await supabase
     .from("shipments")
     .select(
-      "id, shipment_number, status, carrier, tracking_number, delivery_address, dispatched_at, delivered_at, notes, created_at, customers(name), vehicles(registration_number), employees(full_name), sales_invoices(invoice_number), online_orders(order_number)"
+      "id, shipment_number, status, carrier, tracking_number, origin_address, delivery_address, route_description, eta, priority, dispatched_at, delivered_at, notes, created_at, customers(name), vehicles(registration_number), employees(full_name), sales_invoices(invoice_number), online_orders(order_number)"
     )
     .eq("org_id", orgId)
     .order("created_at", { ascending: false });
@@ -35,7 +39,11 @@ export async function listShipments(supabase: SupabaseClient, orgId: string): Pr
       status: ShipmentRow["status"];
       carrier: string | null;
       tracking_number: string | null;
+      origin_address: string | null;
       delivery_address: string | null;
+      route_description: string | null;
+      eta: string | null;
+      priority: ShipmentRow["priority"];
       dispatched_at: string | null;
       delivered_at: string | null;
       notes: string | null;
@@ -52,7 +60,11 @@ export async function listShipments(supabase: SupabaseClient, orgId: string): Pr
     status: row.status,
     carrier: row.carrier,
     tracking_number: row.tracking_number,
+    origin_address: row.origin_address,
     delivery_address: row.delivery_address,
+    route_description: row.route_description,
+    eta: row.eta,
+    priority: row.priority,
     dispatched_at: row.dispatched_at,
     delivered_at: row.delivered_at,
     notes: row.notes,
@@ -74,7 +86,11 @@ export interface ShipmentInput {
   driverId: string;
   carrier: string;
   trackingNumber: string;
+  originAddress: string;
   deliveryAddress: string;
+  routeDescription: string;
+  eta: string;
+  priority: string;
   notes: string;
 }
 
@@ -96,13 +112,22 @@ export async function createShipment(supabase: SupabaseClient, orgId: string, in
     shipment_number: shipmentNumber,
     carrier: input.carrier || null,
     tracking_number: input.trackingNumber || null,
+    origin_address: input.originAddress || null,
     delivery_address: input.deliveryAddress || null,
+    route_description: input.routeDescription || null,
+    eta: input.eta || null,
+    priority: input.priority || "normal",
     notes: input.notes || null,
   });
   if (error) throw error;
 }
 
-export async function updateShipmentStatus(supabase: SupabaseClient, shipmentId: string, status: string) {
+export async function updateShipmentStatus(
+  supabase: SupabaseClient,
+  shipmentId: string,
+  status: string,
+  event?: { location?: string; note?: string }
+) {
   const now = new Date().toISOString();
   const { error } = await supabase
     .from("shipments")
@@ -112,5 +137,47 @@ export async function updateShipmentStatus(supabase: SupabaseClient, shipmentId:
       delivered_at: status === "delivered" ? now : undefined,
     })
     .eq("id", shipmentId);
+  if (error) throw error;
+
+  // Every status change is also a tracking event so the shipment builds a
+  // timeline customers/dispatchers can follow.
+  const { error: eventError } = await supabase.from("shipment_events").insert({
+    shipment_id: shipmentId,
+    status,
+    location: event?.location || null,
+    note: event?.note || null,
+  });
+  if (eventError) throw eventError;
+}
+
+export interface ShipmentEvent {
+  id: string;
+  status: string;
+  location: string | null;
+  note: string | null;
+  occurred_at: string;
+}
+
+export async function listShipmentEvents(supabase: SupabaseClient, shipmentId: string): Promise<ShipmentEvent[]> {
+  const { data, error } = await supabase
+    .from("shipment_events")
+    .select("id, status, location, note, occurred_at")
+    .eq("shipment_id", shipmentId)
+    .order("occurred_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as unknown as ShipmentEvent[];
+}
+
+export async function addShipmentEvent(
+  supabase: SupabaseClient,
+  shipmentId: string,
+  input: { status: string; location?: string; note?: string }
+) {
+  const { error } = await supabase.from("shipment_events").insert({
+    shipment_id: shipmentId,
+    status: input.status,
+    location: input.location || null,
+    note: input.note || null,
+  });
   if (error) throw error;
 }

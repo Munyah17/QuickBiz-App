@@ -58,6 +58,10 @@ export function SalesTable({ invoices }: { invoices: InvoiceListRow[] }) {
         if (inv.doc_type !== "quote") return false;
       } else if (statusFilter === "invoice") {
         if (inv.doc_type !== "invoice") return false;
+      } else if (statusFilter === "debit_note") {
+        if (inv.doc_type !== "debit_note") return false;
+      } else if (statusFilter === "boq") {
+        if (inv.doc_type !== "boq") return false;
       } else if (statusFilter !== "all" && inv.status !== statusFilter) {
         return false;
       }
@@ -75,9 +79,11 @@ export function SalesTable({ invoices }: { invoices: InvoiceListRow[] }) {
         <div className="flex items-center gap-2">
           <SearchInput value={query} onChange={setQuery} placeholder="Search invoice #, customer..." />
           <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-36">
-            <option value="all">All statuses</option>
+            <option value="all">All documents</option>
             <option value="invoice">Invoices only</option>
             <option value="quote">Quotations only</option>
+            <option value="debit_note">Debit notes only</option>
+            <option value="boq">BOQs only</option>
             <option value="draft">Draft</option>
             <option value="issued">Issued</option>
             <option value="partially_paid">Part paid</option>
@@ -89,7 +95,14 @@ export function SalesTable({ invoices }: { invoices: InvoiceListRow[] }) {
             filename="sales-invoices"
             rows={filtered.map((inv) => ({
               Invoice: inv.invoice_number,
-              Type: inv.doc_type === "quote" ? "Quotation" : "Invoice",
+              Type:
+                inv.doc_type === "quote"
+                  ? "Quotation"
+                  : inv.doc_type === "debit_note"
+                    ? "Debit note"
+                    : inv.doc_type === "boq"
+                      ? "BOQ"
+                      : "Invoice",
               Customer: inv.customerName ?? "Walk-in",
               Status: inv.status,
               Total: inv.total,
@@ -135,6 +148,8 @@ export function SalesTable({ invoices }: { invoices: InvoiceListRow[] }) {
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-1.5">
                       {inv.doc_type === "quote" && <Badge tone="info">Quote</Badge>}
+                      {inv.doc_type === "debit_note" && <Badge tone="warning">Debit note</Badge>}
+                      {inv.doc_type === "boq" && <Badge tone="neutral">BOQ</Badge>}
                       <Badge tone={overdue ? "danger" : (statusTone[inv.status] ?? "neutral")}>
                         {overdue ? "Overdue" : (statusLabel[inv.status] ?? inv.status)}
                       </Badge>

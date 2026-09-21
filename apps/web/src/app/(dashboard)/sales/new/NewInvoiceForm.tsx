@@ -63,6 +63,13 @@ function plusDays(days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
+const DOC_TYPES: Array<{ value: SalesDocType; label: string; hint: string }> = [
+  { value: "invoice", label: "Invoice", hint: "Bills the customer; deducts stock when issued" },
+  { value: "quote", label: "Quotation", hint: "Draft proposal — convert to an invoice later" },
+  { value: "debit_note", label: "Debit note", hint: "Increases what the customer owes (e.g. undercharge) — no stock movement" },
+  { value: "boq", label: "Bill of quantities", hint: "Itemised quantities/pricing for tenders and project work" },
+];
+
 const PAYMENT_TERMS = [
   { value: "", label: "Not set" },
   { value: "due_on_receipt", label: "Due on receipt" },
@@ -106,6 +113,7 @@ export function NewInvoiceForm({
     initialSalesActionState
   );
   const [branchWarehouseId, setBranchWarehouseId] = useState(initial?.warehouseId ?? warehouses[0]?.warehouseId ?? "");
+  const [docType, setDocType] = useState<SalesDocType>(initial?.docType ?? "invoice");
   const [customerId, setCustomerId] = useState(initial?.customerId ?? "");
   const [invoiceDate, setInvoiceDate] = useState(initial?.invoiceDate ?? today());
   const [dueDate, setDueDate] = useState(initial?.dueDate ?? plusDays(30));
@@ -213,6 +221,7 @@ export function NewInvoiceForm({
   return (
     <form action={formAction} className="flex flex-col gap-6">
       {initial && <input type="hidden" name="invoiceId" value={initial.invoiceId} />}
+      <input type="hidden" name="docType" value={docType} />
       <input type="hidden" name="items" value={serializedItems} />
       <input type="hidden" name="taxTotal" value={taxTotal} />
       <input type="hidden" name="discountTotal" value={discountTotal} />
@@ -223,8 +232,26 @@ export function NewInvoiceForm({
 
       {/* ---- Header ---- */}
       <Card>
-        <CardHeader title="Invoice details" />
+        <CardHeader title="Document details" />
         <div className="grid grid-cols-2 gap-4 p-4 lg:grid-cols-4">
+          <FormField
+            label="Document type"
+            htmlFor="docType"
+            hint={DOC_TYPES.find((d) => d.value === docType)?.hint}
+          >
+            <Select
+              id="docType"
+              value={docType}
+              onChange={(e) => setDocType(e.target.value as SalesDocType)}
+              disabled={!!initial}
+            >
+              {DOC_TYPES.map((d) => (
+                <option key={d.value} value={d.value}>
+                  {d.label}
+                </option>
+              ))}
+            </Select>
+          </FormField>
           <FormField label="Customer" htmlFor="customerId">
             <Select id="customerId" name="customerId" value={customerId} onChange={(e) => onCustomerChange(e.target.value)}>
               <option value="">Walk-in / no customer on file</option>
@@ -509,16 +536,19 @@ export function NewInvoiceForm({
             Save changes
           </Button>
         </div>
+      ) : docType === "quote" || docType === "boq" ? (
+        <div className="flex justify-end gap-2">
+          <Button type="submit" name="saveAs" value="draft" loading={isPending}>
+            {docType === "quote" ? "Save quotation" : "Save BOQ"}
+          </Button>
+        </div>
       ) : (
         <div className="flex justify-end gap-2">
           <Button type="submit" name="saveAs" value="draft" variant="secondary" loading={isPending}>
             Save as draft
           </Button>
-          <Button type="submit" name="saveAs" value="quote" variant="secondary" loading={isPending}>
-            Save as quotation
-          </Button>
           <Button type="submit" name="saveAs" value="issued" loading={isPending}>
-            Issue invoice
+            {docType === "debit_note" ? "Issue debit note" : "Issue invoice"}
           </Button>
         </div>
       )}

@@ -1,6 +1,6 @@
 import { PageHeader } from "@/components/PageHeader";
 import { requireOrgContext, requireModuleEnabled } from "@/lib/session";
-import { listShipments } from "@/services/logistics";
+import { listShipments, listShipmentEvents, type ShipmentEvent } from "@/services/logistics";
 import { listCustomers } from "@/services/customers";
 import { listVehicles } from "@/services/fleet";
 import { listEmployees } from "@/services/hr";
@@ -25,6 +25,12 @@ export default async function ShipmentsPage() {
     listOnlineOrders(supabase, orgId),
   ]);
 
+  // Tracking timeline per shipment — fetched in parallel, keyed by shipment id.
+  const eventEntries = await Promise.all(
+    shipments.map(async (s) => [s.id, await listShipmentEvents(supabase, s.id)] as const)
+  );
+  const eventsByShipment: Record<string, ShipmentEvent[]> = Object.fromEntries(eventEntries);
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -46,7 +52,7 @@ export default async function ShipmentsPage() {
         invoice or online order they are fulfilling.
       </p>
 
-      <ShipmentsTable shipments={shipments} canManage={canManage} />
+      <ShipmentsTable shipments={shipments} eventsByShipment={eventsByShipment} canManage={canManage} />
     </div>
   );
 }

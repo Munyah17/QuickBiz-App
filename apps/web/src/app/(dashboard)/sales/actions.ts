@@ -39,6 +39,10 @@ export async function createInvoiceAction(_prev: SalesActionState, formData: For
   const discountTotal = Number(formData.get("discountTotal") ?? 0);
   const discountReason = String(formData.get("discountReason") ?? "").trim();
   const saveAs = String(formData.get("saveAs") ?? "issued");
+  const docTypeRaw = String(formData.get("docType") ?? "invoice");
+  const docType = (["invoice", "quote", "debit_note", "boq"] as const).includes(docTypeRaw as never)
+    ? (docTypeRaw as "invoice" | "quote" | "debit_note" | "boq")
+    : "invoice";
   const invoiceDate = String(formData.get("invoiceDate") ?? "").trim() || null;
   const reference = String(formData.get("reference") ?? "").trim();
   const salesperson = String(formData.get("salesperson") ?? "").trim();
@@ -75,8 +79,10 @@ export async function createInvoiceAction(_prev: SalesActionState, formData: For
       dueDate,
       discountTotal,
       discountReason,
-      status: saveAs === "issued" ? "issued" : "draft",
-      docType: saveAs === "quote" ? "quote" : "invoice",
+      // Quotes and BOQs are always drafts; invoices and debit notes can be
+      // issued immediately or saved as drafts.
+      status: saveAs === "issued" && (docType === "invoice" || docType === "debit_note") ? "issued" : "draft",
+      docType,
       invoiceDate,
       reference,
       salesperson,
@@ -104,11 +110,12 @@ export async function recordPaymentAction(_prev: SalesActionState, formData: For
   const amount = Number(formData.get("amount") ?? 0);
   const method = String(formData.get("method") ?? "cash");
   const reference = String(formData.get("reference") ?? "").trim();
+  const proofUrl = String(formData.get("proofUrl") ?? "").trim();
 
   if (amount <= 0) return { error: "Enter a payment amount greater than zero.", success: false };
 
   try {
-    await recordPayment(supabase, { orgId, invoiceId, amount, method, reference });
+    await recordPayment(supabase, { orgId, invoiceId, amount, method, reference, proofUrl: proofUrl || undefined });
   } catch (err) {
     return { error: (err as Error).message, success: false };
   }

@@ -34,6 +34,13 @@ export async function updateCompanyAction(
     });
 
     await upsertOrgSetting(supabase, orgId, "contact.phone", String(formData.get("phone") ?? "").trim());
+    await upsertOrgSetting(supabase, orgId, "contact.email", String(formData.get("email") ?? "").trim());
+    await upsertOrgSetting(supabase, orgId, "contact.website", String(formData.get("website") ?? "").trim());
+    await upsertOrgSetting(supabase, orgId, "contact.address", String(formData.get("address") ?? "").trim());
+    await upsertOrgSetting(supabase, orgId, "branding.logo_url", String(formData.get("logo_url") ?? "").trim());
+    await upsertOrgSetting(supabase, orgId, "branding.tax_number", String(formData.get("tax_number") ?? "").trim());
+    await upsertOrgSetting(supabase, orgId, "branding.bank_details", String(formData.get("bank_details") ?? "").trim());
+    await upsertOrgSetting(supabase, orgId, "branding.terms", String(formData.get("terms") ?? "").trim());
     await upsertOrgSetting(supabase, orgId, "tax.default_rate", String(formData.get("tax_rate") ?? "").trim());
     await upsertOrgSetting(supabase, orgId, "invoice.footer", String(formData.get("invoice_footer") ?? "").trim());
   } catch (err) {

@@ -11,8 +11,9 @@ import { Select } from "@/components/Input";
 import { ExportButton } from "@/components/ExportButton";
 import { useToast } from "@/components/Toast";
 import { StatusSelect } from "./StatusSelect";
+import { TrackingTimelineModal } from "./TrackingTimelineModal";
 import { bulkSetShipmentStatusAction } from "./actions";
-import type { ShipmentRow } from "@/services/logistics";
+import type { ShipmentRow, ShipmentEvent } from "@/services/logistics";
 
 const statusTone: Record<string, "success" | "info" | "warning" | "danger" | "neutral"> = {
   pending: "neutral",
@@ -23,7 +24,22 @@ const statusTone: Record<string, "success" | "info" | "warning" | "danger" | "ne
   returned: "danger",
 };
 
-export function ShipmentsTable({ shipments, canManage }: { shipments: ShipmentRow[]; canManage: boolean }) {
+const priorityTone: Record<string, "success" | "info" | "warning" | "danger" | "neutral"> = {
+  low: "neutral",
+  normal: "info",
+  high: "warning",
+  urgent: "danger",
+};
+
+export function ShipmentsTable({
+  shipments,
+  eventsByShipment,
+  canManage,
+}: {
+  shipments: ShipmentRow[];
+  eventsByShipment: Record<string, ShipmentEvent[]>;
+  canManage: boolean;
+}) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -104,6 +120,9 @@ export function ShipmentsTable({ shipments, canManage }: { shipments: ShipmentRo
               Tracking: s.tracking_number ?? "",
               Reference: s.invoiceNumber ?? s.onlineOrderNumber ?? "",
               "Delivery address": s.delivery_address ?? "",
+              Priority: s.priority,
+              Route: s.route_description ?? "",
+              ETA: s.eta ?? "",
               Dispatched: s.dispatched_at ?? "",
               Delivered: s.delivered_at ?? "",
               Status: s.status,
@@ -147,10 +166,11 @@ export function ShipmentsTable({ shipments, canManage }: { shipments: ShipmentRo
               <th className="px-4 py-2.5">Customer</th>
               <th className="px-4 py-2.5">Carrier / Vehicle</th>
               <th className="px-4 py-2.5">Reference</th>
-              <th className="px-4 py-2.5">Delivery address</th>
-              <th className="px-4 py-2.5">Dispatched</th>
-              <th className="px-4 py-2.5">Delivered</th>
+              <th className="px-4 py-2.5">Route → Delivery</th>
+              <th className="px-4 py-2.5">Priority</th>
+              <th className="px-4 py-2.5">ETA</th>
               <th className="px-4 py-2.5">Status</th>
+              <th className="px-4 py-2.5"></th>
             </tr>
           </thead>
           <tbody>
@@ -176,15 +196,35 @@ export function ShipmentsTable({ shipments, canManage }: { shipments: ShipmentRo
                   {s.invoiceNumber ?? s.onlineOrderNumber ?? "Not linked"}
                   {s.tracking_number && <span className="block text-xs text-text-tertiary">Tracking: {s.tracking_number}</span>}
                 </td>
-                <td className="max-w-xs truncate px-4 py-2.5 text-text-secondary">{s.delivery_address ?? "Not specified"}</td>
-                <td className="px-4 py-2.5 text-text-secondary">{s.dispatched_at ? new Date(s.dispatched_at).toLocaleDateString() : "Not yet"}</td>
-                <td className="px-4 py-2.5 text-text-secondary">{s.delivered_at ? new Date(s.delivered_at).toLocaleDateString() : "Not yet"}</td>
+                <td className="max-w-xs px-4 py-2.5 text-text-secondary">
+                  <span className="block truncate">{s.route_description ?? s.origin_address ?? "—"}</span>
+                  <span className="block truncate text-xs text-text-tertiary">→ {s.delivery_address ?? "Not specified"}</span>
+                </td>
+                <td className="px-4 py-2.5">
+                  <Badge tone={priorityTone[s.priority] ?? "neutral"}>{s.priority}</Badge>
+                </td>
+                <td className="px-4 py-2.5 text-text-secondary">
+                  {s.eta ? new Date(s.eta).toLocaleString() : "—"}
+                  {s.delivered_at && (
+                    <span className="block text-xs text-success-600">
+                      Delivered {new Date(s.delivered_at).toLocaleDateString()}
+                    </span>
+                  )}
+                </td>
                 <td className="px-4 py-2.5">
                   {canManage ? (
                     <StatusSelect shipmentId={s.id} status={s.status} />
                   ) : (
                     <Badge tone={statusTone[s.status] ?? "neutral"}>{s.status.replace("_", " ")}</Badge>
                   )}
+                </td>
+                <td className="px-4 py-2.5">
+                  <TrackingTimelineModal
+                    shipmentId={s.id}
+                    shipmentNumber={s.shipment_number}
+                    events={eventsByShipment[s.id] ?? []}
+                    canManage={canManage}
+                  />
                 </td>
               </tr>
             ))}

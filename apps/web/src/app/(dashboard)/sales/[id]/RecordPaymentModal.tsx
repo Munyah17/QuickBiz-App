@@ -52,6 +52,14 @@ function RecordPaymentForm({
           <Input id="reference" name="reference" />
         </FormField>
 
+        <FormField
+          label="Proof of payment URL"
+          htmlFor="proofUrl"
+          hint="Optional — link to a receipt, bank confirmation or uploaded document"
+        >
+          <Input id="proofUrl" name="proofUrl" type="url" placeholder="https://…" />
+        </FormField>
+
         {state.error && <p className="text-sm text-danger-600">{state.error}</p>}
 
         <div className="flex justify-end gap-2 pt-2">

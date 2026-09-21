@@ -4,8 +4,10 @@ import { Card, CardHeader } from "@/components/Card";
 import { BreakdownBarChart } from "@/components/BreakdownBarChart";
 import { requireOrgContext, requireModuleEnabled } from "@/lib/session";
 import { listExpenses, listAccounts } from "@/services/finance";
+import { listPaymentRequests } from "@/services/paymentRequests";
 import { NewExpenseModal } from "./NewExpenseModal";
 import { ExpensesTable } from "./ExpensesTable";
+import { PaymentRequestsSection } from "./PaymentRequestsSection";
 
 export default async function ExpensesPage() {
   const { supabase, orgId, permissions } = await requireOrgContext();
@@ -15,7 +17,11 @@ export default async function ExpensesPage() {
 
   const { data: member } = await supabase.from("org_members").select("branch_id").eq("status", "active").limit(1).maybeSingle();
 
-  const [expenses, accounts] = await Promise.all([listExpenses(supabase, orgId), listAccounts(supabase, orgId)]);
+  const [expenses, accounts, paymentRequests] = await Promise.all([
+    listExpenses(supabase, orgId),
+    listAccounts(supabase, orgId),
+    listPaymentRequests(supabase, orgId),
+  ]);
 
   const approvedExpenses = expenses.filter((e) => e.status === "approved" || e.status === "paid");
   const pendingApproval = expenses.filter((e) => e.status === "submitted");
@@ -70,6 +76,13 @@ export default async function ExpensesPage() {
       )}
 
       <ExpensesTable expenses={expenses} canApprove={canApprove} canManage={canManage} />
+
+      <PaymentRequestsSection
+        requests={paymentRequests}
+        branchId={(member?.branch_id as string) ?? ""}
+        canManage={canManage}
+        canApprove={canApprove}
+      />
     </div>
   );
 }

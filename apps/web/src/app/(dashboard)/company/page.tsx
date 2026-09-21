@@ -26,6 +26,13 @@ export default async function CompanyPage() {
         currency={org?.currency ?? "USD"}
         timezone={org?.timezone ?? "Africa/Harare"}
         phone={(settings["contact.phone"] as string) ?? ""}
+        email={(settings["contact.email"] as string) ?? ""}
+        website={(settings["contact.website"] as string) ?? ""}
+        address={(settings["contact.address"] as string) ?? ""}
+        logoUrl={(settings["branding.logo_url"] as string) ?? ""}
+        taxNumber={(settings["branding.tax_number"] as string) ?? ""}
+        bankDetails={(settings["branding.bank_details"] as string) ?? ""}
+        terms={(settings["branding.terms"] as string) ?? ""}
         taxRate={(settings["tax.default_rate"] as string) ?? ""}
         invoiceFooter={(settings["invoice.footer"] as string) ?? ""}
         currencies={currencies}

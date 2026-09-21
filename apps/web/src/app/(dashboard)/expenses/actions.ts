@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireOrgContext, requireModuleEnabled } from "@/lib/session";
 import { createExpense, approveExpense, rejectExpense, markExpensePaid } from "@/services/finance";
+import { createPaymentRequest, decidePaymentRequest, markPaymentRequestPaid } from "@/services/paymentRequests";
 
 export interface ExpenseActionState {
   error: string | null;
@@ -73,6 +74,85 @@ export async function rejectExpenseAction(_prev: ExpenseActionState, formData: F
       String(formData.get("expenseId") ?? ""),
       String(formData.get("reason") ?? "").trim()
     );
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/expenses");
+  return { error: null, success: true };
+}
+
+export async function createPaymentRequestAction(
+  _prev: ExpenseActionState,
+  formData: FormData
+): Promise<ExpenseActionState> {
+  const { supabase, orgId, permissions } = await requireOrgContext();
+  await requireModuleEnabled(supabase, orgId, "finance");
+
+  if (!permissions.has("finance.manage")) {
+    return { error: "You don't have permission to create payment requests.", success: false };
+  }
+
+  const payee = String(formData.get("payee") ?? "").trim();
+  const amount = Number(formData.get("amount") ?? 0);
+  const reason = String(formData.get("reason") ?? "").trim();
+  const category = String(formData.get("category") ?? "").trim();
+  const neededBy = String(formData.get("neededBy") ?? "").trim() || null;
+  const branchId = String(formData.get("branchId") ?? "") || null;
+
+  if (!payee) return { error: "Payee is required.", success: false };
+  if (amount <= 0) return { error: "Amount must be greater than zero.", success: false };
+  if (!reason) return { error: "A reason is required.", success: false };
+
+  try {
+    await createPaymentRequest(supabase, { orgId, branchId, payee, amount, reason, category, neededBy });
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/expenses");
+  return { error: null, success: true };
+}
+
+export async function decidePaymentRequestAction(
+  _prev: ExpenseActionState,
+  formData: FormData
+): Promise<ExpenseActionState> {
+  const { supabase, orgId, permissions } = await requireOrgContext();
+  await requireModuleEnabled(supabase, orgId, "finance");
+
+  if (!permissions.has("expenses.approve")) {
+    return { error: "You don't have permission to approve payment requests.", success: false };
+  }
+
+  const requestId = String(formData.get("requestId") ?? "");
+  const decision = String(formData.get("decision") ?? "") as "approved" | "rejected";
+  const note = String(formData.get("note") ?? "").trim();
+  if (!["approved", "rejected"].includes(decision)) return { error: "Invalid decision.", success: false };
+
+  try {
+    await decidePaymentRequest(supabase, orgId, requestId, decision, note);
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/expenses");
+  return { error: null, success: true };
+}
+
+export async function markPaymentRequestPaidAction(
+  _prev: ExpenseActionState,
+  formData: FormData
+): Promise<ExpenseActionState> {
+  const { supabase, orgId, permissions } = await requireOrgContext();
+  await requireModuleEnabled(supabase, orgId, "finance");
+
+  if (!permissions.has("finance.manage")) {
+    return { error: "You don't have permission to mark requests paid.", success: false };
+  }
+
+  try {
+    await markPaymentRequestPaid(supabase, String(formData.get("requestId") ?? ""));
   } catch (err) {
     return { error: (err as Error).message, success: false };
   }

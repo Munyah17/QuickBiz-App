@@ -2,7 +2,7 @@ import type { TypedSupabaseClient as SupabaseClient } from "@quickbiz/supabase/t
 import type { Json } from "@quickbiz/supabase/database.types";
 
 export type InvoiceStatus = "draft" | "issued" | "partially_paid" | "paid" | "cancelled";
-export type SalesDocType = "invoice" | "quote";
+export type SalesDocType = "invoice" | "quote" | "debit_note" | "boq";
 
 export interface InvoiceListRow {
   id: string;
@@ -442,7 +442,7 @@ export async function getSalesStats(supabase: SupabaseClient, orgId: string): Pr
     .from("sales_invoices")
     .select("total, amount_paid")
     .eq("org_id", orgId)
-    .eq("doc_type", "invoice")
+    .in("doc_type", ["invoice", "debit_note"])
     .neq("status", "cancelled");
   if (error) throw error;
 
@@ -456,7 +456,7 @@ export async function getSalesStats(supabase: SupabaseClient, orgId: string): Pr
 
 export async function recordPayment(
   supabase: SupabaseClient,
-  input: { orgId: string; invoiceId: string; amount: number; method: string; reference: string }
+  input: { orgId: string; invoiceId: string; amount: number; method: string; reference: string; proofUrl?: string }
 ) {
   const { error } = await supabase.rpc("record_sales_payment", {
     p_org_id: input.orgId,
@@ -464,6 +464,7 @@ export async function recordPayment(
     p_amount: input.amount,
     p_method: input.method,
     p_reference: input.reference || undefined,
+    p_proof_url: input.proofUrl || undefined,
   });
   if (error) throw error;
 }
@@ -501,7 +502,7 @@ export async function getARAging(supabase: SupabaseClient, orgId: string): Promi
     .from("sales_invoices")
     .select("customer_id, total, amount_paid, due_date, customers(name)")
     .eq("org_id", orgId)
-    .eq("doc_type", "invoice")
+    .in("doc_type", ["invoice", "debit_note"])
     .in("status", ["issued", "partially_paid"]);
   if (error) throw error;
 

@@ -3,7 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOrgContext } from "@/lib/session";
-import { createPurchaseOrder, receivePurchaseOrder, recordPurchasePayment, type PurchaseOrderLineInput } from "@/services/purchasing";
+import {
+  createPurchaseOrder,
+  receivePurchaseOrder,
+  recordPurchasePayment,
+  createRequisition,
+  decideRequisition,
+  markRequisitionConverted,
+  type PurchaseOrderLineInput,
+} from "@/services/purchasing";
 
 export interface PurchasingActionState {
   error: string | null;
@@ -27,6 +35,8 @@ export async function createPurchaseOrderAction(
   const taxTotal = Number(formData.get("taxTotal") ?? 0);
   const notes = String(formData.get("notes") ?? "").trim();
   const expectedDate = String(formData.get("expectedDate") ?? "").trim() || null;
+  const buyerName = String(formData.get("buyerName") ?? "").trim();
+  const requisitionId = String(formData.get("requisitionId") ?? "").trim() || null;
 
   let items: PurchaseOrderLineInput[];
   try {
@@ -43,13 +53,75 @@ export async function createPurchaseOrderAction(
 
   let poId: string;
   try {
-    poId = await createPurchaseOrder(supabase, { orgId, branchId, supplierId, items, taxTotal, notes, expectedDate });
+    poId = await createPurchaseOrder(supabase, { orgId, branchId, supplierId, items, taxTotal, notes, expectedDate, buyerName });
+    // When the PO was raised from an approved requisition, link them.
+    if (requisitionId) await markRequisitionConverted(supabase, requisitionId, poId);
   } catch (err) {
     return { error: (err as Error).message, success: false };
   }
 
   revalidatePath("/purchasing");
   redirect(`/purchasing/${poId}`);
+}
+
+export async function createRequisitionAction(
+  _prev: PurchasingActionState,
+  formData: FormData
+): Promise<PurchasingActionState> {
+  const { supabase, orgId, permissions } = await requireOrgContext();
+
+  if (!permissions.has("purchasing.manage")) {
+    return { error: "You don't have permission to create requisitions.", success: false };
+  }
+
+  const branchId = String(formData.get("branchId") ?? "") || null;
+  const neededBy = String(formData.get("neededBy") ?? "").trim() || null;
+  const justification = String(formData.get("justification") ?? "").trim();
+
+  let items: Array<{ product_id: string; description: string; quantity: number; estimated_cost: number }>;
+  try {
+    items = JSON.parse(String(formData.get("items") ?? "[]"));
+  } catch {
+    return { error: "Invalid line items.", success: false };
+  }
+
+  if (items.length === 0) return { error: "Add at least one item.", success: false };
+  if (items.some((i) => !i.description || i.quantity <= 0)) {
+    return { error: "Every line needs a description and a quantity greater than zero.", success: false };
+  }
+
+  try {
+    await createRequisition(supabase, { orgId, branchId, items, neededBy, justification });
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/purchasing");
+  return { error: null, success: true };
+}
+
+export async function decideRequisitionAction(
+  _prev: PurchasingActionState,
+  formData: FormData
+): Promise<PurchasingActionState> {
+  const { supabase, orgId, permissions } = await requireOrgContext();
+
+  if (!permissions.has("purchasing.manage")) {
+    return { error: "You don't have permission to approve requisitions.", success: false };
+  }
+
+  const requisitionId = String(formData.get("requisitionId") ?? "");
+  const decision = String(formData.get("decision") ?? "") as "approved" | "rejected";
+  if (!["approved", "rejected"].includes(decision)) return { error: "Invalid decision.", success: false };
+
+  try {
+    await decideRequisition(supabase, orgId, requisitionId, decision);
+  } catch (err) {
+    return { error: (err as Error).message, success: false };
+  }
+
+  revalidatePath("/purchasing");
+  return { error: null, success: true };
 }
 
 export async function receivePurchaseOrderAction(
