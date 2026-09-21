@@ -6,7 +6,11 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    dependencies:
+      cooladmin:
+        specifier: ^3.4.0
+        version: 3.4.0
 
   apps/management-api:
     dependencies:
@@ -1224,6 +1228,9 @@ packages:
   cookie@1.1.1:
     resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
     engines: {node: '>=18'}
+
+  cooladmin@3.4.0:
+    resolution: {integrity: sha512-lNvTVLhMKIawH+e4PV9bfAeQOcngfh44ZDe09d+KgDKtOBtQ10lJfiyqzJJW4w0FlJKgLcn0pCwf/XMIKX6Ccg==}
 
   cors@2.8.6:
     resolution: {integrity: sha512-tJtZBBHA6vjIAaF6EnIaq6laBBP9aq/Y3ouVJjEfoHbRBcHBAHYcMh/w8LDrk2PvIMMq8gmopa5D4V8RmbrxGw==}
@@ -3533,6 +3540,8 @@ snapshots:
   cookie@0.7.2: {}
 
   cookie@1.1.1: {}
+
+  cooladmin@3.4.0: {}
 
   cors@2.8.6:
     dependencies:

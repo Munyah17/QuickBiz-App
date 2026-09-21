@@ -1,0 +1,191 @@
+/*
+  QuickBiz brand overlay for CoolAdmin.
+
+  The modern overlay (app.css) is fully driven by --m-* custom properties on
+  body.app, so re-theming is a matter of remapping those tokens to the
+  QuickBiz palette (see src/config/design-tokens.css). The legacy theme.css
+  brand hexes were already swapped to the same palette when the file was
+  vendored (#4272d7 -> #3b76f6 etc.).
+
+  Lives in the `quickbiz-theme` cascade layer, declared after `cooladmin`
+  in globals.css, so these rules win over the vendored sheets.
+*/
+body.app {
+  /* Surfaces — QuickBiz workspace */
+  --m-bg: #f8fafc;
+  --m-surface: #ffffff;
+  --m-surface-2: #f8fafc;
+  --m-sidebar: #0b1222;
+  --m-sidebar-soft: #141d30;
+  /* Borders + dividers */
+  --m-border: #e5e7eb;
+  --m-border-soft: #f1f5f9;
+  --m-divider: #f1f5f9;
+  /* Text */
+  --m-text: #0f172a;
+  --m-text-muted: #64748b;
+  --m-text-faint: #94a3b8;
+  --m-text-on-dark: #f1f5f9;
+  /* Brand accent — QuickBiz enterprise blue */
+  --m-accent: #3b76f6;
+  --m-accent-rgb: 59, 118, 246;
+  --m-accent-hover: #2563eb;
+  --m-accent-soft: #eff6ff;
+  /* KPI accents */
+  --m-c1: #3b76f6;
+  --m-c1-soft: #eff6ff;
+  /* Status — QuickBiz semantic palette */
+  --m-success: #16a34a;
+  --m-success-soft: #dcfce7;
+  --m-warning: #f59e0b;
+  --m-warning-soft: #fef3c7;
+  --m-danger: #ef4444;
+  --m-danger-soft: #fee2e2;
+  /* Typography — QuickBiz ships Inter via next/font */
+  --m-font: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Sidebar sub-list open/close: the template animates via jQuery-style
+   slideToggle; the React port toggles .is-open instead. Same visual result —
+   a short slide/fade — without inline-style height juggling. */
+body.app .navbar__sub-list,
+body.app .navbar-mobile-sub__list {
+  display: none;
+}
+body.app .navbar__sub-list.is-open,
+body.app .navbar-mobile-sub__list.is-open {
+  display: block;
+  animation: qb-sublist-in 0.2s ease-out;
+}
+@keyframes qb-sublist-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Collapsed-rail tooltip (fixed so it escapes the sidebar's overflow clip). */
+.sidebar-tooltip {
+  position: fixed;
+  z-index: 1060;
+  transform: translateY(-50%);
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #141d30;
+  color: #f1f5f9;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+}
+.sidebar-tooltip.is-visible {
+  opacity: 1;
+}
+
+/* --- QuickBiz additions on top of template markup -------------------------- */
+
+/* Initials avatar in place of the template's <img> avatars. */
+body.app .avatar-initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--m-accent-soft);
+  color: var(--m-accent-hover);
+  font-weight: 600;
+  font-size: 15px;
+  text-transform: uppercase;
+}
+
+/* Global-search results panel, styled to match the topbar dropdowns. */
+body.app .form-header {
+  position: relative;
+}
+body.app .search-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 1050;
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  box-shadow: var(--m-shadow-lg);
+  padding: 6px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+body.app .search-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  background: transparent;
+  border-radius: var(--m-radius-sm);
+  font-size: 13.5px;
+  color: var(--m-text);
+  text-align: left;
+  cursor: pointer;
+}
+body.app .search-dropdown__item:hover {
+  background: var(--m-surface-2);
+}
+body.app .search-dropdown__item > i {
+  color: var(--m-text-faint);
+  width: 16px;
+  text-align: center;
+}
+body.app .search-dropdown__label {
+  font-weight: 500;
+}
+body.app .search-dropdown__sublabel {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--m-text-faint);
+}
+body.app .search-dropdown__empty {
+  padding: 10px 12px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--m-text-faint);
+}
+
+/* Unread notification rows get the accent tint. */
+body.app .notifi__item--unread {
+  background: var(--m-accent-soft);
+}
+
+/* The account dropdown footer is an <a> in the template; ours is a submit
+   button inside a server-action form — same look, full width. */
+body.app .account-dropdown__footer form {
+  margin: 0;
+}
+body.app .account-dropdown__signout {
+  display: block;
+  width: 100%;
+  padding: 10px 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+body.app .account-dropdown__signout i {
+  margin-right: 8px;
+}
+body.app .account-dropdown__signout:hover {
+  color: var(--m-accent);
+}

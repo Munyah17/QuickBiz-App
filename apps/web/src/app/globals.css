@@ -1,3 +1,8 @@
+/* Pre-declare the CoolAdmin layers before Tailwind's (theme/base/components/
+   utilities) so that on utility-class collisions the Tailwind utilities used
+   by existing pages always win over Bootstrap's same-named utilities. */
+@layer cooladmin-vendor, cooladmin, quickbiz-theme;
+
 @import "tailwindcss";
 @import "../config/design-tokens.css";
 

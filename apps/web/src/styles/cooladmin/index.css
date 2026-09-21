@@ -1,0 +1,17 @@
+/*
+  CoolAdmin bundle entry — imported by the (dashboard) layout only, so auth,
+  print and onboarding routes never pay for it.
+
+  Everything is loaded into cascade layers declared *before* Tailwind's own
+  layers (see globals.css `@layer` pre-declaration). That ordering means:
+    - CoolAdmin/Bootstrap component styles apply normally (no Tailwind
+      equivalent exists for `.menu-sidebar`, `.au-input`, `.stat-card`…).
+    - On the rare utility-class collision (Bootstrap `.mt-3` vs Tailwind
+      `.mt-3`, `.text-primary`, `.container`…) the Tailwind utility wins,
+      so existing Tailwind-built pages keep their exact spacing/colors.
+*/
+@import "./bootstrap.min.css" layer(cooladmin-vendor);
+@import "./hamburgers.min.css" layer(cooladmin-vendor);
+@import "./theme.css" layer(cooladmin);
+@import "./app.css" layer(cooladmin);
+@import "./quickbiz-theme.css" layer(quickbiz-theme);

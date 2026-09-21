@@ -85,6 +85,21 @@ export interface ThemeVars {
   "--color-primary-500": string;
   "--color-primary-600": string;
   "--color-primary-700": string;
+  // CoolAdmin overlay tokens (app.css) — the dashboard shell is driven by
+  // --m-* vars, so the tenant color re-themes it too.
+  "--m-accent": string;
+  "--m-accent-rgb": string;
+  "--m-accent-hover": string;
+  "--m-accent-soft": string;
+  "--m-sidebar": string;
+  "--m-sidebar-soft": string;
+}
+
+function hexToRgbTriplet(hex: string): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `${r}, ${g}, ${b}`;
 }
 
 export function generateThemeVars(hexInput: string | null | undefined): ThemeVars | null {
@@ -105,5 +120,14 @@ export function generateThemeVars(hexInput: string | null | undefined): ThemeVar
     "--color-primary-500": shade(base, { s: base.s, l: clamp(base.l + 8, 0, 62) }),
     "--color-primary-600": hexInput,
     "--color-primary-700": shade(base, { s: base.s, l: clamp(base.l - 11, 14, 100) }),
+    // CoolAdmin overlay mirrors the same palette.
+    "--m-accent": shade(base, { s: base.s, l: clamp(base.l + 8, 0, 62) }),
+    "--m-accent-rgb": hexToRgbTriplet(
+      shade(base, { s: base.s, l: clamp(base.l + 8, 0, 62) }),
+    ),
+    "--m-accent-hover": hexInput,
+    "--m-accent-soft": shade(base, { s: clamp(base.s * 0.5, 20, 60), l: 96 }),
+    "--m-sidebar": shade(base, { s: clamp(base.s * 0.65, 15, 45), l: 9 }),
+    "--m-sidebar-soft": shade(base, { s: clamp(base.s * 0.65, 15, 45), l: 15 }),
   };
 }

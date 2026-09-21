@@ -1,14 +1,15 @@
-import { Sidebar } from "@/components/Sidebar";
-import { TopBar } from "@/components/TopBar";
+import Script from "next/script";
+import { CoolAdminShell } from "@/components/cooladmin/CoolAdminShell";
 import { ToastProvider } from "@/components/Toast";
 import { requireOrgContext } from "@/lib/session";
 import { listNotifications } from "@/services/notifications";
 import { listEnabledModuleKeys } from "@/services/modules";
 import { generateThemeVars } from "@/lib/theme";
 import { getActiveCustomCode } from "@/services/customCode";
+import "@/styles/cooladmin/index.css";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { supabase, orgId, orgName, branchName, roleName, permissions, themeColor, userName } =
+  const { supabase, user, orgId, orgName, branchName, roleName, permissions, themeColor, userName } =
     await requireOrgContext();
 
   const [notifications, enabledModules] = await Promise.all([
@@ -21,21 +22,29 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <ToastProvider>
+      {/* CoolAdmin vendored assets — Font Awesome stylesheet and the
+          Bootstrap bundle (data-bs components like modals/tooltips). */}
+      <link
+        rel="stylesheet"
+        href="/cooladmin/vendor/fontawesome-7.3.1/css/all.min.css"
+      />
+      <Script src="/cooladmin/js/vanilla-utils.js" strategy="afterInteractive" />
+      <Script src="/cooladmin/vendor/bootstrap-5.3.8.bundle.min.js" strategy="afterInteractive" />
+      <Script src="/cooladmin/js/bootstrap5-init.js" strategy="afterInteractive" />
       {customCss && <style id="org-custom-css" dangerouslySetInnerHTML={{ __html: customCss }} />}
-      <div
-        className="flex h-screen w-full overflow-hidden bg-workspace"
-        style={themeVars ? (themeVars as React.CSSProperties) : undefined}
-      >
-        <Sidebar
+      <div style={themeVars ? (themeVars as React.CSSProperties) : undefined}>
+        <CoolAdminShell
           permissions={Array.from(permissions)}
           enabledModules={enabledModules}
           orgName={orgName}
           branchName={branchName}
-        />
-        <div className="flex min-w-0 flex-1 flex-col">
-          <TopBar userName={userName} roleName={roleName} notifications={notifications} />
-          <main className="flex-1 overflow-y-auto p-6">{children}</main>
-        </div>
+          userName={userName}
+          roleName={roleName}
+          email={user.email ?? ""}
+          notifications={notifications}
+        >
+          {children}
+        </CoolAdminShell>
       </div>
     </ToastProvider>
   );

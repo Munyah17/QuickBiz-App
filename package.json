@@ -15,5 +15,8 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "cooladmin": "^3.4.0"
   }
 }
