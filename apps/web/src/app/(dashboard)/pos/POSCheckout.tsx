@@ -207,8 +207,8 @@ function POSCheckoutForm({
   );
 
   return (
-    <div className="grid h-[calc(100vh-8rem)] grid-cols-1 gap-4 lg:grid-cols-3">
-      <div className="flex flex-col gap-3 lg:col-span-2">
+    <div className="grid grid-cols-1 gap-4 lg:h-[calc(100vh-8rem)] lg:grid-cols-3">
+      <div className="flex min-h-0 flex-col gap-3 lg:col-span-2">
         <div className="flex items-center gap-2">
           <div className="flex h-9 flex-1 items-center gap-2 rounded-md border border-border bg-white px-3">
             <Search className="size-4 shrink-0 text-text-tertiary" />
@@ -262,7 +262,7 @@ function POSCheckoutForm({
           </Card>
         )}
 
-        <div className="grid flex-1 grid-cols-2 gap-3 overflow-y-auto sm:grid-cols-3 xl:grid-cols-4">
+        <div className="grid max-h-[55vh] flex-1 grid-cols-2 gap-3 overflow-y-auto sm:grid-cols-3 lg:max-h-none xl:grid-cols-4">
           {filtered.map((product) => (
             <button
               key={product.id}

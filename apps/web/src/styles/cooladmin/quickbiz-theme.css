@@ -189,3 +189,92 @@ body.app .account-dropdown__signout i {
 body.app .account-dropdown__signout:hover {
   color: var(--m-accent);
 }
+
+/* ============================================================================
+   MOBILE / TABLET — space optimisation + drawer hardening (< 992px)
+   The vendored app.css already slides `.menu-sidebar` off-canvas; these rules
+   reinforce that and reclaim the padding/overflow that made pages feel
+   cramped on phones.
+   ==========================================================================*/
+@media (max-width: 991.98px) {
+  /* Drawer: guarantee off-canvas even if a vendored rule is cached/stale. */
+  body.app .menu-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 280px;
+    max-width: 86vw;
+    transform: translateX(-105%);
+    transition: transform 0.24s ease;
+    z-index: 1050;
+  }
+  body.app.sidebar-open .menu-sidebar {
+    transform: translateX(0) !important;
+  }
+  /* Content must never reserve space for the hidden drawer. */
+  body.app .page-container {
+    padding-left: 0 !important;
+  }
+
+  /* Reclaim horizontal space: the template's 30px page gutter is desktop-only. */
+  body.app .section__content--p30 {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  body.app .main-content > .section__content--p30 {
+    padding-top: 14px;
+  }
+  body.app .container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /* app.css already fixes the topbar (position: fixed, 60px) and offsets
+     .main-content by the same amount — don't fight that. Just stop the page
+     from scrolling sideways when a wide child overflows. */
+  body.app .main-content {
+    overflow-x: clip;
+  }
+
+  /* Wide data tables scroll horizontally inside their card instead of
+     crushing columns — never split thead/tbody into separate display
+     contexts (it misaligns columns). */
+  body.app .main-content .au-card,
+  body.app .main-content .card,
+  body.app .main-content .m-card {
+    overflow-x: clip;
+  }
+  body.app .main-content table {
+    max-width: 100%;
+  }
+
+  /* Cards, stat tiles and form rows stack to full width. */
+  body.app .au-card,
+  body.app .stat-card,
+  body.app .card {
+    width: 100%;
+  }
+}
+
+/* Phones: tighten further and collapse the search box to keep the topbar
+   (hamburger + bell + avatar) on one row. */
+@media (max-width: 575.98px) {
+  body.app .section__content--p30 {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  /* Search becomes a full-width row under the topbar instead of squeezing it. */
+  body.app .header-wrap {
+    flex-wrap: wrap;
+  }
+  body.app .form-header {
+    order: 3;
+    flex: 1 1 100%;
+    margin-top: 8px;
+  }
+  body.app .form-header__hint {
+    display: none;
+  }
+  body.app .account-item .content {
+    display: none; /* avatar only — name is inside the dropdown */
+  }
+}

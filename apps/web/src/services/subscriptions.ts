@@ -82,19 +82,22 @@ export async function updateSubscription(
   subscriptionId: string,
   input: Partial<SubscriptionInput> & { status?: SubscriptionStatus }
 ) {
-  const patch: SubscriptionUpdate = {};
-  if (input.name !== undefined) patch.name = input.name;
-  if (input.counterparty !== undefined) patch.counterparty = input.counterparty;
-  if (input.amount !== undefined) patch.amount = input.amount;
-  if (input.currency !== undefined) patch.currency = input.currency;
-  if (input.billingCycle !== undefined) patch.billing_cycle = input.billingCycle;
-  if (input.startDate !== undefined) patch.start_date = input.startDate;
-  if (input.nextRenewalDate !== undefined) patch.next_renewal_date = input.nextRenewalDate;
-  if (input.autoRenew !== undefined) patch.auto_renew = input.autoRenew;
-  if (input.notes !== undefined) patch.notes = input.notes || null;
-  if (input.status !== undefined) patch.status = input.status;
-
-  const { error } = await supabase.from("subscriptions").update(patch).eq("id", subscriptionId);
+  // supabase-js drops undefined keys, so only provided fields are updated.
+  const { error } = await supabase
+    .from("subscriptions")
+    .update({
+      name: input.name,
+      counterparty: input.counterparty,
+      amount: input.amount,
+      currency: input.currency,
+      billing_cycle: input.billingCycle,
+      start_date: input.startDate,
+      next_renewal_date: input.nextRenewalDate,
+      auto_renew: input.autoRenew,
+      notes: input.notes === undefined ? undefined : input.notes || null,
+      status: input.status,
+    })
+    .eq("id", subscriptionId);
   if (error) throw error;
 }
 

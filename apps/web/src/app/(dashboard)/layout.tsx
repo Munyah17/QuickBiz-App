@@ -1,5 +1,6 @@
 import Script from "next/script";
 import { CoolAdminShell } from "@/components/cooladmin/CoolAdminShell";
+import { ReminderSweep } from "@/components/ReminderSweep";
 import { ToastProvider } from "@/components/Toast";
 import { requireOrgContext } from "@/lib/session";
 import { listNotifications } from "@/services/notifications";
@@ -33,6 +34,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <Script src="/cooladmin/js/bootstrap5-init.js" strategy="afterInteractive" />
       {customCss && <style id="org-custom-css" dangerouslySetInnerHTML={{ __html: customCss }} />}
       <div style={themeVars ? (themeVars as React.CSSProperties) : undefined}>
+        <ReminderSweep />
         <CoolAdminShell
           permissions={Array.from(permissions)}
           enabledModules={enabledModules}

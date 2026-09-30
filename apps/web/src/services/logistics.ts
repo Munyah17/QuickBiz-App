@@ -181,3 +181,150 @@ export async function addShipmentEvent(
   });
   if (error) throw error;
 }
+
+// ---- Distribution routes ----------------------------------------------------
+
+export interface DistributionRouteRow {
+  id: string;
+  route_name: string;
+  status: "planned" | "active" | "completed";
+  scheduled_date: string | null;
+  stops: unknown;
+  notes: string | null;
+  created_at: string;
+  vehicleRegistration: string | null;
+  driverName: string | null;
+}
+
+export async function listDistributionRoutes(supabase: SupabaseClient, orgId: string): Promise<DistributionRouteRow[]> {
+  const { data, error } = await supabase
+    .from("distribution_routes")
+    .select("id, route_name, status, scheduled_date, stops, notes, created_at, vehicles(registration_number), employees(full_name)")
+    .eq("org_id", orgId)
+    .order("scheduled_date", { ascending: false });
+  if (error) throw error;
+  return (
+    (data ?? []) as unknown as Array<
+      Omit<DistributionRouteRow, "vehicleRegistration" | "driverName"> & {
+        vehicles: { registration_number: string } | null;
+        employees: { full_name: string } | null;
+      }
+    >
+  ).map((r) => ({
+    ...r,
+    vehicleRegistration: r.vehicles?.registration_number ?? null,
+    driverName: r.employees?.full_name ?? null,
+  }));
+}
+
+export interface DistributionRouteInput {
+  routeName: string;
+  vehicleId: string;
+  driverId: string;
+  scheduledDate: string;
+  stops: string; // newline-separated stops, stored as a jsonb array
+  notes: string;
+}
+
+export async function createDistributionRoute(supabase: SupabaseClient, orgId: string, input: DistributionRouteInput) {
+  const stops = input.stops
+    .split("\n")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const { error } = await supabase.from("distribution_routes").insert({
+    org_id: orgId,
+    route_name: input.routeName,
+    vehicle_id: input.vehicleId || null,
+    driver_id: input.driverId || null,
+    scheduled_date: input.scheduledDate || null,
+    stops,
+    notes: input.notes || null,
+    status: "planned",
+  });
+  if (error) throw error;
+}
+
+export async function setDistributionRouteStatus(supabase: SupabaseClient, routeId: string, status: string) {
+  const { error } = await supabase.from("distribution_routes").update({ status }).eq("id", routeId);
+  if (error) throw error;
+}
+
+// ---- Emergency incidents ------------------------------------------------------
+
+export interface EmergencyIncidentRow {
+  id: string;
+  incident_number: string;
+  type: "breakdown" | "accident" | "theft" | "delay" | "other";
+  severity: "low" | "medium" | "high" | "critical";
+  status: "open" | "resolved";
+  location: string | null;
+  description: string | null;
+  reported_at: string;
+  resolved_at: string | null;
+  created_at: string;
+  shipmentNumber: string | null;
+  vehicleRegistration: string | null;
+}
+
+export async function listEmergencyIncidents(supabase: SupabaseClient, orgId: string): Promise<EmergencyIncidentRow[]> {
+  const { data, error } = await supabase
+    .from("emergency_incidents")
+    .select("id, incident_number, type, severity, status, location, description, reported_at, resolved_at, created_at, shipments(shipment_number), vehicles(registration_number)")
+    .eq("org_id", orgId)
+    .order("reported_at", { ascending: false });
+  if (error) throw error;
+  return (
+    (data ?? []) as unknown as Array<
+      Omit<EmergencyIncidentRow, "shipmentNumber" | "vehicleRegistration"> & {
+        shipments: { shipment_number: string } | null;
+        vehicles: { registration_number: string } | null;
+      }
+    >
+  ).map((r) => ({
+    ...r,
+    shipmentNumber: r.shipments?.shipment_number ?? null,
+    vehicleRegistration: r.vehicles?.registration_number ?? null,
+  }));
+}
+
+export interface EmergencyIncidentInput {
+  shipmentId: string;
+  vehicleId: string;
+  type: string;
+  severity: string;
+  location: string;
+  description: string;
+}
+
+export async function reportEmergencyIncident(supabase: SupabaseClient, orgId: string, input: EmergencyIncidentInput) {
+  const { data: incidentNumber, error: numError } = await supabase.rpc("next_number", {
+    target_org_id: orgId,
+    p_entity_type: "emergency_incident",
+  });
+  if (numError) throw numError;
+
+  const { error } = await supabase.from("emergency_incidents").insert({
+    org_id: orgId,
+    incident_number: incidentNumber,
+    shipment_id: input.shipmentId || null,
+    vehicle_id: input.vehicleId || null,
+    type: input.type || "other",
+    severity: input.severity || "medium",
+    location: input.location || null,
+    description: input.description || null,
+    status: "open",
+    reported_at: new Date().toISOString(),
+  });
+  if (error) throw error;
+}
+
+export async function setEmergencyIncidentStatus(supabase: SupabaseClient, incidentId: string, status: string) {
+  const { error } = await supabase
+    .from("emergency_incidents")
+    .update({
+      status,
+      resolved_at: status === "resolved" ? new Date().toISOString() : undefined,
+    })
+    .eq("id", incidentId);
+  if (error) throw error;
+}

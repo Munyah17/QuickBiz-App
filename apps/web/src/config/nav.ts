@@ -47,6 +47,13 @@ import {
   ScrollText,
   Palette,
   Printer,
+  Wrench,
+  PackageX,
+  Route,
+  MapPinned,
+  Navigation,
+  Siren,
+  FileCheck,
   type LucideIcon,
 } from "lucide-react";
 
@@ -86,24 +93,19 @@ export function isNavGroup(entry: NavEntry): entry is NavGroup {
 export const NAV_STRUCTURE: NavEntry[] = [
   { key: "dashboard", href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   {
+    // Merged: Sales & Purchasing + Point of Sale. No group moduleKey — each
+    // child carries its own so the group shows when *any* of its modules is on.
     key: "sales",
-    label: "Sales & Purchasing",
+    label: "Sales & POS",
     icon: Receipt,
-    moduleKey: "sales",
     children: [
-      { key: "customers", href: "/customers", label: "Customers", icon: Contact },
-      { key: "sales", href: "/sales", label: "Invoices & Sales", icon: Receipt },
-      { key: "suppliers", href: "/suppliers", label: "Suppliers", icon: Truck },
-      { key: "purchase-orders", href: "/purchasing", label: "Purchase Orders", icon: ClipboardList },
-      { key: "tenders", href: "/tenders", label: "Tenders", icon: Gavel },
+      { key: "customers", href: "/customers", label: "Customers", icon: Contact, moduleKey: "sales" },
+      { key: "sales", href: "/sales", label: "Invoices & Sales", icon: Receipt, moduleKey: "sales" },
+      { key: "pos", href: "/pos", label: "Point of Sale", icon: ShoppingCart, moduleKey: "pos" },
+      { key: "suppliers", href: "/suppliers", label: "Suppliers", icon: Truck, moduleKey: "sales" },
+      { key: "purchase-orders", href: "/purchasing", label: "Purchase Orders", icon: ClipboardList, moduleKey: "sales" },
+      { key: "tenders", href: "/tenders", label: "Tenders", icon: Gavel, moduleKey: "sales" },
     ],
-  },
-  {
-    key: "pos",
-    label: "Point of Sale",
-    icon: ShoppingCart,
-    moduleKey: "pos",
-    children: [{ key: "pos", href: "/pos", label: "Point of Sale", icon: ShoppingCart }],
   },
   {
     key: "crm",
@@ -119,24 +121,18 @@ export const NAV_STRUCTURE: NavEntry[] = [
     ],
   },
   {
-    key: "ecommerce",
-    label: "Ecommerce",
-    icon: Store,
-    moduleKey: "ecommerce",
-    children: [
-      { key: "catalog", href: "/ecommerce/catalog", label: "Online Catalog", icon: Store },
-      { key: "online-orders", href: "/ecommerce/orders", label: "Online Orders", icon: ShoppingBag },
-    ],
-  },
-  {
+    // Merged: Inventory + Ecommerce, plus Loss Control (expired/discarded
+    // goods) alongside Stock Take under warehousing.
     key: "inventory",
-    label: "Inventory",
+    label: "Inventory & Ecommerce",
     icon: Package,
-    moduleKey: "inventory",
     children: [
-      { key: "products", href: "/products", label: "Products", icon: Package },
-      { key: "warehousing", href: "/warehousing", label: "Warehouses", icon: Warehouse },
-      { key: "stock-take", href: "/stock-take", label: "Stock Take", icon: ClipboardCheck },
+      { key: "products", href: "/products", label: "Products", icon: Package, moduleKey: "inventory" },
+      { key: "warehousing", href: "/warehousing", label: "Warehouses", icon: Warehouse, moduleKey: "inventory" },
+      { key: "stock-take", href: "/stock-take", label: "Stock Take", icon: ClipboardCheck, moduleKey: "inventory" },
+      { key: "loss-control", href: "/loss-control", label: "Loss Control", icon: PackageX, moduleKey: "inventory" },
+      { key: "catalog", href: "/ecommerce/catalog", label: "Online Catalog", icon: Store, moduleKey: "ecommerce" },
+      { key: "online-orders", href: "/ecommerce/orders", label: "Online Orders", icon: ShoppingBag, moduleKey: "ecommerce" },
     ],
   },
   {
@@ -147,6 +143,7 @@ export const NAV_STRUCTURE: NavEntry[] = [
     children: [
       { key: "boms", href: "/manufacturing/boms", label: "Bills of Materials", icon: Layers },
       { key: "work-orders", href: "/manufacturing/work-orders", label: "Work Orders", icon: Factory },
+      { key: "workshop", href: "/manufacturing/workshop", label: "Workshop", icon: Wrench },
     ],
   },
   {
@@ -160,13 +157,6 @@ export const NAV_STRUCTURE: NavEntry[] = [
     ],
   },
   {
-    key: "assets",
-    label: "Assets",
-    icon: Archive,
-    moduleKey: "assets",
-    children: [{ key: "assets", href: "/assets", label: "Fixed Assets", icon: Archive }],
-  },
-  {
     key: "hr",
     label: "HR & Payroll",
     icon: IdCard,
@@ -178,16 +168,19 @@ export const NAV_STRUCTURE: NavEntry[] = [
     ],
   },
   {
+    // Merged: Finance + Assets. Children carry their own moduleKey so the
+    // group shows when finance *or* assets is enabled.
     key: "finance",
     label: "Finance",
     icon: Wallet,
-    moduleKey: "finance",
     children: [
-      { key: "pnl", href: "/finance", label: "Profit & Loss", icon: TrendingUp },
-      { key: "accounts", href: "/accounts", label: "Chart of Accounts", icon: Wallet },
-      { key: "expenses", href: "/expenses", label: "Expenses", icon: BadgeDollarSign },
-      { key: "iban", href: "/iban", label: "IBAN", icon: Landmark },
-      { key: "tax-compliance", href: "/tax-compliance", label: "Tax Compliance", icon: ReceiptText },
+      { key: "pnl", href: "/finance", label: "Profit & Loss", icon: TrendingUp, moduleKey: "finance" },
+      { key: "accounts", href: "/accounts", label: "Chart of Accounts", icon: Wallet, moduleKey: "finance" },
+      { key: "expenses", href: "/expenses", label: "Expenses", icon: BadgeDollarSign, moduleKey: "finance" },
+      { key: "iban", href: "/iban", label: "IBAN", icon: Landmark, moduleKey: "finance" },
+      { key: "tax-compliance", href: "/tax-compliance", label: "Tax Compliance", icon: ReceiptText, moduleKey: "finance" },
+      { key: "fiscalisation", href: "/fiscalisation", label: "ZIMRA Fiscalisation", icon: FileCheck, moduleKey: "finance" },
+      { key: "assets", href: "/assets", label: "Fixed Assets", icon: Archive, moduleKey: "assets" },
     ],
   },
   {
@@ -207,6 +200,10 @@ export const NAV_STRUCTURE: NavEntry[] = [
     moduleKey: "logistics",
     children: [
       { key: "shipments", href: "/shipments", label: "Shipments", icon: Truck },
+      { key: "distribution", href: "/distribution", label: "Distribution", icon: Route },
+      { key: "tracking", href: "/tracking", label: "Live Tracking", icon: MapPinned },
+      { key: "transit", href: "/transit", label: "Transit", icon: Navigation },
+      { key: "emergency", href: "/emergency", label: "Emergency", icon: Siren },
       { key: "fleet", href: "/vehicles", label: "Fleet", icon: Car },
     ],
   },

@@ -70,8 +70,8 @@ export async function createPaymentRequest(
 ) {
   const { data, error } = await supabase.rpc("create_payment_request", {
     p_org_id: input.orgId,
-    // Generated types mark p_branch_id required, but the function accepts
-    // NULL (branch is optional) — cast keeps the runtime null intact.
+    // RPC declares p_branch_id as required; null is valid at runtime when the
+    // member has no branch, so cast rather than drop the arg.
     p_branch_id: input.branchId as string,
     p_payee: input.payee,
     p_amount: input.amount,

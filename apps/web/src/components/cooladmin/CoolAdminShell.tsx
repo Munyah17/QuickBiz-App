@@ -117,6 +117,7 @@ export function CoolAdminShell({
           branchName={branchName}
           notifications={notifications}
           onToggleSidebar={toggleSidebar}
+          sidebarExpanded={mobileOpen || !collapsed}
         />
         <main className="main-content" id="main-content">
           <div className="section__content section__content--p30">

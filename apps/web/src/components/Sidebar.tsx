@@ -47,8 +47,8 @@ export function Sidebar({
   branchName: string;
 }) {
   const pathname = usePathname();
-  // Explicit user overrides win over the "active section auto-opens" default,
-  // so clicking a group closed actually closes it even while its route is active.
+  // Groups stay collapsed until the user clicks one. Explicit user toggles are
+  // the only thing that opens a section — nothing auto-expands on navigation.
   const [groupOverrides, setGroupOverrides] = useState<Record<string, boolean>>({});
 
   const leafVisible = (leaf: NavLeaf) =>
@@ -80,7 +80,7 @@ export function Sidebar({
           if (visibleChildren.length === 0) return null;
 
           const groupActive = visibleChildren.some((c) => isLeafActive(pathname, c.href));
-          const open = groupOverrides[entry.key] ?? groupActive;
+          const open = groupOverrides[entry.key] ?? false;
           const Icon = entry.icon;
 
           return (

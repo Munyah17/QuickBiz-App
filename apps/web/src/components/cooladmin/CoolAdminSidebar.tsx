@@ -35,8 +35,8 @@ export function CoolAdminSidebar({
   onClose: () => void;
 }) {
   const pathname = usePathname();
-  // Explicit user overrides win over the "active section auto-opens" default,
-  // matching the previous sidebar's behavior.
+  // Groups stay collapsed until the user clicks one. Explicit toggles are the
+  // only thing that opens a section — nothing auto-expands on navigation.
   const [groupOverrides, setGroupOverrides] = useState<Record<string, boolean>>({});
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 

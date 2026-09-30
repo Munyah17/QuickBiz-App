@@ -34,6 +34,7 @@ export function CoolAdminHeader({
   branchName,
   notifications,
   onToggleSidebar,
+  sidebarExpanded,
 }: {
   userName: string;
   roleName: string;
@@ -42,6 +43,8 @@ export function CoolAdminHeader({
   branchName: string;
   notifications: NotificationRow[];
   onToggleSidebar: () => void;
+  /** Drawer open on mobile / full sidebar on desktop — feeds aria-expanded. */
+  sidebarExpanded: boolean;
 }) {
   const router = useRouter();
   const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
@@ -92,7 +95,7 @@ export function CoolAdminHeader({
               className="sidebar-toggle js-sidebar-toggle"
               type="button"
               aria-label="Toggle navigation"
-              aria-expanded="false"
+              aria-expanded={sidebarExpanded}
               aria-controls="main-sidebar"
               onClick={onToggleSidebar}
             >

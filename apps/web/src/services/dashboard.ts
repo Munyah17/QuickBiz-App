@@ -307,6 +307,113 @@ export async function getAttentionItems(supabase: SupabaseClient, orgId: string)
         }
       })()
     );
+    fetches.push(
+      (async () => {
+        const { count } = await supabase
+          .from("purchase_requisitions")
+          .select("id", { count: "exact", head: true })
+          .eq("org_id", orgId)
+          .eq("status", "pending");
+        if ((count ?? 0) > 0) {
+          items.push({
+            key: "pending_requisitions",
+            label: `${count} purchase requisition${count === 1 ? "" : "s"} awaiting decision`,
+            detail: "pending approval",
+            href: "/purchasing",
+            severity: "warning",
+          });
+        }
+      })()
+    );
+  }
+
+  if (enabled.has("finance")) {
+    // Subscription renewals — the "don't let me forget" surface. Overdue
+    // renewals are danger; anything renewing inside 7 days is a warning.
+    fetches.push(
+      (async () => {
+        const in7days = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+        const { data } = await supabase
+          .from("subscriptions")
+          .select("amount, next_renewal_date")
+          .eq("org_id", orgId)
+          .eq("status", "active")
+          .lte("next_renewal_date", in7days);
+        const rows = (data ?? []) as Array<{ amount: number; next_renewal_date: string | null }>;
+        const overdue = rows.filter((r) => r.next_renewal_date && r.next_renewal_date < today);
+        const upcoming = rows.filter((r) => r.next_renewal_date && r.next_renewal_date >= today);
+        if (overdue.length > 0) {
+          items.push({
+            key: "subs_overdue",
+            label: `${overdue.length} subscription${overdue.length === 1 ? "" : "s"} past renewal date`,
+            detail: currency(overdue.reduce((s, r) => s + r.amount, 0)),
+            href: "/finance",
+            severity: "danger",
+          });
+        }
+        if (upcoming.length > 0) {
+          items.push({
+            key: "subs_due",
+            label: `${upcoming.length} subscription${upcoming.length === 1 ? "" : "s"} renewing within 7 days`,
+            detail: currency(upcoming.reduce((s, r) => s + r.amount, 0)),
+            href: "/finance",
+            severity: "warning",
+          });
+        }
+      })()
+    );
+    fetches.push(
+      (async () => {
+        const { data } = await supabase
+          .from("payment_requests")
+          .select("amount")
+          .eq("org_id", orgId)
+          .eq("status", "pending");
+        const rows = (data ?? []) as Array<{ amount: number }>;
+        if (rows.length > 0) {
+          items.push({
+            key: "pending_payment_requests",
+            label: `${rows.length} payment request${rows.length === 1 ? "" : "s"} awaiting approval`,
+            detail: currency(rows.reduce((s, r) => s + r.amount, 0)),
+            href: "/expenses",
+            severity: "warning",
+          });
+        }
+      })()
+    );
+  }
+
+  if (enabled.has("logistics")) {
+    fetches.push(
+      (async () => {
+        const { data } = await supabase
+          .from("shipments")
+          .select("status, eta")
+          .eq("org_id", orgId)
+          .in("status", ["dispatched", "in_transit", "failed"]);
+        const rows = (data ?? []) as Array<{ status: string; eta: string | null }>;
+        const failed = rows.filter((r) => r.status === "failed").length;
+        const late = rows.filter((r) => r.status !== "failed" && r.eta && r.eta < today).length;
+        if (failed > 0) {
+          items.push({
+            key: "failed_shipments",
+            label: `${failed} failed shipment${failed === 1 ? "" : "s"}`,
+            detail: "needs resolution",
+            href: "/shipments",
+            severity: "danger",
+          });
+        }
+        if (late > 0) {
+          items.push({
+            key: "late_shipments",
+            label: `${late} shipment${late === 1 ? "" : "s"} past ETA`,
+            detail: "still in transit",
+            href: "/shipments",
+            severity: "warning",
+          });
+        }
+      })()
+    );
   }
 
   await Promise.all(fetches);
