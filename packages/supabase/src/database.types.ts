@@ -1,12 +1,3 @@
-﻿node.exe : npm notice run quickbiz-erp@0.1.0 npx
-At line:1 char:1
-+ & "C:\Program Files\nodejs/node.exe" "C:\Users\MeXa\AppData\Roaming\n ...
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (npm notice run quickbiz-erp@0.1.0 npx:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 
-npm notice run supabase gen types typescript --db-url postgresql://postgres:postgres@127.0.0.1:54322/postgres --schema public
-Connecting to 127.0.0.1 54322
 export type Json =
   | string
   | number

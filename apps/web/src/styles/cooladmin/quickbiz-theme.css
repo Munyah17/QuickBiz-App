@@ -203,17 +203,37 @@ body.app .account-dropdown__signout:hover {
     inset: 0 auto 0 0;
     width: 280px;
     max-width: 86vw;
-    transform: translateX(-105%);
-    transition: transform 0.24s ease;
+    /* Hidden by both transform AND visibility — a transform alone can be
+       defeated by an overriding rule, leaving the drawer peeking in from
+       the left edge while content slides under it. */
+    transform: translateX(-105%) !important;
+    visibility: hidden;
+    transition: transform 0.24s ease, visibility 0s linear 0.24s;
     z-index: 1050;
   }
   body.app.sidebar-open .menu-sidebar {
     transform: translateX(0) !important;
+    visibility: visible;
+    transition: transform 0.24s ease, visibility 0s;
   }
   /* Content must never reserve space for the hidden drawer. */
   body.app .page-container {
     padding-left: 0 !important;
   }
+}
+
+/* Desktop keeps its sidebar offset — reinforced so no later rule can
+   flatten it and let content slide under the fixed sidebar. */
+@media (min-width: 992px) {
+  body.app .page-container {
+    padding-left: 260px !important;
+  }
+  body.app.sidebar-collapsed .page-container {
+    padding-left: 72px !important;
+  }
+}
+
+@media (max-width: 991.98px) {
 
   /* Reclaim horizontal space: the template's 30px page gutter is desktop-only. */
   body.app .section__content--p30 {

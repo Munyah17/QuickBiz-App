@@ -30,10 +30,12 @@ const FA_ICONS: Record<string, string> = {
   products: "fa-solid fa-box",
   warehousing: "fa-solid fa-warehouse",
   "stock-take": "fa-solid fa-clipboard-check",
+  "loss-control": "fa-solid fa-box-open",
   // Manufacturing
   manufacturing: "fa-solid fa-industry",
   boms: "fa-solid fa-layer-group",
   "work-orders": "fa-solid fa-screwdriver-wrench",
+  workshop: "fa-solid fa-toolbox",
   // Projects
   projects: "fa-solid fa-diagram-project",
   "petty-cash": "fa-solid fa-coins",
@@ -51,6 +53,9 @@ const FA_ICONS: Record<string, string> = {
   expenses: "fa-solid fa-money-bill-wave",
   iban: "fa-solid fa-building-columns",
   "tax-compliance": "fa-solid fa-file-invoice",
+  fiscalisation: "fa-solid fa-file-signature",
+  debtors: "fa-solid fa-hand-holding-dollar",
+  creditors: "fa-solid fa-building-columns",
   // Service Management
   service_management: "fa-solid fa-headset",
   tickets: "fa-solid fa-ticket",
@@ -58,6 +63,10 @@ const FA_ICONS: Record<string, string> = {
   // Logistics & Fleet
   logistics: "fa-solid fa-truck-fast",
   shipments: "fa-solid fa-truck-fast",
+  distribution: "fa-solid fa-route",
+  tracking: "fa-solid fa-location-dot",
+  transit: "fa-solid fa-plane-departure",
+  emergency: "fa-solid fa-triangle-exclamation",
   fleet: "fa-solid fa-car",
   // Risk & Compliance
   risk_insurance: "fa-solid fa-shield-halved",

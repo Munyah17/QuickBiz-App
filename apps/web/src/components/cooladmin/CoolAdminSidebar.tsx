@@ -91,7 +91,9 @@ export function CoolAdminSidebar({
               const groupActive = item.children.some(
                 (c) => c.href && isLeafActive(pathname, c.href),
               );
-              const open = groupOverrides[item.key] ?? groupActive;
+              // Retracted by default — only an explicit click opens a group,
+              // even when it contains the active route.
+              const open = groupOverrides[item.key] ?? false;
 
               return (
                 <li key={item.key} className={cn("has-sub", groupActive && "active")}>

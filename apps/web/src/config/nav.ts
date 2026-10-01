@@ -176,6 +176,8 @@ export const NAV_STRUCTURE: NavEntry[] = [
     children: [
       { key: "pnl", href: "/finance", label: "Profit & Loss", icon: TrendingUp, moduleKey: "finance" },
       { key: "accounts", href: "/accounts", label: "Chart of Accounts", icon: Wallet, moduleKey: "finance" },
+      { key: "debtors", href: "/debtors", label: "Debtors", icon: HandCoins, moduleKey: "finance" },
+      { key: "creditors", href: "/creditors", label: "Creditors", icon: Landmark, moduleKey: "finance" },
       { key: "expenses", href: "/expenses", label: "Expenses", icon: BadgeDollarSign, moduleKey: "finance" },
       { key: "iban", href: "/iban", label: "IBAN", icon: Landmark, moduleKey: "finance" },
       { key: "tax-compliance", href: "/tax-compliance", label: "Tax Compliance", icon: ReceiptText, moduleKey: "finance" },
