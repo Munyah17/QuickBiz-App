@@ -35,6 +35,7 @@ export function CoolAdminHeader({
   notifications,
   onToggleSidebar,
   sidebarExpanded,
+  demo = false,
 }: {
   userName: string;
   roleName: string;
@@ -45,6 +46,8 @@ export function CoolAdminHeader({
   onToggleSidebar: () => void;
   /** Drawer open on mobile / full sidebar on desktop — feeds aria-expanded. */
   sidebarExpanded: boolean;
+  /** Demo shell: no auth/session, so server actions are skipped. */
+  demo?: boolean;
 }) {
   const router = useRouter();
   const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
@@ -74,6 +77,12 @@ export function CoolAdminHeader({
   useEffect(() => {
     if (!queryLongEnough) return;
     const timeout = setTimeout(() => {
+      if (demo) {
+        // No server action in the demo shell — just show the empty state.
+        setResults([]);
+        setSearchOpen(true);
+        return;
+      }
       startTransition(async () => {
         const data = await searchWorkspaceAction(query);
         setResults(data);
@@ -81,7 +90,7 @@ export function CoolAdminHeader({
       });
     }, 250);
     return () => clearTimeout(timeout);
-  }, [query, queryLongEnough]);
+  }, [query, queryLongEnough, demo]);
 
   const toggleMenu = (menu: Exclude<OpenMenu, null>) =>
     setOpenMenu((current) => (current === menu ? null : menu));
@@ -179,7 +188,7 @@ export function CoolAdminHeader({
                       <div
                         key={n.id}
                         className={cn("notifi__item", !n.read_at && "notifi__item--unread")}
-                        onClick={() => markNotificationReadAction(n.id)}
+                        onClick={() => { if (!demo) void markNotificationReadAction(n.id); }}
                       >
                         <div className="bg-c1 img-cir img-40">
                           <i className="fa-solid fa-bell" aria-hidden="true"></i>
@@ -191,7 +200,9 @@ export function CoolAdminHeader({
                       </div>
                     ))}
                     <div className="notifi__footer">
-                      <Link href="/notifications">All notifications</Link>
+                      <Link href={demo ? "/demo/dashboard" : "/notifications"}>
+                        {demo ? "Demo — nothing is saved" : "All notifications"}
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -239,28 +250,38 @@ export function CoolAdminHeader({
                       </div>
                     </div>
                     <div className="account-dropdown__body">
+                      {!demo && (
+                        <>
+                          <div className="account-dropdown__item">
+                            <Link href="/profile">
+                              <i className="fa-solid fa-user" aria-hidden="true"></i>Account
+                            </Link>
+                          </div>
+                          <div className="account-dropdown__item">
+                            <Link href="/notifications">
+                              <i className="fa-solid fa-bell" aria-hidden="true"></i>Notifications
+                            </Link>
+                          </div>
+                        </>
+                      )}
                       <div className="account-dropdown__item">
-                        <Link href="/profile">
-                          <i className="fa-solid fa-user" aria-hidden="true"></i>Account
-                        </Link>
-                      </div>
-                      <div className="account-dropdown__item">
-                        <Link href="/notifications">
-                          <i className="fa-solid fa-bell" aria-hidden="true"></i>Notifications
-                        </Link>
-                      </div>
-                      <div className="account-dropdown__item">
-                        <Link href="/company">
+                        <Link href={demo ? "/demo/company" : "/company"}>
                           <i className="fa-solid fa-gear" aria-hidden="true"></i>Settings
                         </Link>
                       </div>
                     </div>
                     <div className="account-dropdown__footer">
-                      <form action={signOutAction}>
-                        <button type="submit" className="account-dropdown__signout">
-                          <i className="fa-solid fa-power-off" aria-hidden="true"></i>Logout
-                        </button>
-                      </form>
+                      {demo ? (
+                        <Link href="/login" className="account-dropdown__signout">
+                          <i className="fa-solid fa-power-off" aria-hidden="true"></i>Exit Demo
+                        </Link>
+                      ) : (
+                        <form action={signOutAction}>
+                          <button type="submit" className="account-dropdown__signout">
+                            <i className="fa-solid fa-power-off" aria-hidden="true"></i>Logout
+                          </button>
+                        </form>
+                      )}
                     </div>
                   </div>
                 </div>

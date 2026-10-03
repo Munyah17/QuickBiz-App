@@ -26,6 +26,7 @@ export function CoolAdminSidebar({
   collapsed,
   onNavigate,
   onClose,
+  homeHref = "/dashboard",
 }: {
   model: CoolNavItem[];
   collapsed: boolean;
@@ -33,6 +34,8 @@ export function CoolAdminSidebar({
   onNavigate: () => void;
   /** The `.sidebar-close` button inside the logo row (mobile drawer). */
   onClose: () => void;
+  /** Logo link target ("/demo/dashboard" in the demo shell). */
+  homeHref?: string;
 }) {
   const pathname = usePathname();
   // Groups stay collapsed until the user clicks one. Explicit toggles are the

@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { NotificationRow } from "@/services/notifications";
+import { NAV_STRUCTURE, prefixNavStructure } from "@/config/nav";
 import { buildNavModel } from "./nav-model";
 import { CoolAdminSidebar } from "./CoolAdminSidebar";
 import { CoolAdminHeader } from "./CoolAdminHeader";
@@ -28,6 +29,8 @@ export function CoolAdminShell({
   userName,
   roleName,
   email,
+  navPrefix,
+  demo = false,
   notifications,
 }: {
   children: React.ReactNode;
@@ -38,6 +41,10 @@ export function CoolAdminShell({
   userName: string;
   roleName: string;
   email: string;
+  /** Prepended to every nav href (e.g. "/demo" for the public demo shell). */
+  navPrefix?: string;
+  /** Demo mode: header skips server actions (search/mark-read/sign-out). */
+  demo?: boolean;
   notifications: NotificationRow[];
 }) {
   const pathname = usePathname();
@@ -45,8 +52,13 @@ export function CoolAdminShell({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const model = useMemo(
-    () => buildNavModel(permissions, enabledModules),
-    [permissions, enabledModules],
+    () =>
+      buildNavModel(
+        permissions,
+        enabledModules,
+        navPrefix ? prefixNavStructure(NAV_STRUCTURE, navPrefix) : NAV_STRUCTURE,
+      ),
+    [permissions, enabledModules, navPrefix],
   );
 
   // `body.app` is set in the root layout so the overlay applies from first
@@ -102,6 +114,7 @@ export function CoolAdminShell({
         collapsed={collapsed}
         onNavigate={() => setMobileOpen(false)}
         onClose={() => setMobileOpen(false)}
+        homeHref={navPrefix ? `${navPrefix}/dashboard` : "/dashboard"}
       />
       <div
         className="sidebar-backdrop"
@@ -118,6 +131,7 @@ export function CoolAdminShell({
           notifications={notifications}
           onToggleSidebar={toggleSidebar}
           sidebarExpanded={mobileOpen || !collapsed}
+          demo={demo}
         />
         <main className="main-content" id="main-content">
           <div className="section__content section__content--p30">

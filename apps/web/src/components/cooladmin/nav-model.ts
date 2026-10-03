@@ -1,6 +1,7 @@
 import {
   NAV_STRUCTURE,
   isNavGroup,
+  type NavEntry,
   type NavLeaf,
 } from "@/config/nav";
 import { faIcon } from "./fa-icons";
@@ -22,6 +23,7 @@ export interface CoolNavItem {
 export function buildNavModel(
   permissions: string[],
   enabledModules: string[],
+  entries: NavEntry[] = NAV_STRUCTURE,
 ): CoolNavItem[] {
   const leafVisible = (leaf: NavLeaf) =>
     (!leaf.moduleKey || enabledModules.includes(leaf.moduleKey)) &&
@@ -29,7 +31,7 @@ export function buildNavModel(
 
   const items: CoolNavItem[] = [];
 
-  for (const entry of NAV_STRUCTURE) {
+  for (const entry of entries) {
     if (!isNavGroup(entry)) {
       if (!leafVisible(entry)) continue;
       items.push({

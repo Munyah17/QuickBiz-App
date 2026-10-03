@@ -1,0 +1,1287 @@
+4: legacy stylesheet. Scoped via `body.app` so other pages remain
+7: body.app {
+64: body.app,
+65: body.app .page-wrapper,
+66: body.app .page-container {
+76: body.app .menu-sidebar {
+82: body.app .page-container {
+87: body.app .menu-sidebar .logo {
+96: body.app .menu-sidebar .logo a {
+101: body.app .menu-sidebar .logo img {
+109: body.app .menu-sidebar__content {
+117: body.app .menu-sidebar__content::-webkit-scrollbar {
+121: body.app .menu-sidebar__content::-webkit-scrollbar-thumb {
+128: body.app .navbar-sidebar {
+132: body.app .navbar-sidebar .navbar__list {
+138: body.app .navbar-sidebar .navbar__list li {
+143: body.app .navbar-sidebar .navbar__list > li > a {
+161: body.app .navbar-sidebar .navbar__list > li > a > i {
+171: body.app .navbar-sidebar .navbar__list > li > a:hover {
+176: body.app .navbar-sidebar .navbar__list > li > a:hover > i {
+181: body.app .navbar-sidebar .navbar__list > li.active > a {
+187: body.app .navbar-sidebar .navbar__list > li.active > a > i {
+191: body.app .navbar-sidebar .navbar__list > li.active > a::before {
+203: body.app .navbar-sidebar .navbar__list > li.has-sub > a.js-arrow {
+207: body.app .navbar-sidebar .navbar__list > li.has-sub > a.js-arrow::after {
+220: body.app .navbar-sidebar .navbar__list > li.has-sub > a.js-arrow.open::after {
+227: body.app .navbar-sidebar .navbar__list .navbar__sub-list {
+234: body.app .navbar-sidebar .navbar__list .navbar__sub-list::before {
+245: body.app .navbar-sidebar .navbar__list .navbar__sub-list li {
+250: body.app .navbar-sidebar .navbar__list .navbar__sub-list li a {
+262: body.app .navbar-sidebar .navbar__list .navbar__sub-list li a:hover {
+267: body.app .navbar-sidebar .navbar__list .navbar__sub-list li.active > a,
+268: body.app .navbar-sidebar .navbar__list .navbar__sub-list li > a.active {
+274: body.app .navbar-sidebar .nav-group-label {
+286: body.app .header-desktop {
+292: body.app .header-desktop .section__content {
+296: body.app .header-wrap {
+301: body.app .form-header {
+315: body.app .form-header:focus-within {
+321: body.app .form-header__icon {
+331: body.app .form-header .au-input {
+343: body.app .form-header .au-input::placeholder {
+347: body.app .form-header__hint {
+364: body.app .form-header:focus-within .form-header__hint {
+370: body.app .form-header .au-btn--submit {
+374: body.app .header-button {
+378: body.app .noti__item {
+389: body.app .noti__item:hover {
+393: body.app .noti__item i {
+398: body.app .noti__item:hover i {
+402: body.app .noti__item .quantity {
+415: body.app .account-item {
+422: body.app .account-item:hover {
+426: body.app .account-item .image {
+432: body.app .account-item > .content > a {
+438: body.app .account-item > .content > a:after {
+443: body.app .account-dropdown,
+444: body.app .mess-dropdown,
+445: body.app .email-dropdown,
+446: body.app .notifi-dropdown {
+455: body.app .page-header {
+464: body.app .page-header h1 {
+472: body.app .page-header .subtitle {
+478: body.app .page-header__actions {
+487: body.app .m-btn {
+504: body.app .m-btn:active {
+508: body.app .m-btn--primary {
+514: body.app .m-btn--primary:hover {
+520: body.app .m-btn--ghost {
+526: body.app .m-btn--ghost:hover {
+530: body.app .m-btn i {
+537: body.app .m-card {
+545: body.app .m-card__header {
+553: body.app .m-card__title {
+561: body.app .m-card__subtitle {
+570: body.app .stat-card {
+581: body.app .stat-card:hover {
+586: body.app .stat-card__head {
+593: body.app .stat-card__label {
+600: body.app .stat-card__icon {
+614: body.app .stat-card__icon--c1 {
+619: body.app .stat-card__icon--c2 {
+624: body.app .stat-card__icon--c3 {
+629: body.app .stat-card__icon--c4 {
+635: body.app .stat-card__icon--success {
+640: body.app .stat-card__icon--warning {
+645: body.app .stat-card__icon--danger {
+650: body.app .stat-card__value {
+659: body.app .stat-card__delta {
+668: body.app .stat-card__delta--up {
+672: body.app .stat-card__delta--down {
+676: body.app .stat-card__delta i {
+680: body.app .stat-card__delta-period {
+686: body.app .stat-card__sparkline {
+692: body.app .stat-card__sparkline canvas {
+701: body.app .section-eyebrow {
+713: body.app .date-chip {
+727: body.app .date-chip i {
+732: body.app .date-chip:hover {
+739: body.app .activity-list {
+745: body.app .activity-item {
+753: body.app .activity-item:last-child {
+757: body.app .activity-item__avatar {
+766: body.app .activity-item__body {
+771: body.app .activity-item__text {
+778: body.app .activity-item__text b {
+782: body.app .activity-item__time {
+792: body.app .task-list {
+798: body.app .task-item {
+806: body.app .task-item:last-child {
+810: body.app .task-item input[type=checkbox] {
+823: body.app .task-item input[type=checkbox]:hover {
+827: body.app .task-item input[type=checkbox]:checked {
+832: body.app .task-item input[type=checkbox]:checked::after {
+845: body.app .task-item__title {
+853: body.app .task-item input[type=checkbox]:checked + .task-item__title {
+858: body.app .task-item__meta {
+867: body.app .priority-chip {
+878: body.app .priority-chip--high {
+883: body.app .priority-chip--medium {
+888: body.app .priority-chip--low {
+896: body.app .m-table {
+902: body.app .m-table th,
+903: body.app .m-table td {
+909: body.app .m-table tbody tr:last-child td {
+913: body.app .m-table th {
+922: body.app .m-table td.num {
+928: body.app .m-table .row-product {
+936: body.app .m-table .row-product__icon {
+949: body.app .trend-mini {
+957: body.app .trend-mini--up {
+961: body.app .trend-mini--down {
+968: body.app .copyright p {
+974: body.app .copyright a {
+983: body.app .main-content {
+987: body.app .main-content > .section__content--p30 {
+992: @media (max-width: 991px) {
+993: body.app .main-content {
+996: body.app .main-content > .section__content--p30 {
+1001: body.app .stack-y > * + * {
+1005: body.app .stack-y-lg > * + * {
+1009: body.app .row-tight {
+1017: body.app .sidebar-toggle {
+1033: body.app .sidebar-toggle:hover {
+1038: body.app .sidebar-toggle__bars {
+1048: body.app .sidebar-toggle__bars::before,
+1049: body.app .sidebar-toggle__bars::after {
+1060: body.app .sidebar-toggle__bars::before {
+1064: body.app .sidebar-toggle__bars::after {
+1069: body.app .sidebar-close {
+1083: body.app .sidebar-close:hover {
+1089: `.menu-sidebar`). On mobile the sidebar lives off-screen and slides in
+1090: when `body.sidebar-open` is set. */
+1091: body.app .menu-sidebar {
+1099: body.app .menu-sidebar .logo .logo-link {
+1109: body.app .menu-sidebar .logo .logo-mark {
+1127: body.app .menu-sidebar .logo .logo-text {
+1137: @media (min-width: 992px) {
+1138: body.app.sidebar-collapsed .menu-sidebar {
+1141: body.app.sidebar-collapsed .page-container {
+1145: body.app.sidebar-collapsed .menu-sidebar .logo {
+1149: body.app.sidebar-collapsed .menu-sidebar .logo .logo-link {
+1153: body.app.sidebar-collapsed .menu-sidebar .logo .logo-text {
+1159: body.app.sidebar-collapsed .navbar-sidebar {
+1162: body.app.sidebar-collapsed .navbar-sidebar .navbar__list {
+1167: body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li {
+1175: body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li > a {
+1196: body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li > a > i {
+1211: body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li.has-sub > a.js-arrow::after {
+1215: body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li:not(.active) > a:hover,
+1216: body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li:not(.active) > a:focus-visible {
+1220: body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li:not(.active) > a:hover > i,
+1221: body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li:not(.active) > a:focus-visible > i {
+1225: body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li.active > a {
+1230: body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li.active > a > i {
+1234: body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li.active > a::before {
+1238: body.app.sidebar-collapsed .navbar-sidebar .navbar__list .navbar__sub-list {
+1271: @media (max-width: 991.98px) {
+1272: body.app .menu-sidebar {
+1283: body.app.sidebar-open .menu-sidebar {
+1286: body.app .page-container {
+1290: body.app .sidebar-close {
+1296: body.app .header-mobile,
+1297: body.app .navbar-mobile {
+1300: body.app .header-desktop {
+1303: body.app .main-content {
+1308: body.app .sidebar-backdrop {
+1319: body.app.sidebar-open .sidebar-backdrop {
+1324: body.app.sidebar-open {
+1333: body.app .mess-dropdown,
+1334: body.app .email-dropdown,
+1335: body.app .notifi-dropdown,
+1336: body.app .account-dropdown {
+1349: body.app .mess-dropdown:before,
+1350: body.app .email-dropdown:before,
+1351: body.app .notifi-dropdown:before,
+1352: body.app .account-dropdown:after {
+1358: body.app .mess__title,
+1359: body.app .email__title,
+1360: body.app .notifi__title {
+1369: body.app .mess__title p,
+1370: body.app .email__title p,
+1371: body.app .notifi__title p {
+1381: body.app .mess__item,
+1382: body.app .email__item,
+1383: body.app .notifi__item {
+1393: body.app .mess__item:hover,
+1394: body.app .email__item:hover,
+1395: body.app .notifi__item:hover {
+1399: body.app .mess__item:last-of-type,
+1400: body.app .email__item:last-of-type,
+1401: body.app .notifi__item:last-of-type {
+1406: body.app .mess__item .image,
+1407: body.app .email__item .image,
+1408: body.app .notifi__item .img-cir {
+1420: body.app .mess__item .image img,
+1421: body.app .email__item .image img {
+1430: body.app .notifi__item .bg-c1 {
+1435: body.app .notifi__item .bg-c2 {
+1440: body.app .notifi__item .bg-c3 {
+1445: body.app .notifi__item .bg-c4 {
+1450: body.app .notifi__item .img-cir i {
+1455: body.app .mess__item .content,
+1456: body.app .email__item .content,
+1457: body.app .notifi__item .content {
+1462: body.app .mess__item .content h6 {
+1469: body.app .mess__item .content p,
+1470: body.app .email__item .content p,
+1471: body.app .notifi__item .content p {
+1481: body.app .mess__item .content .time,
+1482: body.app .email__item .content span,
+1483: body.app .notifi__item .content .date {
+1491: body.app .mess__footer,
+1492: body.app .email__footer,
+1493: body.app .notifi__footer {
+1498: body.app .mess__footer a,
+1499: body.app .email__footer a,
+1500: body.app .notifi__footer a {
+1511: body.app .mess__footer a:hover,
+1512: body.app .email__footer a:hover,
+1513: body.app .notifi__footer a:hover {
+1518: body.app .account-dropdown .info {
+1527: body.app .account-dropdown .info .image {
+1535: body.app .account-dropdown .info .image img {
+1542: body.app .account-dropdown .info .content {
+1549: body.app .account-dropdown .info .content .name {
+1555: body.app .account-dropdown .info .content .name a {
+1561: body.app .account-dropdown .info .content .email {
+1571: body.app .account-dropdown__body {
+1575: body.app .account-dropdown__item a,
+1576: body.app .account-dropdown__footer a {
+1587: body.app .account-dropdown__item a:hover,
+1588: body.app .account-dropdown__footer a:hover {
+1593: body.app .account-dropdown__item a i,
+1594: body.app .account-dropdown__footer a i {
+1601: body.app .account-dropdown__footer {
+1606: body.app .account-dropdown__footer a {
+1610: body.app .account-dropdown__footer a i {
+1616: body.app .mess-dropdown,
+1617: body.app .email-dropdown,
+1618: body.app .notifi-dropdown,
+1619: body.app .account-dropdown {
+1626: body.app .js-item-menu.show-dropdown > .mess-dropdown,
+1627: body.app .js-item-menu.show-dropdown > .email-dropdown,
+1628: body.app .js-item-menu.show-dropdown > .notifi-dropdown,
+1629: body.app .js-item-menu.show-dropdown > .account-dropdown {
+1640: body.app .header-desktop {
+1650: @media (min-width: 992px) {
+1651: body.app.sidebar-collapsed .header-desktop {
+1655: @media (max-width: 991.98px) {
+1656: body.app .header-desktop {
+1664: body.app .header-desktop .section__content,
+1665: body.app .header-desktop .section__content--p30 {
+1670: body.app .header-desktop .container-fluid {
+1676: body.app .header-wrap {
+1685: body.app .header-wrap .form-header {
+1690: body.app .header-button {
+1697: body.app .noti-wrap {
+1706: body.app .noti-wrap .noti__item,
+1707: body.app .noti-wrap .noti__item:last-child {
+1714: body.app .account-item {
+1724: body.app .account-item .image {
+1734: body.app .account-item .image > img {
+1743: body.app .noti__item {
+1753: body.app .noti__item i {
+1759: body.app .noti__item:hover {
+1763: body.app .noti__item:hover i {
+1768: @media (max-width: 768px) {
+1769: body.app .header-wrap {
+1773: body.app .form-header {
+1776: body.app .form-header__hint {
+1784: body.app.auth-page {
+1793: body.app.auth-page .page-wrapper,
+1794: body.app.auth-page .page-content--bge5,
+1795: body.app.auth-page .container {
+1804: body.app.auth-page .login-wrap {
+1810: body.app.auth-page .login-content {
+1818: body.app.auth-page .auth-brand {
+1827: body.app.auth-page .auth-brand .logo-mark {
+1843: body.app.auth-page .auth-brand .logo-text {
+1851: body.app.auth-page .auth-title {
+1861: body.app.auth-page .auth-subtitle {
+1869: body.app.auth-page .login-form .form-group {
+1873: body.app.auth-page .login-form label {
+1882: body.app.auth-page .login-form .au-input {
+1896: body.app.auth-page .login-form .au-input::placeholder {
+1900: body.app.auth-page .login-form .au-input:focus {
+1905: body.app.auth-page .login-checkbox {
+1914: body.app.auth-page .login-checkbox > label {
+1924: body.app.auth-page .login-checkbox input[type=checkbox] {
+1936: body.app.auth-page .login-checkbox input[type=checkbox]:checked {
+1941: body.app.auth-page .login-checkbox input[type=checkbox]:checked::after {
+1953: body.app.auth-page .login-checkbox a {
+1959: body.app.auth-page .login-checkbox a:hover {
+1964: body.app.auth-page .login-form .au-btn {
+1981: body.app.auth-page .login-form .au-btn:hover {
+1985: body.app.auth-page .login-form .au-btn:active {
+1989: body.app.auth-page .login-form .au-btn--green {
+1993: body.app.auth-page .login-form .au-btn--green:hover {
+1998: body.app.auth-page .social-login-content {
+2002: body.app.auth-page .social-login-content::before {
+2015: body.app.auth-page .social-login-content::before {
+2019: body.app.auth-page .social-button {
+2025: body.app.auth-page .social-button .au-btn {
+2033: body.app.auth-page .social-button .au-btn:hover {
+2037: body.app.auth-page .social-button .au-btn--blue,
+2038: body.app.auth-page .social-button .au-btn--blue2 {
+2044: body.app.auth-page .register-link {
+2054: body.app.auth-page .register-link p {
+2058: body.app.auth-page .register-link a {
+2064: body.app.auth-page .register-link a:hover {
+2069: body.app.auth-page .login-logo {
+2080: body.app .title-1,
+2081: body.app .title-2,
+2082: body.app .title-3,
+2083: body.app .title-4,
+2084: body.app .title-5 {
+2094: body.app .title-1 {
+2099: body.app .title-2 {
+2103: body.app .title-3 i,
+2104: body.app .title-5 i {
+2111: body.app .au-card {
+2119: body.app .au-card-inner {
+2123: body.app .au-card--bg-blue {
+2128: body.app .au-card--bg-blue .table-top-countries tbody td,
+2129: body.app .au-card--bg-blue .table-top-countries tbody tr {
+2135: body.app .table-earning thead th {
+2148: body.app .table-earning tbody td {
+2157: body.app .table-earning tbody tr:hover td {
+2166: body.app .table-top-countries,
+2167: body.app .table-top-campaign {
+2173: body.app .table-top-countries tbody td,
+2174: body.app .table-top-campaign.table td {
+2185: body.app .table-top-countries tbody tr td:last-child,
+2186: body.app .table-top-campaign.table tr td:last-child {
+2193: body.app .table-top-countries tbody tr td:first-child,
+2194: body.app .table-top-campaign.table tr td:first-child {
+2199: body.app .table-top-countries tbody tr:last-child td,
+2200: body.app .table-top-campaign.table tr:last-child td {
+2205: body.app .table-top-countries tbody tr,
+2206: body.app .table-top-campaign.table tbody tr {
+2210: body.app .table-top-countries tbody tr:hover td,
+2211: body.app .table-top-campaign.table tbody tr:hover td {
+2216: body.app .table-top-campaign.table tr td:last-child {
+2222: body.app .user-data,
+2223: body.app .top-campaign {
+2230: body.app .user-data .filters {
+2237: body.app .user-data__footer {
+2243: body.app .au-btn-load {
+2256: body.app .au-btn-load:hover {
+2262: body.app .table-data__tool {
+2271: body.app .table-data__tool-left,
+2272: body.app .table-data__tool-right {
+2279: body.app .au-btn-filter {
+2295: body.app .au-btn-filter:hover {
+2299: body.app .au-btn-filter i {
+2305: body.app .au-btn--green {
+2323: body.app .au-btn--green:hover {
+2327: body.app .au-btn--small {
+2333: body.app .select-wrapper select.form-select {
+2343: body.app .select-wrapper select.form-select:focus {
+2349: body.app .role {
+2361: body.app .role.admin {
+2366: body.app .role.user {
+2371: body.app .role.member {
+2377: body.app .status--process,
+2378: body.app .status--approved,
+2379: body.app .status--denied,
+2380: body.app td.process,
+2381: body.app td.approved,
+2382: body.app td.denied {
+2393: body.app .status--process,
+2394: body.app td.process {
+2399: body.app .status--approved,
+2400: body.app td.approved {
+2405: body.app .status--denied,
+2406: body.app td.denied {
+2412: body.app .table-data2 {
+2417: body.app .table-data2.table thead th {
+2431: body.app .table-data2.table tbody tr,
+2432: body.app .table-data2.table tr.tr-shadow {
+2438: body.app .table-data2.table tbody td {
+2448: body.app .table-data2.table tr.spacer {
+2452: body.app .table-data2.table tbody tr:hover td {
+2456: body.app .block-email {
+2463: body.app .table-data-feature {
+2469: body.app .table-data-feature .item {
+2484: body.app .table-data-feature .item:hover {
+2489: body.app .table-data-feature .item i {
+2494: body.app .table-data3 thead th {
+2507: body.app .table-data3 thead tr th:first-child {
+2513: body.app .table-data3 thead tr th:last-child {
+2519: body.app .table-data3 tbody td {
+2528: body.app .table-data3 tbody tr:last-child td {
+2533: body.app .au-checkbox {
+2543: body.app .au-checkbox input {
+2552: body.app .au-checkmark {
+2561: body.app .au-checkbox:hover .au-checkmark {
+2565: body.app .au-checkbox input:checked ~ .au-checkmark {
+2570: body.app .au-checkbox input:checked ~ .au-checkmark::after {
+2584: body.app .more {
+2596: body.app .more:hover {
+2602: body.app .table-data__info h6 {
+2610: body.app .table-data__info span a {
+2616: body.app .table-data__info span a:hover {
+2621: body.app .table--no-card {
+2629: body.app .badge.bg-success {
+2635: body.app .badge.bg-warning {
+2641: body.app .badge.bg-danger {
+2647: body.app .badge.bg-info {
+2653: body.app .badge.bg-primary {
+2662: body.app .rank-list {
+2671: body.app .rank-list > li {
+2679: body.app .rank-list__rank {
+2697: body.app .rank-list > li:nth-child(1) .rank-list__rank {
+2702: body.app .rank-list > li:nth-child(2) .rank-list__rank {
+2707: body.app .rank-list > li:nth-child(3) .rank-list__rank {
+2712: body.app .rank-list__title {
+2725: body.app .rank-list__value {
+2738: body.app .rank-list__bar {
+2749: body.app .rank-list__bar::after {
+2762: body.app .rank-list > li:nth-child(1) .rank-list__bar::after {
+2773: body.app .statistic {
+2777: body.app .statistic .section__content--p30 {
+2784: body.app .statistic__item {
+2796: body.app .statistic__item:hover {
+2801: body.app .statistic__item h2,
+2802: body.app .statistic__item .number {
+2812: body.app .statistic__item .desc {
+2822: body.app .statistic__item .icon {
+2837: body.app .statistic__item .icon i {
+2846: body.app .statistic__item--blue {
+2850: body.app .statistic__item--blue .icon {
+2854: body.app .statistic__item--blue .icon i {
+2858: body.app .statistic__item--green {
+2862: body.app .statistic__item--green .icon {
+2866: body.app .statistic__item--green .icon i {
+2870: body.app .statistic__item--orange {
+2874: body.app .statistic__item--orange .icon {
+2878: body.app .statistic__item--orange .icon i {
+2882: body.app .statistic__item--red {
+2886: body.app .statistic__item--red .icon {
+2890: body.app .statistic__item--red .icon i {
+2896: body.app .statistic .row > [class*=col-]:nth-child(1) .statistic__item:not([class*="--"]) .icon {
+2900: body.app .statistic .row > [class*=col-]:nth-child(1) .statistic__item:not([class*="--"]) .icon i {
+2904: body.app .statistic .row > [class*=col-]:nth-child(2) .statistic__item:not([class*="--"]) .icon {
+2908: body.app .statistic .row > [class*=col-]:nth-child(2) .statistic__item:not([class*="--"]) .icon i {
+2912: body.app .statistic .row > [class*=col-]:nth-child(3) .statistic__item:not([class*="--"]) .icon {
+2916: body.app .statistic .row > [class*=col-]:nth-child(3) .statistic__item:not([class*="--"]) .icon i {
+2920: body.app .statistic .row > [class*=col-]:nth-child(4) .statistic__item:not([class*="--"]) .icon {
+2924: body.app .statistic .row > [class*=col-]:nth-child(4) .statistic__item:not([class*="--"]) .icon i {
+2929: body.app .statistic2 {
+2938: body.app .statistic-chart-1,
+2939: body.app .chart-percent-2,
+2940: body.app .chart-percent-3 {
+2949: body.app .statistic-chart-1-note span {
+2955: body.app .statistic-chart-1-note .big {
+2962: body.app .recent-report2,
+2963: body.app .recent-report3 {
+2972: body.app .recent-report__chart {
+2976: body.app .recent-report2 .chart-info,
+2977: body.app .recent-report3 .chart-info {
+2986: body.app .recent-report2 .chart-info__left,
+2987: body.app .recent-report3 .chart-info__left {
+2993: body.app .recent-report2 .chart-info-right,
+2994: body.app .recent-report3 .chart-info-right {
+2999: body.app .chart-note {
+3008: body.app .chart-note .dot {
+3015: body.app .chart-note .dot--blue {
+3019: body.app .chart-note .dot--green {
+3023: body.app .chart-note .dot--orange {
+3027: body.app .chart-note .dot--red {
+3032: body.app .task-progress {
+3041: body.app .au-progress {
+3045: body.app .au-progress:last-child {
+3049: body.app .au-progress__title {
+3058: body.app .au-progress__bar {
+3066: body.app .au-progress__inner {
+3074: body.app .au-progress:nth-child(1) .au-progress__inner {
+3078: body.app .au-progress:nth-child(2) .au-progress__inner {
+3082: body.app .au-progress:nth-child(3) .au-progress__inner {
+3086: body.app .au-progress:nth-child(4) .au-progress__inner {
+3090: body.app .au-progress__value {
+3100: body.app .au-task,
+3101: body.app .au-task--border {
+3111: body.app .au-task__title {
+3120: body.app .au-task__title h3,
+3121: body.app .au-task__title .title-3 {
+3130: body.app .au-task-list {
+3134: body.app .au-task__item {
+3144: body.app .au-task__item:last-child {
+3148: body.app .au-task__item:hover {
+3152: body.app .au-task__item--primary {
+3156: body.app .au-task__item--success {
+3160: body.app .au-task__item--warning {
+3164: body.app .au-task__item--danger {
+3168: body.app .au-task__item-inner h5 {
+3176: body.app .au-task__item-inner .time {
+3182: body.app .au-task__footer {
+3189: body.app .au-task__footer a {
+3198: body.app .au-message {
+3207: body.app .au-message-list {
+3211: body.app .au-message__item {
+3221: body.app .au-message__item:last-child {
+3225: body.app .au-message__item:hover {
+3229: body.app .au-message__item.unread {
+3233: body.app .au-message__item.unread:hover {
+3237: body.app .au-message__item-inner {
+3245: body.app .au-message__item .av-img {
+3253: body.app .au-message__item .av-img img {
+3259: body.app .au-message__item-text {
+3264: body.app .au-message__item-text h5 {
+3275: body.app .au-message__item.unread .au-message__item-text h5 {
+3279: body.app .au-message__item-text p {
+3289: body.app .au-message__item-time {
+3297: body.app .au-message__noti {
+3310: body.app .au-message__footer {
+3317: body.app .au-message__footer a {
+3326: body.app .au-chat,
+3327: body.app .au-chat--border {
+3336: body.app .au-chat__title {
+3343: body.app .au-chat__title h3 {
+3352: body.app .au-chat__content {
+3356: body.app .au-chat-info {
+3361: body.app .au-chat-textfield {
+3370: body.app .welcome,
+3371: body.app .welcome2 {
+3380: body.app .welcome2 {
+3384: body.app .welcome2-greeting {
+3393: body.app .welcome2-greeting + p,
+3394: body.app .welcome2 p {
+3400: body.app .au-card {
+3408: body.app .au-card--no-shadow {
+3412: body.app .au-card--no-pad {
+3416: body.app .au-card--border {
+3420: body.app .au-card-inner {
+3424: body.app .au-card-title {
+3432: body.app .au-card-title h3,
+3433: body.app .au-card-title h4 {
+3444: body.app main .section__content--p30 {
+3451: body.app .project-list {
+3457: body.app .project-list > li {
+3467: body.app .project-list > li:last-child {
+3471: body.app .project-list__title {
+3479: body.app .project-list__meta {
+3487: body.app .project-list__avatars {
+3492: body.app .project-list__avatars img {
+3502: body.app .project-list__avatars img:first-child {
+3506: body.app .project-list__bar {
+3515: body.app .project-list__bar::after {
+3524: body.app .project-list__bar--success::after {
+3528: body.app .project-list__bar--warning::after {
+3532: body.app .project-list__bar--danger::after {
+3536: body.app .deadline-list {
+3542: body.app .deadline-list > li {
+3549: body.app .deadline-list > li:last-child {
+3553: body.app .deadline-list__date {
+3564: body.app .deadline-list__date strong {
+3571: body.app .deadline-list__date span {
+3578: body.app .deadline-list__body {
+3583: body.app .deadline-list__title {
+3592: body.app .deadline-list__project {
+3599: body.app .team-list {
+3605: body.app .team-list > li {
+3613: body.app .team-list > li:last-child {
+3617: body.app .team-list__avatar {
+3624: body.app .team-list__avatar img {
+3631: body.app .team-list__status {
+3641: body.app .team-list__status--online {
+3645: body.app .team-list__status--away {
+3649: body.app .team-list__status--busy {
+3653: body.app .team-list__status--offline {
+3657: body.app .team-list__name {
+3666: body.app .team-list__role {
+3674: body.app .team-list__badge {
+3682: body.app .donut-wrap {
+3689: body.app .page-header h1 + .subtitle {
+3699: body.app .card {
+3708: body.app .card > .card-header,
+3709: body.app .card-header {
+3721: body.app .card-header strong {
+3725: body.app .card-header small {
+3731: body.app .card-body {
+3735: body.app .card-title {
+3744: body.app .card-footer {
+3751: body.app .form-group {
+3755: body.app .form-group:last-child {
+3760: body.app .form-control-label,
+3761: body.app .control-label,
+3762: body.app form label:not(.form-check-label):not(.au-checkbox):not(.btn) {
+3772: body.app .form-control,
+3773: body.app input.form-control,
+3774: body.app textarea.form-control,
+3775: body.app select.form-control,
+3776: body.app .form-select {
+3792: body.app textarea.form-control {
+3800: body.app .form-control::placeholder,
+3801: body.app .form-select::placeholder {
+3805: body.app .form-control:focus,
+3806: body.app .form-select:focus {
+3812: body.app .form-control[readonly],
+3813: body.app .form-control[disabled],
+3814: body.app .form-control:disabled {
+3821: body.app input[type=file].form-control {
+3826: body.app input[type=file]::file-selector-button {
+3839: body.app input[type=file]::file-selector-button:hover {
+3844: body.app .form-control-plaintext {
+3853: body.app .help-block,
+3854: body.app .form-text {
+3863: body.app .has-success .form-control,
+3864: body.app .form-control.is-valid,
+3865: body.app .form-control-success {
+3869: body.app .has-success .form-control:focus,
+3870: body.app .form-control.is-valid:focus,
+3871: body.app .form-control-success:focus {
+3875: body.app .has-warning .form-control,
+3876: body.app .form-control-warning {
+3880: body.app .has-warning .form-control:focus,
+3881: body.app .form-control-warning:focus {
+3885: body.app .has-danger .form-control,
+3886: body.app .form-control.is-invalid,
+3887: body.app .form-control-danger {
+3891: body.app .has-danger .form-control:focus,
+3892: body.app .form-control.is-invalid:focus,
+3893: body.app .form-control-danger:focus {
+3897: body.app .has-success .help-block {
+3901: body.app .has-warning .help-block {
+3905: body.app .has-danger .help-block {
+3910: body.app .input-group {
+3918: body.app .input-group > .form-control {
+3923: body.app .input-group > :first-child {
+3928: body.app .input-group > :last-child {
+3933: body.app .input-group-text,
+3934: body.app .input-group-prepend > .input-group-text,
+3935: body.app .input-group-append > .input-group-text {
+3947: body.app .input-group:focus-within {
+3952: body.app .form-check {
+3961: body.app .form-check-inline {
+3967: body.app .form-check-input {
+3979: body.app .form-check-input[type=radio] {
+3983: body.app .form-check-input:hover {
+3987: body.app .form-check-input:focus {
+3993: body.app .form-check-input:checked {
+3998: body.app .form-check-label {
+4008: body.app .form-actions,
+4009: body.app .form-actions.form-group {
+4020: body.app .btn {
+4039: body.app .btn:active {
+4043: body.app .btn:focus,
+4044: body.app .btn:focus-visible {
+4049: body.app .btn-sm {
+4055: body.app .btn-lg {
+4061: body.app .btn-primary,
+4062: body.app .btn-info {
+4068: body.app .btn-primary:hover,
+4069: body.app .btn-info:hover {
+4075: body.app .btn-secondary {
+4081: body.app .btn-secondary:hover {
+4087: body.app .btn-success {
+4093: body.app .btn-success:hover {
+4099: body.app .btn-warning {
+4105: body.app .btn-warning:hover {
+4111: body.app .btn-danger {
+4117: body.app .btn-danger:hover {
+4124: body.app .btn-outline-primary,
+4125: body.app .btn-outline-info {
+4131: body.app .btn-outline-primary:hover,
+4132: body.app .btn-outline-info:hover {
+4137: body.app .btn-outline-secondary {
+4143: body.app .btn-outline-secondary:hover {
+4148: body.app .btn-outline-success {
+4154: body.app .btn-outline-success:hover {
+4159: body.app .btn-outline-warning {
+4165: body.app .btn-outline-warning:hover {
+4170: body.app .btn-outline-danger {
+4176: body.app .btn-outline-danger:hover {
+4182: body.app .btn-group {
+4189: body.app .btn-group > .btn {
+4194: body.app .btn-group > .btn:first-child {
+4200: body.app .btn-group > .btn:last-child {
+4206: body.app .dropdown-toggle::after {
+4211: body.app .dropdown-menu {
+4221: body.app .dropdown-item {
+4228: body.app .dropdown-item:hover,
+4229: body.app .dropdown-item:focus {
+4234: body.app .dropdown-divider {
+4240: body.app form .row.mb-3 {
+4245: body.app form .row.mb-3 > [class*=col-md-3] label {
+4252: body.app .au-input {
+4266: body.app .au-input:focus {
+4271: body.app .au-input--xl {
+4276: body.app .card hr {
+4283: body.app fieldset {
+4290: body.app fieldset legend {
+4301: body.app .legend-list {
+4307: body.app .legend-list > li {
+4317: body.app .legend-dot {
+4329: body.app .calendar-container {
+4333: body.app .fc {
+4341: body.app .inbox-tabs {
+4354: body.app .inbox-tabs::-webkit-scrollbar {
+4358: body.app .inbox-tab {
+4376: body.app .inbox-tab:hover {
+4381: body.app .inbox-tab.is-active {
+4386: body.app .inbox-tab i {
+4390: body.app .inbox-tab__count {
+4403: body.app .inbox-tab.is-active .inbox-tab__count {
+4409: body.app .inbox-toolbar {
+4418: body.app .inbox-toolbar__left,
+4419: body.app .inbox-toolbar__right {
+4425: body.app .icon-btn {
+4439: body.app .icon-btn:hover {
+4444: body.app .icon-btn i {
+4448: body.app .inbox-toolbar__count {
+4456: body.app .email-list {
+4462: body.app .email-item {
+4474: body.app .email-item:last-child {
+4478: body.app .email-item:hover {
+4483: body.app .email-item.is-unread {
+4487: body.app .email-item.is-unread::before {
+4498: body.app .email-item.is-unread:hover {
+4502: body.app .email-item.is-unread .email-item__sender,
+4503: body.app .email-item.is-unread .email-item__subject {
+4508: body.app .email-item__check input {
+4516: body.app .email-item__star {
+4528: body.app .email-item__star:hover {
+4532: body.app .email-item__star i {
+4536: body.app .email-item__star.is-starred {
+4540: body.app .email-item__star.is-starred:hover {
+4544: body.app .email-item__avatar {
+4552: body.app .email-item__avatar img {
+4559: body.app .email-item__body {
+4566: body.app .email-item__sender {
+4579: body.app .email-item__label {
+4591: body.app .email-item__label--work {
+4596: body.app .email-item__label--personal {
+4601: body.app .email-item__label--social {
+4606: body.app .email-item__label--promo {
+4611: body.app .email-item__label--alert {
+4616: body.app .email-item__subject {
+4626: body.app .email-item__preview {
+4632: body.app .email-item__meta {
+4642: body.app .email-item__meta i {
+4647: body.app .inbox-pagination {
+4659: body.app .inbox-pagination__nav {
+4666: body.app .inbox-stats {
+4673: body.app .inbox-stat {
+4685: body.app .inbox-stat__icon {
+4696: body.app .inbox-stat__body {
+4700: body.app .inbox-stat__label {
+4707: body.app .inbox-stat__value {
+4717: @media (max-width: 768px) {
+4718: body.app .email-item {
+4721: body.app .email-item__check {
+4729: body.app .profile-card {
+4734: body.app .profile-card__avatar {
+4744: body.app .profile-card__avatar img {
+4751: body.app .profile-card__name {
+4759: body.app .profile-card__role {
+4766: body.app .profile-card__divider {
+4772: body.app .profile-card__socials {
+4778: body.app .profile-card__socials a {
+4791: body.app .profile-card__socials a:hover {
+4796: body.app .profile-card__socials a i {
+4800: body.app .profile-card__stats {
+4807: body.app .profile-card__stat {
+4811: body.app .profile-card__stat-value {
+4819: body.app .profile-card__stat-label {
+4828: body.app .cover-card {
+4833: body.app .cover-card__image {
+4840: body.app .cover-card__body {
+4844: body.app .cover-card__tag {
+4859: body.app .cover-card__title {
+4868: body.app .cover-card__text {
+4876: body.app .cover-card__footer {
+4886: body.app .cover-card__author {
+4894: body.app .cover-card__author img {
+4902: body.app .pricing-card {
+4908: body.app .pricing-card--featured {
+4913: body.app .pricing-card__badge {
+4928: body.app .pricing-card__tier {
+4938: body.app .pricing-card__price {
+4948: body.app .pricing-card__price small {
+4955: body.app .pricing-card__period {
+4961: body.app .pricing-card__features {
+4971: body.app .pricing-card__features li {
+4978: body.app .pricing-card__features li i {
+4986: body.app .notice-card {
+4992: body.app .notice-card__icon {
+5003: body.app .notice-card__body {
+5008: body.app .notice-card__title {
+5016: body.app .notice-card__text {
+5024: body.app .notice-card__actions {
+5030: body.app .notice-card--info .notice-card__icon {
+5035: body.app .notice-card--success .notice-card__icon {
+5040: body.app .notice-card--warning .notice-card__icon {
+5045: body.app .notice-card--danger .notice-card__icon {
+5051: body.app .card-list {
+5057: body.app .card-list > li {
+5067: body.app .card-list > li:last-child {
+5071: body.app .card-list > li:hover {
+5075: body.app .card-list__main {
+5082: body.app .card-list__icon {
+5095: body.app .card-list__title {
+5102: body.app .card-list__sub {
+5110: body.app .card-list__meta {
+5118: body.app .preview-card {
+5122: body.app .preview-card__head {
+5129: body.app .preview-card__label {
+5136: body.app .preview-card__value {
+5144: body.app .preview-card__chart {
+5151: body.app .accent-card {
+5156: body.app .accent-card--success {
+5160: body.app .accent-card--warning {
+5164: body.app .accent-card--danger {
+5172: @media (max-width: 991.98px) {
+5174: body.app .main-content > .section__content--p30 {
+5179: body.app .page-header {
+5184: body.app .page-header h1 {
+5187: body.app .page-header .subtitle {
+5190: body.app .page-header__actions {
+5194: body.app .page-header__actions .m-btn,
+5195: body.app .page-header__actions .date-chip {
+5200: body.app .m-card__header {
+5204: body.app .m-card__header > div:first-child {
+5208: body.app .m-card {
+5211: body.app .stat-card {
+5215: body.app .row.row-tight > [class*=col-] {
+5218: body.app .row.row-tight > [class*=col-]:last-child {
+5223: body.app .m-card > .m-table,
+5224: body.app .m-card > .table,
+5225: body.app .m-card > .table-top-countries,
+5226: body.app .m-card > .table-top-campaign {
+5231: body.app .m-table th,
+5232: body.app .m-table td {
+5236: body.app .m-card > div[style*="height: 280px"],
+5237: body.app .m-card > section > div[style*="height: 280px"] {
+5241: body.app .pricing-card {
+5244: body.app .pricing-card--featured {
+5248: body.app .cover-card__image {
+5252: body.app .inbox-stat {
+5257: body.app .email-item {
+5262: body.app .email-item__check {
+5265: body.app .email-item__preview {
+5268: body.app .email-item__sender .email-item__label {
+5272: body.app .m-card__header .user-data.filters,
+5273: body.app .m-card__header .filters {
+5277: body.app .m-card__header .user-data.filters .select-wrapper {
+5282: body.app form .row.mb-3 > [class*=col-md-3] {
+5287: body.app .project-list > li {
+5291: body.app .copyright {
+5296: body.app .sidebar-close {
+5302: @media (max-width: 575.98px) {
+5304: body.app .form-header {
+5308: body.app .account-item {
+5313: body.app .account-item > .content {
+5319: body.app .header-button .noti-wrap > .noti__item:nth-child(1) {
+5323: body.app .sidebar-toggle {
+5328: body.app .header-wrap {
+5332: body.app .page-header h1 {
+5335: body.app .page-header .subtitle {
+5338: body.app .page-header__actions .m-btn,
+5339: body.app .page-header__actions .date-chip {
+5345: body.app .stat-card {
+5348: body.app .stat-card__value {
+5351: body.app .stat-card__sparkline {
+5355: body.app .m-card {
+5358: body.app .m-card__title {
+5362: body.app .inbox-stat {
+5366: body.app .inbox-toolbar__count {
+5369: body.app .inbox-toolbar {
+5373: body.app .email-item {
+5378: body.app .profile-card {
+5381: body.app .pricing-card {
+5385: body.app .notice-card {
+5389: body.app .notice-card__icon {
+5394: body.app .m-table th,
+5395: body.app .m-table td {
+5400: body.app .activity-item,
+5401: body.app .task-item,
+5402: body.app .deadline-list > li,
+5403: body.app .team-list > li {
+5406: body.app .activity-item__text,
+5407: body.app .task-item__title,
+5408: body.app .deadline-list__title {
+5412: body.app .section-eyebrow {
+5421: @media (max-width: 379.98px) {
+5422: body.app .page-header__actions {
+5426: body.app .page-header__actions .m-btn,
+5427: body.app .page-header__actions .date-chip {
+5431: body.app .stat-card__delta-period {
+5451: @media (max-width: 991.98px) {
+5453: body.app .header-desktop {
+5456: body.app .main-content {
+5459: body.app .menu-sidebar__content {
+5462: body.app .header-wrap {
+5469: body.app .sidebar-toggle {
+5476: body.app .form-header {
+5480: body.app .header-button {
+5488: body.app .header-button .noti-wrap {
+5492: body.app .account-wrap {
+5495: body.app .account-item {
+5502: body.app .account-item:hover {
+5505: body.app .account-item .image {
+5511: body.app .account-item > .content {
+5519: body.app .account-dropdown {
+5530: @media (max-width: 575.98px) {
+5531: body.app .header-wrap {
+5534: body.app .sidebar-toggle {
+5538: body.app .account-item .image {
+5550: @media (max-width: 991.98px) {
+5552: body.app .header-desktop {
+5566: body.app .header-desktop > .section__content,
+5567: body.app .header-desktop .section__content--p30 {
+5573: body.app .header-desktop .container-fluid {
+5580: body.app .header-wrap {
+5591: body.app .header-wrap .sidebar-toggle {
+5606: body.app .header-wrap .sidebar-toggle:hover {
+5611: body.app .header-wrap .form-header {
+5615: body.app .header-wrap .header-button {
+5624: body.app .header-wrap .header-button .noti-wrap {
+5628: body.app .header-wrap .account-wrap {
+5633: body.app .header-wrap .account-item {
+5646: body.app .header-wrap .account-item:hover {
+5649: body.app .header-wrap .account-item .image {
+5659: body.app .header-wrap .account-item .image > img {
+5666: body.app .header-wrap .account-item > .content,
+5667: body.app .header-wrap .account-item > .content > a {
+5671: body.app .account-dropdown {
+5682: body.app .main-content {
+5685: body.app .menu-sidebar__content {
+5689: body.app .header-mobile,
+5690: body.app .navbar-mobile {
+5696: The legacy CSS-drawn `<span class="sidebar-toggle__bars">` was replaced
+5699: body.app .sidebar-toggle {
+5705: body.app .sidebar-toggle > i {
+5715: @media (max-width: 991.98px) {
+5716: body.app .header-wrap .sidebar-toggle > i {
+5723: ULTRA-FINAL header layout fix ??? replace flex on .header-desktop with grid
+5728: /* Reset .header-desktop ??? block-level (NOT flex), pinned to top.
+5731: (handled by the @media (max-width: 991.98px) rule above). */
+5732: body.app .header-desktop {
+5747: @media (max-width: 991.98px) {
+5748: body.app .header-desktop {
+5753: body.app .header-desktop > .section__content,
+5754: body.app .header-desktop .section__content,
+5755: body.app .header-desktop .section__content--p30 {
+5765: body.app .header-desktop .container-fluid {
+5776: body.app .header-wrap {
+5789: body.app .header-wrap > .sidebar-toggle {
+5794: body.app .header-wrap > .form-header {
+5800: body.app .header-wrap > .header-button {
+5807: @media (max-width: 991.98px) {
+5808: body.app .header-desktop {
+5811: body.app .main-content {
+5814: body.app .menu-sidebar__content {
+5817: body.app .header-wrap {
+5823: body.app .header-wrap > .form-header {
+5827: body.app .header-wrap > .header-button .noti-wrap {
+5831: body.app .header-wrap > .header-button .account-item > .content {
+5842: @media (max-width: 991.98px) {
+5844: body.app .header-wrap > .header-button .noti-wrap {
+5851: body.app .header-wrap .noti__item {
+5859: body.app .header-wrap .noti__item > i {
+5862: body.app .header-wrap .noti__item .quantity {
+5867: body.app .header-wrap .header-button {
+5875: body.app .noti__item .mess-dropdown,
+5876: body.app .noti__item .email-dropdown,
+5877: body.app .noti__item .notifi-dropdown,
+5878: body.app .account-wrap .account-dropdown {
+5894: body.app .mess-dropdown:before,
+5895: body.app .email-dropdown:before,
+5896: body.app .notifi-dropdown:before,
+5897: body.app .account-dropdown:after {
+5902: @media (max-width: 419.98px) {
+5903: body.app .header-wrap .noti-wrap > .noti__item:first-child {
+6040: @media (max-width: 575.98px) {
+6053: body.app .empty-state {
+6063: body.app .empty-state__icon {
+6076: body.app .empty-state__title {
+6084: body.app .empty-state__text {
+6093: body.app .empty-state__actions {
+6101: body.app .skeleton {
+6117: body.app .skeleton-line {
+6123: body.app .skeleton-line--short {
+6127: body.app .skeleton-line--xshort {
+6131: body.app .skeleton-circle {
+6136: body.app .skeleton-row {
+6144: body.app .skeleton-row:last-child {
+6328: body.app.error-page {
+6337: body.app .error-card {
+6348: body.app .error-card__brand {
+6356: body.app .error-card__code {
+6369: body.app .error-card__icon {
+6375: body.app .error-card__title {
+6383: body.app .error-card__text {
+6390: body.app .error-card__actions {
+6397: body.app .error-card__hint {
+6405: body.app .error-card__hint a {
+6411: body.app .error-card__hint a:hover {
+6418: body.app .settings-tabs {
+6428: body.app .settings-tabs .nav-link {
+6445: body.app .settings-tabs .nav-link i {
+6450: body.app .settings-tabs .nav-link:hover {
+6455: body.app .settings-tabs .nav-link.active {
+6461: body.app .settings-tabs .nav-link.active i {
+6466: body.app .notif-grid {
+6471: body.app .notif-row {
+6480: body.app .notif-row:last-child {
+6484: body.app .notif-row__title {
+6492: body.app .notif-row__sub {
+6502: body.app .kanban-board {
+6510: body.app .kanban-col {
+6522: body.app .kanban-col__header {
+6531: body.app .kanban-col__title {
+6542: body.app .kanban-col__count {
+6551: body.app .kanban-col__rail {
+6558: body.app .kanban-col__rail--backlog {
+6562: body.app .kanban-col__rail--progress {
+6566: body.app .kanban-col__rail--review {
+6570: body.app .kanban-col__rail--done {
+6574: body.app .kanban-col__list {
+6583: body.app .kanban-col__list.is-drop-target {
+6587: body.app .kanban-col__add {
+6592: body.app .kanban-col__add button {
+6609: body.app .kanban-col__add button:hover {
+6614: body.app .kanban-card {
+6624: body.app .kanban-card:hover {
+6628: body.app .kanban-card.is-dragging {
+6633: body.app .kanban-card__labels {
+6640: body.app .kanban-card__label {
+6652: body.app .kanban-card__label--bug {
+6657: body.app .kanban-card__label--feature {
+6662: body.app .kanban-card__label--design {
+6667: body.app .kanban-card__label--docs {
+6672: body.app .kanban-card__label--research {
+6677: body.app .kanban-card__title {
+6686: body.app .kanban-card__footer {
+6693: body.app .kanban-card__meta {
+6701: body.app .kanban-card__meta i {
+6706: body.app .kanban-card__avatars img {
+6715: body.app .kanban-card__avatars img:first-child {
+6722: body.app .pricing-hero {
+6727: body.app .pricing-hero h1 {
+6738: body.app .pricing-hero p {
+6746: body.app .pricing-toggle {
+6755: body.app .pricing-toggle button {
+6767: body.app .pricing-toggle button.is-active {
+6772: body.app .pricing-toggle button .save-badge {
+6782: body.app .pricing-toggle button.is-active .save-badge {
+6787: body.app .pricing-faq summary {
+6800: body.app .pricing-faq summary::-webkit-details-marker {
+6804: body.app .pricing-faq summary::after {
+6813: body.app .pricing-faq details[open] summary::after {
+6817: body.app .pricing-faq details[open] summary {
+6821: body.app .pricing-faq p {
+6832: body.app .invoice-doc {
+6840: body.app .invoice-doc__head {
+6851: body.app .invoice-doc__brand {
+6857: body.app .invoice-doc__brand .logo-mark {
+6863: body.app .invoice-doc__brand .logo-text {
+6867: body.app .invoice-doc__title-wrap {
+6871: body.app .invoice-doc__title-wrap h1 {
+6879: body.app .invoice-doc__title-wrap p {
+6885: body.app .invoice-doc__parties {
+6892: body.app .invoice-doc__party h6 {
+6901: body.app .invoice-doc__party p {
+6908: body.app .invoice-doc__party strong {
+6914: body.app .invoice-doc__lines {
+6920: body.app .invoice-doc__lines thead th {
+6932: body.app .invoice-doc__lines tbody td {
+6940: body.app .invoice-doc__lines tbody td.num {
+6945: body.app .invoice-doc__totals {
+6951: body.app .invoice-doc__totals tr td {
+6957: body.app .invoice-doc__totals tr td:last-child {
+6964: body.app .invoice-doc__totals tr.invoice-doc__grand td {
+6972: body.app .invoice-doc__notes {
+6982: @media print {
+6983: body.app .menu-sidebar,
+6984: body.app .header-desktop,
+6985: body.app .page-header,
+6986: body.app .copyright,
+6987: body.app .invoice-actions {
+6990: body.app .page-container {
+6993: body.app .main-content {
+6996: body.app .invoice-doc {
+7005: body.app .wizard {
+7010: body.app .wizard__steps {
+7019: body.app .wizard__step {
+7027: body.app .wizard__step:not(:last-child)::after {
+7035: body.app .wizard__step.is-complete:not(:last-child)::after,
+7036: body.app .wizard__step.is-active:not(:last-child)::after {
+7040: body.app .wizard__circle {
+7056: body.app .wizard__step.is-active .wizard__circle {
+7063: body.app .wizard__step.is-complete .wizard__circle {
+7069: body.app .wizard__label {
+7077: body.app .wizard__step.is-active .wizard__label,
+7078: body.app .wizard__step.is-complete .wizard__label {
+7082: body.app .wizard__sublabel {
+7090: body.app .wizard__panel {
+7098: body.app .wizard__nav {
+7105: @media (max-width: 575.98px) {
+7106: body.app .wizard__step .wizard__label {
+7109: body.app .wizard__step:last-child .wizard__label {
+7116: body.app .dt-toolbar {
+7125: body.app .dt-search {
+7131: body.app .dt-search input {
+7144: body.app .dt-search input:focus {
+7149: body.app .dt-search i {
+7159: body.app .dt-table th[data-sort] {
+7164: body.app .dt-table th[data-sort]::after {
+7174: body.app .dt-table th[data-sort].dt-sort-asc::after {
+7180: body.app .dt-table th[data-sort].dt-sort-desc::after {
+7186: body.app .dt-pagination {
+7195: body.app .dt-pagination__info {
+7200: body.app .dt-pagination__nav {
+7206: body.app .dt-pagination__nav button {
+7218: body.app .dt-pagination__nav button.is-active {
+7224: body.app .dt-pagination__nav button:disabled {
+7229: body.app .dt-pagination__nav button:hover:not(:disabled):not(.is-active) {
+7240: body.app.theme-blue {
+7247: body.app.theme-purple {
+7254: body.app.theme-teal {
+7261: body.app.theme-rose {
+7268: body.app.theme-amber {
+7275: body.app.theme-graphite {
+7286: body.app .menu-sidebar .logo .logo-mark {
+7291: body.app .auth-page .auth-brand .logo-mark,
+7292: body.app .invoice-doc__brand .logo-mark,
+7293: body.app .error-card .logo-mark,
+7294: body.app .cmdk-item__icon {
+7418: @media (max-width: 575.98px) {
+7430: body.app .docs-layout {
+7437: body.app .docs-toc {
+7446: body.app .docs-toc__title {
+7455: body.app .docs-toc__list {
+7464: body.app .docs-toc__list a {
+7476: body.app .docs-toc__list a:hover {
+7481: body.app .docs-toc__list a.is-active {
+7487: body.app .docs-content {
+7492: body.app .docs-section {
+7502: body.app .docs-content h2 {
+7513: body.app .docs-content h2 .anchor {
+7521: body.app .docs-content h2:hover .anchor {
+7525: body.app .docs-content h3 {
+7532: body.app .docs-content p {
+7539: body.app .docs-content ul,
+7540: body.app .docs-content ol {
+7548: body.app .docs-content li {
+7552: body.app .docs-content li code,
+7553: body.app .docs-content p code {
+7563: body.app .docs-content pre {
+7576: body.app .docs-content pre code {
+7584: body.app .docs-copy-btn {
+7600: body.app .docs-copy-btn:hover {
+7605: body.app .docs-content kbd {
+7617: body.app .docs-content blockquote {
+7627: body.app .docs-content blockquote p:last-child {
+7631: body.app .docs-content blockquote strong {
+7640: body.app .docs-content table {
+7647: body.app .docs-content table th,
+7648: body.app .docs-content table td {
+7654: body.app .docs-content table th {
+7661: body.app .docs-content table td {
+7665: body.app .docs-content table td code {
+7669: @media (max-width: 991.98px) {
+7670: body.app .docs-layout {
+7674: body.app .docs-toc {
+7687: body.app .notif-day {
+7691: body.app .notif-day__label {
+7700: body.app .notif-list {
+7706: body.app .notif-list > li {
+7719: body.app .notif-list > li:hover {
+7723: body.app .notif-list > li.is-unread {
+7728: body.app .notif-list__icon {
+7739: body.app .notif-list__icon img {
+7745: body.app .notif-list__icon--info {
+7750: body.app .notif-list__icon--success {
+7755: body.app .notif-list__icon--warning {
+7760: body.app .notif-list__icon--danger {
+7765: body.app .notif-list__body {
+7770: body.app .notif-list__text {
+7777: body.app .notif-list__text b {
+7781: body.app .notif-list__meta {
+7790: body.app .notif-list__chip {
+7802: body.app .notif-list__chip--mention {
+7807: body.app .notif-list__chip--system {
+7812: body.app .notif-list__chip--billing {
+7817: body.app .notif-list__chip--security {
+7822: body.app .notif-list__close {
+7832: body.app .notif-list__close:hover {
+7837: body.app .notif-filters {
+7843: body.app .notif-filter {
+7855: body.app .notif-filter.is-active {
+7867: body.app .inbox-split {
+7874: body.app .inbox-list-pane {
+7883: body.app .inbox-reader-pane {
+7897: body.app .inbox-reader__empty {
+7907: body.app .inbox-reader__empty .empty-state__icon {
+7911: body.app .inbox-reader__header {
+7920: body.app .inbox-reader__header > div:first-child {
+7925: body.app .inbox-reader__subject {
+7935: body.app .inbox-reader__labels {
+7941: body.app .inbox-reader__actions {
+7947: body.app .inbox-reader__back {
+7961: body.app .inbox-reader__back:hover {
+7966: body.app .inbox-reader__sender {
+7974: body.app .inbox-reader__sender-avatar {
+7982: body.app .inbox-reader__sender-avatar img {
+7989: body.app .inbox-reader__sender-info {
+7994: body.app .inbox-reader__sender-name {
+8002: body.app .inbox-reader__sender-meta {
+8009: body.app .inbox-reader__sender-meta strong {
+8014: body.app .inbox-reader__date {
+8021: body.app .inbox-reader__body {
+8031: body.app .inbox-reader__body p {
+8035: body.app .inbox-reader__body p:last-child {
+8039: body.app .inbox-reader__body strong {
+8044: body.app .inbox-reader__body a {
+8049: body.app .inbox-reader__body a:hover {
+8053: body.app .inbox-reader__body ul,
+8054: body.app .inbox-reader__body ol {
+8059: body.app .inbox-reader__body li {
+8063: body.app .inbox-reader__body blockquote {
+8071: body.app .inbox-reader__attachments {
+8079: body.app .inbox-reader__attachment {
+8094: body.app .inbox-reader__attachment:hover {
+8098: body.app .inbox-reader__attachment-icon {
+8111: body.app .inbox-reader__attachment-info {
+8115: body.app .inbox-reader__attachment-name {
+8127: body.app .inbox-reader__attachment-size {
+8134: body.app .inbox-reader__quick-reply {
+8144: body.app .inbox-reader__quick-reply input {
+8157: body.app .inbox-reader__quick-reply input:focus {
+8162: body.app .inbox-reader__quick-reply button {
+8176: body.app .inbox-reader__quick-reply button:hover {
+8181: body.app .email-list .email-item.is-active {
+8185: body.app .email-list .email-item.is-active::before {
+8195: body.app .email-list .email-item.is-active.is-unread::before {
+8202: body.app .inbox-list-pane .inbox-toolbar {
+8206: body.app .inbox-list-pane .email-list {
+8212: @media (max-width: 991.98px) {
+8213: body.app .inbox-split {
+8216: body.app .inbox-reader-pane {
+8229: body.app.inbox-reader-open .inbox-reader-pane {
+8232: body.app.inbox-reader-open .inbox-reader__back {
+8236: body.app.inbox-reader-open {
+8246: body.app .btn-spinner {
+8263: body.app .circular-progress {
+8270: body.app .circular-progress svg {
+8276: body.app .circular-progress circle {
+8281: body.app .circular-progress circle.bg {
+8285: body.app .circular-progress circle.fg {
+8293: body.app .circular-progress__label {
+8304: body.app .circular-progress__label strong {
+8311: body.app .circular-progress__label span {
+8320: body.app .skeleton-stat-card {
+8331: body.app .skeleton-line {
+8339: body.app .skeleton-line--sm {
+8344: body.app .skeleton-line--md {
+8349: body.app .skeleton-line--lg {
+8354: body.app .skeleton-block {
+8361: body.app .skeleton-circle {
+8377: body.app .demo-grid {
+8383: body.app .demo-tile {
+8390: body.app .demo-tile + .demo-tile {
+8394: body.app .demo-label {

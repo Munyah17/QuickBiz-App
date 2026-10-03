@@ -1,0 +1,1 @@
+STALE decomm=3 :: C:\Users\MeXa\Desktop\QuickBiz ERP\packages\supabase\src\database.types.ts
