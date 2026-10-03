@@ -54,5 +54,5 @@ export async function signUpAction(_prev: ActionState, formData: FormData): Prom
   }
 
   await createOrganization(supabase, companyName, "Head Office");
-  redirect("/dashboard");
+  redirect("/onboarding");
 }

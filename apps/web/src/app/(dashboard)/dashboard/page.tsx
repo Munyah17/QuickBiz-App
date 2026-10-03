@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutGrid } from "lucide-react";
+import { LayoutGrid, Rocket, ArrowRight } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { StatCard, type StatCardTone } from "@/components/StatCard";
 import { Card, CardHeader } from "@/components/Card";
@@ -34,6 +34,66 @@ export default async function DashboardPage() {
   ]);
 
   const hasRevenueData = overview.revenueTrend && overview.revenueTrend.some((p) => p.revenue > 0);
+
+  // Brand-new workspace: nothing enabled yet. Instead of a bare two-card grid
+  // (the "empty dashboard" bug new signups hit), show a proper setup view.
+  if (billing.enabledModules.length === 0) {
+    return (
+      <div className="flex flex-col gap-6">
+        <PageHeader title="Dashboard" />
+
+        <Card className="flex flex-col items-center gap-4 p-10 text-center">
+          <div className="flex size-14 items-center justify-center rounded-full bg-primary-50">
+            <Rocket className="size-7 text-primary-600" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold text-text-primary">Finish setting up {orgName}</h2>
+            <p className="mx-auto mt-1 max-w-md text-sm text-text-secondary">
+              Your workspace is created — now pick the modules you need. Once activated, your
+              dashboards, lists, and day-to-day tools appear here and in the sidebar.
+            </p>
+          </div>
+
+          <ol className="mt-2 flex w-full max-w-lg flex-col gap-2 text-left">
+            {[
+              { step: 1, label: "Company created", done: true },
+              { step: 2, label: "Choose your modules", done: false },
+              { step: 3, label: "Activate billing — pay the one-time setup fee + first month", done: false },
+            ].map((s) => (
+              <li
+                key={s.step}
+                className="flex items-center gap-3 rounded-md border border-border bg-surface px-4 py-2.5"
+              >
+                <span
+                  className={`flex size-6 items-center justify-center rounded-full text-xs font-semibold ${
+                    s.done ? "bg-success-500 text-white" : "border border-border text-text-tertiary"
+                  }`}
+                >
+                  {s.done ? "✓" : s.step}
+                </span>
+                <span className={`text-sm ${s.done ? "text-text-secondary line-through" : "font-medium text-text-primary"}`}>
+                  {s.label}
+                </span>
+              </li>
+            ))}
+          </ol>
+
+          <div className="mt-2 flex flex-wrap justify-center gap-3">
+            <Link href="/onboarding">
+              <Button>
+                Resume setup <ArrowRight className="size-4" />
+              </Button>
+            </Link>
+            <Link href="/modules">
+              <Button variant="secondary">
+                <LayoutGrid className="size-4" /> Browse Module Store
+              </Button>
+            </Link>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
