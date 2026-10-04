@@ -1,21 +1,21 @@
+import type { LucideIcon } from "lucide-react";
 import {
   NAV_STRUCTURE,
   isNavGroup,
   type NavEntry,
   type NavLeaf,
 } from "@/config/nav";
-import { faIcon } from "./fa-icons";
 
 /**
  * NAV_STRUCTURE holds Lucide component references which can't cross the
  * Server -> Client boundary. The CoolAdmin shell is a client component, so it
- * imports the config itself and resolves each entry to a plain serializable
- * item with a Font Awesome class — the template's icon font.
+ * imports the config itself and carries the components straight through —
+ * no vendored icon font required.
  */
 export interface CoolNavItem {
   key: string;
   label: string;
-  icon: string;
+  icon: LucideIcon;
   href?: string;
   children?: CoolNavItem[];
 }
@@ -37,7 +37,7 @@ export function buildNavModel(
       items.push({
         key: entry.key,
         label: entry.label,
-        icon: faIcon(entry.key),
+        icon: entry.icon,
         href: entry.href,
       });
       continue;
@@ -50,7 +50,7 @@ export function buildNavModel(
     const children = entry.children.filter(leafVisible).map((child) => ({
       key: child.key,
       label: child.label,
-      icon: faIcon(child.key),
+      icon: child.icon,
       href: child.href,
     }));
     if (children.length === 0) continue;
@@ -58,7 +58,7 @@ export function buildNavModel(
     items.push({
       key: entry.key,
       label: entry.label,
-      icon: faIcon(entry.key),
+      icon: entry.icon,
       children,
     });
   }

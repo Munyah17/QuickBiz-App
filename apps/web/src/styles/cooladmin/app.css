@@ -158,7 +158,8 @@ body.app .navbar-sidebar .navbar__list > li > a {
   position: relative;
 }
 
-body.app .navbar-sidebar .navbar__list > li > a > i {
+body.app .navbar-sidebar .navbar__list > li > a > i,
+body.app .navbar-sidebar .navbar__list > li > a > svg {
   width: 18px;
   font-size: 15px;
   color: #94a3b8; /* slate-400 */
@@ -173,7 +174,8 @@ body.app .navbar-sidebar .navbar__list > li > a:hover {
   color: #ffffff;
 }
 
-body.app .navbar-sidebar .navbar__list > li > a:hover > i {
+body.app .navbar-sidebar .navbar__list > li > a:hover > i,
+body.app .navbar-sidebar .navbar__list > li > a:hover > svg {
   color: #e2e8f0;
 }
 
@@ -184,7 +186,8 @@ body.app .navbar-sidebar .navbar__list > li.active > a {
   font-weight: 600;
 }
 
-body.app .navbar-sidebar .navbar__list > li.active > a > i {
+body.app .navbar-sidebar .navbar__list > li.active > a > i,
+body.app .navbar-sidebar .navbar__list > li.active > a > svg {
   color: #93b4ec; /* light wash of the brand blue */
 }
 
@@ -205,21 +208,26 @@ body.app .navbar-sidebar .navbar__list > li.has-sub > a.js-arrow {
 }
 
 body.app .navbar-sidebar .navbar__list > li.has-sub > a.js-arrow::after {
-  content: "\f078"; /* fa-chevron-down */
-  font-family: "Font Awesome 7 Free";
-  font-weight: 900;
+  content: "";
+  /* Border-drawn chevron-down — no icon font required. */
   position: absolute;
-  right: 12px;
+  right: 14px;
   top: 50%;
-  transform: translateY(-50%);
-  font-size: 9px;
-  color: rgba(255, 255, 255, 0.4);
-  transition: transform 200ms ease, color 120ms ease;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.4);
+  transform: translateY(-70%) rotate(45deg);
+  transition: transform 200ms ease, border-color 120ms ease;
+}
+
+body.app .navbar-sidebar .navbar__list > li.has-sub > a.js-arrow:hover::after {
+  border-color: rgba(255, 255, 255, 0.7);
 }
 
 body.app .navbar-sidebar .navbar__list > li.has-sub > a.js-arrow.open::after {
-  transform: translateY(-50%) rotate(180deg);
-  color: #cbd5e1;
+  transform: translateY(-30%) rotate(225deg);
+  border-color: #cbd5e1;
 }
 
 /* Sub-list â€” properly nested with an indent guide rail, no awkward 34px
@@ -390,12 +398,14 @@ body.app .noti__item:hover {
   background: var(--m-surface-2);
 }
 
-body.app .noti__item i {
+body.app .noti__item i,
+body.app .noti__item svg {
   font-size: 16px;
   color: var(--m-text-muted);
 }
 
-body.app .noti__item:hover i {
+body.app .noti__item:hover i,
+body.app .noti__item:hover svg {
   color: var(--m-text);
 }
 
@@ -1193,7 +1203,8 @@ body.app .menu-sidebar .logo .logo-text {
   /* Force every icon to a fixed 24px square with text-align: center so the
      glyph sits in the same x-position regardless of FA glyph width
      (`fa-bell` is narrower than `fa-tachometer-alt`, etc.). */
-  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li > a > i {
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li > a > i,
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li > a > svg {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1218,7 +1229,9 @@ body.app .menu-sidebar .logo .logo-text {
     color: #ffffff;
   }
   body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li:not(.active) > a:hover > i,
-  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li:not(.active) > a:focus-visible > i {
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li:not(.active) > a:focus-visible > i,
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li:not(.active) > a:hover > svg,
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li:not(.active) > a:focus-visible > svg {
     color: #ffffff;
   }
   /* Active â€” flat brand-blue pill, no glow shadow. */
@@ -1227,7 +1240,8 @@ body.app .menu-sidebar .logo .logo-text {
     color: #ffffff;
     box-shadow: none;
   }
-  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li.active > a > i {
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li.active > a > i,
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li.active > a > svg {
     color: #ffffff;
   }
   /* Suppress the legacy off-screen `::before` rail used in expanded mode. */
@@ -1447,8 +1461,15 @@ body.app .notifi__item .bg-c4 {
   color: var(--m-c4);
 }
 
-body.app .notifi__item .img-cir i {
+body.app .notifi__item .img-cir i,
+body.app .notifi__item .img-cir svg {
   font-size: 13px;
+}
+
+body.app .notifi__item .img-cir {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Item content */
@@ -1591,11 +1612,15 @@ body.app .account-dropdown__footer a:hover {
 }
 
 body.app .account-dropdown__item a i,
-body.app .account-dropdown__footer a i {
+body.app .account-dropdown__footer a i,
+body.app .account-dropdown__item a svg,
+body.app .account-dropdown__footer a svg {
   width: 16px;
   margin-right: 0; /* override legacy 20px */
   font-size: 13px;
   color: var(--m-text-faint);
+  flex-shrink: 0;
+  vertical-align: -2px;
 }
 
 body.app .account-dropdown__footer {
@@ -1607,7 +1632,8 @@ body.app .account-dropdown__footer a {
   color: var(--m-danger);
 }
 
-body.app .account-dropdown__footer a i {
+body.app .account-dropdown__footer a i,
+body.app .account-dropdown__footer a svg {
   color: var(--m-danger);
 }
 
@@ -5692,9 +5718,7 @@ body.app .accent-card--danger {
   }
 }
 /* ============================================================================
-   Hamburger button â€” Font Awesome bars icon styling
-   The legacy CSS-drawn `<span class="sidebar-toggle__bars">` was replaced
-   with `<i class="fa-solid fa-bars">` for predictable cross-browser rendering.
+   Hamburger button â€” Lucide Menu icon (SVG; no vendor icon font).
    ============================================================================ */
 body.app .sidebar-toggle {
   display: inline-flex;
@@ -5702,20 +5726,14 @@ body.app .sidebar-toggle {
   justify-content: center;
 }
 
-body.app .sidebar-toggle > i {
-  font-size: 18px;
-  line-height: 1;
+body.app .sidebar-toggle > svg {
   color: inherit;
-  width: auto;
-  height: auto;
-  margin: 0;
+  flex-shrink: 0;
 }
 
-/* Mobile-specific hamburger: a touch larger so the tap target reads well */
+/* Mobile-specific hamburger: ensure contrast on the white topbar */
 @media (max-width: 991.98px) {
-  body.app .header-wrap .sidebar-toggle > i {
-    font-size: 18px !important;
-    line-height: 1 !important;
+  body.app .header-wrap .sidebar-toggle > svg {
     color: var(--m-text) !important;
   }
 }
@@ -5856,8 +5874,11 @@ body.app .header-wrap > .header-button {
     border-radius: 8px !important;
     flex-shrink: 0 !important;
   }
-  body.app .header-wrap .noti__item > i {
+  body.app .header-wrap .noti__item > i,
+  body.app .header-wrap .noti__item > svg {
     font-size: 15px !important;
+    width: 15px !important;
+    height: 15px !important;
   }
   body.app .header-wrap .noti__item .quantity {
     top: 6px !important;

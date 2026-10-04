@@ -3,6 +3,19 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
+import {
+  Bell,
+  Contact,
+  CircleUserRound,
+  FileText,
+  GitBranch,
+  Menu,
+  Package,
+  Power,
+  Search,
+  Settings,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/cn";
 import { searchWorkspaceAction } from "@/app/actions/search";
 import { markNotificationReadAction } from "@/app/actions/notifications";
@@ -10,12 +23,12 @@ import { signOutAction } from "@/app/actions/auth";
 import type { SearchResult } from "@/services/search";
 import type { NotificationRow } from "@/services/notifications";
 
-const RESULT_ICON: Record<SearchResult["type"], string> = {
-  branch: "fa-solid fa-code-branch",
-  user: "fa-solid fa-user",
-  customer: "fa-solid fa-address-book",
-  product: "fa-solid fa-box",
-  invoice: "fa-solid fa-file-invoice-dollar",
+const RESULT_ICON: Record<SearchResult["type"], LucideIcon> = {
+  branch: GitBranch,
+  user: CircleUserRound,
+  customer: Contact,
+  product: Package,
+  invoice: FileText,
 };
 
 type OpenMenu = "notifications" | "account" | null;
@@ -108,7 +121,7 @@ export function CoolAdminHeader({
               aria-controls="main-sidebar"
               onClick={onToggleSidebar}
             >
-              <i className="fa-solid fa-bars" aria-hidden="true"></i>
+              <Menu size={20} strokeWidth={2} aria-hidden="true" />
             </button>
 
             <form
@@ -117,7 +130,7 @@ export function CoolAdminHeader({
               ref={searchRef}
               onSubmit={(e) => e.preventDefault()}
             >
-              <i className="fa-solid fa-magnifying-glass form-header__icon" aria-hidden="true"></i>
+              <Search className="form-header__icon" size={16} aria-hidden="true" />
               <input
                 className="au-input au-input--xl"
                 type="search"
@@ -146,7 +159,10 @@ export function CoolAdminHeader({
                           router.push(result.href);
                         }}
                       >
-                        <i className={RESULT_ICON[result.type]} aria-hidden="true"></i>
+                        {(() => {
+                          const ResultIcon = RESULT_ICON[result.type];
+                          return <ResultIcon size={14} aria-hidden="true" />;
+                        })()}
                         <span className="search-dropdown__label">{result.label}</span>
                         <span className="search-dropdown__sublabel">{result.sublabel}</span>
                       </button>
@@ -169,7 +185,7 @@ export function CoolAdminHeader({
                   onClick={() => toggleMenu("notifications")}
                   onKeyDown={(e) => e.key === "Enter" && toggleMenu("notifications")}
                 >
-                  <i className="fa-solid fa-bell" aria-hidden="true"></i>
+                  <Bell size={18} aria-hidden="true" />
                   {unreadCount > 0 && (
                     <span className="quantity">{unreadCount > 9 ? "9+" : unreadCount}</span>
                   )}
@@ -191,7 +207,7 @@ export function CoolAdminHeader({
                         onClick={() => { if (!demo) void markNotificationReadAction(n.id); }}
                       >
                         <div className="bg-c1 img-cir img-40">
-                          <i className="fa-solid fa-bell" aria-hidden="true"></i>
+                          <Bell size={15} aria-hidden="true" />
                         </div>
                         <div className="content">
                           <p>{n.title}</p>
@@ -254,31 +270,31 @@ export function CoolAdminHeader({
                         <>
                           <div className="account-dropdown__item">
                             <Link href="/profile">
-                              <i className="fa-solid fa-user" aria-hidden="true"></i>Account
+                              <CircleUserRound size={14} aria-hidden="true" />Account
                             </Link>
                           </div>
                           <div className="account-dropdown__item">
                             <Link href="/notifications">
-                              <i className="fa-solid fa-bell" aria-hidden="true"></i>Notifications
+                              <Bell size={14} aria-hidden="true" />Notifications
                             </Link>
                           </div>
                         </>
                       )}
                       <div className="account-dropdown__item">
                         <Link href={demo ? "/demo/company" : "/company"}>
-                          <i className="fa-solid fa-gear" aria-hidden="true"></i>Settings
+                          <Settings size={14} aria-hidden="true" />Settings
                         </Link>
                       </div>
                     </div>
                     <div className="account-dropdown__footer">
                       {demo ? (
                         <Link href="/login" className="account-dropdown__signout">
-                          <i className="fa-solid fa-power-off" aria-hidden="true"></i>Exit Demo
+                          <Power size={14} aria-hidden="true" />Exit Demo
                         </Link>
                       ) : (
                         <form action={signOutAction}>
                           <button type="submit" className="account-dropdown__signout">
-                            <i className="fa-solid fa-power-off" aria-hidden="true"></i>Logout
+                            <Power size={14} aria-hidden="true" />Logout
                           </button>
                         </form>
                       )}

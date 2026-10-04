@@ -23,12 +23,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <ToastProvider>
-      {/* CoolAdmin vendored assets — Font Awesome stylesheet and the
-          Bootstrap bundle (data-bs components like modals/tooltips). */}
-      <link
-        rel="stylesheet"
-        href="/cooladmin/vendor/fontawesome-7.3.1/css/all.min.css"
-      />
+      {/* CoolAdmin vendored assets — the Bootstrap bundle (data-bs
+          components like modals/tooltips). Icons are Lucide SVGs. */}
       <Script src="/cooladmin/js/vanilla-utils.js" strategy="afterInteractive" />
       <Script src="/cooladmin/vendor/bootstrap-5.3.8.bundle.min.js" strategy="afterInteractive" />
       <Script src="/cooladmin/js/bootstrap5-init.js" strategy="afterInteractive" />

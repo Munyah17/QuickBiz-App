@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Package, Check, LayoutGrid, CreditCard, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { Package, Check, LayoutGrid, CreditCard, ArrowLeft, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
@@ -78,16 +78,16 @@ export function OnboardingWizard({
   const categories = [...new Set(catalog.map((m) => m.category))];
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-workspace px-4 py-10">
-      <div className="mb-8 flex items-center gap-2">
+    <div className="flex min-h-screen flex-col items-center bg-workspace px-4 py-6 sm:py-10">
+      <div className="mb-5 flex items-center gap-2 sm:mb-8">
         <div className="flex size-9 items-center justify-center rounded-md bg-primary-600">
           <Package className="size-5 text-white" />
         </div>
         <span className="text-lg font-semibold text-text-primary">QuickBiz ERP</span>
       </div>
 
-      {/* Step indicator */}
-      <ol className="mb-8 flex items-center gap-2 text-xs font-medium">
+      {/* Step indicator — labels only under the current step on phones. */}
+      <ol className="mb-6 flex items-center gap-2 text-xs font-medium sm:mb-8">
         {STEP_LABELS.map((label, i) => {
           const n = i + 1;
           const done = n < step;
@@ -97,7 +97,7 @@ export function OnboardingWizard({
               {i > 0 && <span className="h-px w-6 bg-border sm:w-10" />}
               <span
                 className={cn(
-                  "flex size-6 items-center justify-center rounded-full border",
+                  "flex size-6 shrink-0 items-center justify-center rounded-full border",
                   done && "border-success-500 bg-success-500 text-white",
                   current && "border-primary-600 bg-primary-600 text-white",
                   !done && !current && "border-border bg-surface text-text-tertiary",
@@ -105,7 +105,14 @@ export function OnboardingWizard({
               >
                 {done ? <Check className="size-3.5" /> : n}
               </span>
-              <span className={cn(current ? "text-text-primary" : "text-text-tertiary")}>{label}</span>
+              <span
+                className={cn(
+                  current ? "text-text-primary" : "text-text-tertiary",
+                  !current && "hidden sm:inline",
+                )}
+              >
+                {label}
+              </span>
             </li>
           );
         })}
@@ -189,20 +196,23 @@ export function OnboardingWizard({
 
             {error && <p className="mb-3 text-sm text-danger-600">{error}</p>}
 
-            <div className="sticky bottom-4 flex items-center justify-between gap-3 rounded-lg border border-border bg-surface p-4 shadow-popover">
-              <div>
-                <p className="text-sm font-semibold text-text-primary">
-                  {selected.size} module{selected.size === 1 ? "" : "s"} selected
+            <div className="sticky bottom-3 flex items-center justify-between gap-2 rounded-lg border border-border bg-surface px-3 py-2.5 shadow-popover sm:gap-3 sm:p-4">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-text-primary">
+                  {selected.size} module{selected.size === 1 ? "" : "s"}
+                  <span className="ml-1.5 font-normal text-text-secondary">
+                    {money(monthlyTotal)}/mo
+                  </span>
                 </p>
-                <p className="text-xs text-text-secondary">
-                  {money(monthlyTotal)}/mo + {money(setupFeeUsd)} one-time setup
+                <p className="hidden text-xs text-text-secondary sm:block">
+                  + {money(setupFeeUsd)} one-time setup
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <Button type="button" variant="secondary" onClick={() => setStep(1)} disabled={pending}>
-                  <ArrowLeft className="size-4" /> Back
+              <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+                <Button type="button" variant="secondary" size="sm" onClick={() => setStep(1)} disabled={pending}>
+                  <ArrowLeft className="size-4" /> <span className="hidden sm:inline">Back</span>
                 </Button>
-                <Button type="button" onClick={() => setStep(3)} disabled={selected.size === 0}>
+                <Button type="button" size="sm" onClick={() => setStep(3)} disabled={selected.size === 0}>
                   Continue <ArrowRight className="size-4" />
                 </Button>
               </div>

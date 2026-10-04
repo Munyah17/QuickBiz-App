@@ -141,9 +141,11 @@ body.app .search-dropdown__item {
 body.app .search-dropdown__item:hover {
   background: var(--m-surface-2);
 }
-body.app .search-dropdown__item > i {
+body.app .search-dropdown__item > i,
+body.app .search-dropdown__item > svg {
   color: var(--m-text-faint);
   width: 16px;
+  flex-shrink: 0;
   text-align: center;
 }
 body.app .search-dropdown__label {

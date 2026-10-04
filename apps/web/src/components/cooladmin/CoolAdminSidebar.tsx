@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import type { CoolNavItem } from "./nav-model";
 
@@ -65,7 +66,7 @@ export function CoolAdminSidebar({
           aria-label="Close navigation"
           onClick={onClose}
         >
-          <i className="fa-solid fa-xmark" aria-hidden="true"></i>
+          <X size={18} aria-hidden="true" />
         </button>
       </div>
       <div className="menu-sidebar__content js-scrollbar1">
@@ -74,6 +75,7 @@ export function CoolAdminSidebar({
             {model.map((item) => {
               if (!item.children) {
                 const active = item.href ? isLeafActive(pathname, item.href) : false;
+                const LeafIcon = item.icon;
                 return (
                   <li key={item.key} className={cn(active && "active")}>
                     <Link
@@ -84,7 +86,7 @@ export function CoolAdminSidebar({
                       onFocus={(e) => showTooltip(e, item.label)}
                       onBlur={hideTooltip}
                     >
-                      <i className={item.icon} aria-hidden="true"></i>
+                      <LeafIcon size={16} strokeWidth={1.9} aria-hidden="true" />
                       {item.label}
                     </Link>
                   </li>
@@ -98,6 +100,7 @@ export function CoolAdminSidebar({
               // even when it contains the active route.
               const open = groupOverrides[item.key] ?? false;
 
+              const GroupIcon = item.icon;
               return (
                 <li key={item.key} className={cn("has-sub", groupActive && "active")}>
                   <a
@@ -113,7 +116,7 @@ export function CoolAdminSidebar({
                     onFocus={(e) => showTooltip(e, item.label)}
                     onBlur={hideTooltip}
                   >
-                    <i className={item.icon} aria-hidden="true"></i>
+                    <GroupIcon size={16} strokeWidth={1.9} aria-hidden="true" />
                     {item.label}
                   </a>
                   <ul

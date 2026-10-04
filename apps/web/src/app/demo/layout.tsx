@@ -13,10 +13,6 @@ export default function DemoLayout({ children }: { children: React.ReactNode }) 
   return (
     <DemoProvider>
       <ToastProvider>
-        <link
-          rel="stylesheet"
-          href="/cooladmin/vendor/fontawesome-7.3.1/css/all.min.css"
-        />
         <Script src="/cooladmin/js/vanilla-utils.js" strategy="afterInteractive" />
         <Script src="/cooladmin/vendor/bootstrap-5.3.8.bundle.min.js" strategy="afterInteractive" />
         <Script src="/cooladmin/js/bootstrap5-init.js" strategy="afterInteractive" />
