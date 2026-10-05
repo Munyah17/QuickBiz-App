@@ -358,8 +358,10 @@ section {
 
 @media (max-width: 991px) {
   .page-container {
+    /* Legacy template offset for its absolute `.header-mobile` — our shell
+       uses the fixed 60px header-desktop on mobile, offset by
+       .main-content's padding-top. No `top` shift here. */
     position: relative;
-    top: 88px;
     padding-left: 0;
   }
 }
@@ -386,7 +388,9 @@ section {
 @media (max-width: 991px) {
   .main-content {
     padding-top: 50px;
-    padding-bottom: 100px;
+    /* Legacy 100px bottom padding reserved space for the removed mobile
+       navbar; our fixed-header shell doesn't need it. */
+    padding-bottom: 0;
   }
 }
 .page-content--bgf7 {
@@ -1468,30 +1472,15 @@ section {
   list-style-type: none !important;
 }
 
-/* Chevron arrows for submenu indicators */
+/* Chevron arrows for submenu indicators — drawn with CSS borders by
+   app.css (body.app .navbar-sidebar .navbar__list > li.has-sub > a.js-arrow::after).
+   The legacy Font Awesome glyph rule was removed; the vendor font is gone. */
 .navbar-sidebar .navbar__list li.has-sub {
   position: relative;
 }
 
 .navbar-sidebar .navbar__list li.has-sub > a {
   position: relative;
-}
-
-.navbar-sidebar .navbar__list li.has-sub > a::after {
-  content: "\f054";
-  font-family: "Font Awesome 7 Free";
-  font-weight: 900;
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 14px;
-  color: #999;
-  transition: transform 0.3s ease;
-}
-
-.navbar-sidebar .navbar__list li.has-sub.open > a::after {
-  transform: translateY(-50%) rotate(90deg);
 }
 
 .has-sub {

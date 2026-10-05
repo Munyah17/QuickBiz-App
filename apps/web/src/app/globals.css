@@ -1,7 +1,12 @@
-/* Pre-declare the CoolAdmin layers before Tailwind's (theme/base/components/
-   utilities) so that on utility-class collisions the Tailwind utilities used
-   by existing pages always win over Bootstrap's same-named utilities. */
-@layer cooladmin-vendor, cooladmin, quickbiz-theme;
+/* Pre-declare the full cascade-layer order. Tailwind's own layers
+   (theme/base/components) come FIRST — lowest priority — so its preflight
+   (`* { margin: 0; padding: 0 }`, `a { color: inherit }`, `svg { display:
+   block }`, `button` resets) cannot flatten the CoolAdmin component styles
+   that follow. The CoolAdmin layers sit in the middle, and Tailwind's
+   `utilities` layer stays LAST so utility-class collisions (Bootstrap `.mt-3`
+   vs Tailwind `.mt-3`, `.container`, `.text-primary`…) still resolve in
+   favour of the Tailwind utilities used by existing pages. */
+@layer theme, base, components, cooladmin-vendor, cooladmin, quickbiz-theme, utilities;
 
 @import "tailwindcss";
 @import "../config/design-tokens.css";
